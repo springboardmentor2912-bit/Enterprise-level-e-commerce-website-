@@ -1,0 +1,758 @@
+/* ============================================================
+   CUSTOMER SIDEBAR & MOBILE 3-DOT NAVIGATION
+   CUSTOMER SIDEBAR & MOBILE NAVIGATION
+   ============================================================ */
+
+/* Desktop Sidebar */
+
+/* ============================================================
+   DESKTOP SIDEBAR
+   ============================================================ */
+
+.customer-sidebar {
+    width: 260px;
+    height: 100vh;
+
+    position: fixed;
+    left: 0;
+    top: 0;
+    bottom: 0;
+
+    z-index: 100;
+    align-self: flex-start;
+
+    overflow-y: auto;
+    background: #1E3A8A;
+
+    background: #1e3a8a;
+
+    display: flex;
+    flex-direction: column;
+
+    padding: 25px 18px;
+
+    box-sizing: border-box;
+
+    box-shadow: 2px 0 10px rgba(0, 0, 0, 0.12);
+}
+
+.customer-sidebar::-webkit-scrollbar {
+    width: 6px;
+}
+
+.customer-sidebar::-webkit-scrollbar-thumb {
+    background: rgba(255, 255, 255, 0.2);
+    border-radius: 10px;
+}
+
+/* Logo */
+
+/* ============================================================
+   SIDEBAR LOGO
+   ============================================================ */
+
+.sidebar-logo {
+    position: relative;
+
+    text-align: center;
+
+    padding-bottom: 24px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.20);
+    margin-bottom: 20px;
+    position: relative;
+
+    border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.sidebar-logo-content h2 {
+    color: white;
+
+    font-size: 26px;
+    font-weight: 700;
+
+    margin: 0;
+    font-weight: 700;
+
+    letter-spacing: 0.5px;
+}
+
+.sidebar-logo-content p {
+    color: #DBEAFE;
+    margin-top: 6px;
+    color: #dbeafe;
+
+    margin: 6px 0 0;
+
+    font-size: 13px;
+}
+
+
+/* ============================================================
+   CLOSE BUTTON
+   ============================================================ */
+
+.sidebar-close-btn {
+    display: none;
+
+    position: absolute;
+
+    right: 0;
+    top: 0;
+    background: transparent;
+    border: none;
+
+    width: 38px;
+    height: 38px;
+
+    padding: 0;
+
+    background: rgba(255, 255, 255, 0.12);
+
+    border: 1px solid rgba(255, 255, 255, 0.2);
+
+    border-radius: 8px;
+
+    color: white;
+    font-size: 20px;
+
+    font-size: 18px;
+
+    cursor: pointer;
+    padding: 4px 8px;
+    border-radius: 6px;
+
+    align-items: center;
+    justify-content: center;
+
+    transition: background 0.2s ease;
+}
+
+/* Nav Buttons */
+.sidebar-close-btn:hover {
+    background: rgba(255, 255, 255, 0.25);
+}
+
+
+/* ============================================================
+   NAVIGATION BUTTONS
+   ============================================================ */
+
+.customer-sidebar > button:not(.sidebar-close-btn) {
+    width: 100%;
+    padding: 13px 16px;
+    margin-bottom: 10px;
+    min-height: 50px;
+
+    padding: 0 16px;
+    margin-bottom: 8px;
+
+    border: none;
+    border-radius: 10px;
+
+    background: transparent;
+    color: white;
+
+    font-size: 15px;
+    font-weight: 500;
+
+    cursor: pointer;
+
+    text-align: left;
+    transition: all 0.2s ease;
+
+    display: flex;
+    align-items: center;
+    gap: 8px;
+
+    gap: 10px;
+
+    position: relative;
+
+    box-sizing: border-box;
+
+    flex-shrink: 0;
+
+    transition:
+        background 0.2s ease,
+        color 0.2s ease,
+        transform 0.2s ease;
+}
+
+.customer-sidebar > button:not(.sidebar-close-btn):hover {
+    background: white;
+    color: #1E3A8A;
+    color: #1e3a8a;
+
+    transform: translateX(4px);
+}
+
+.customer-sidebar > button.active {
+    background: white;
+    color: #1E3A8A;
+    color: #1e3a8a;
+
+    font-weight: 700;
+
+    box-shadow: 0 3px 8px rgba(0, 0, 0, 0.12);
+}
+
+/* Logout */
+.logout-btn {
+    margin-top: auto !important;
+    border: 1px solid rgba(255, 255, 255, 0.35) !important;
+}
+/* ============================================================
+   NAVIGATION ICON
+   ============================================================ */
+
+.nav-icon {
+    width: 24px;
+    min-width: 24px;
+
+    display: inline-flex;
+
+    align-items: center;
+    justify-content: center;
+
+    font-size: 17px;
+
+    line-height: 1;
+}
+
+.logout-btn:hover {
+    background: #DC2626 !important;
+    color: white !important;
+    transform: none;
+    border-color: #DC2626 !important;
+}
+/* ============================================================
+   NAVIGATION TEXT
+   ============================================================ */
+
+.nav-label {
+    display: block;
+
+    white-space: nowrap;
+
+    line-height: 1.2;
+}
+
+
+/* ============================================================
+   NOTIFICATION DOT
+   ============================================================ */
+
+.notification-dot {
+    display: inline-block;
+    width: 9px;
+    height: 9px;
+    margin: 0 4px 0 0;
+    border: 2px solid currentColor;
+
+    margin-left: auto;
+
+    flex-shrink: 0;
+
+    border-radius: 50%;
+
+    background: #ef4444;
+
+    border: 2px solid white;
+
+    box-sizing: border-box;
+}
+
+
+/* ============================================================
+   CART / WISHLIST BADGES
+   ============================================================ */
+
+.cart-count-badge,
+.wishlist-count-badge {
+    margin-left: auto;
+    position: absolute;
+
+    right: 16px;
+    top: 50%;
+
+    transform: translateY(-50%);
+
+    min-width: 22px;
+    padding: 2px 7px;
+    height: 22px;
+
+    padding: 0 6px;
+
+    border-radius: 999px;
+    color: #1E3A8A;
+
+    background: white;
+    color: #1e3a8a;
+
+    font-size: 12px;
+    font-weight: 800;
+    text-align: center;
+
+    display: flex;
+
+    align-items: center;
+    justify-content: center;
+
+    box-sizing: border-box;
+}
+
+/* Desktop content gutter */
+
+/* ============================================================
+   LOGOUT
+   ============================================================ */
+
+.logout-btn {
+    margin-top: auto !important;
+
+    border: 1px solid rgba(255, 255, 255, 0.35) !important;
+}
+
+.logout-btn:hover {
+    background: #dc2626 !important;
+    color: white !important;
+
+    transform: none !important;
+
+    border-color: #dc2626 !important;
+}
+
+
+/* ============================================================
+   DESKTOP CONTENT GUTTER
+   ============================================================ */
+
+.customer-dashboard-layout > .customer-dashboard-page,
+.customer-products-layout > .browse-page,
+.customer-cart-layout > .cart-page,
+.customer-wishlist-layout > .wishlist-page,
+.customer-returns-layout > .customer-returns-page,
+.customer-notifications-layout > .customer-notifications-page,
+.orders-layout > .orders-page,
+.customer-checkout-layout > .checkout-page,
+.customer-profile-layout > .customer-profile-container {
+    margin-left: 280px !important;
+
+    width: calc(100% - 280px) !important;
+
+    min-width: 0;
+
+    box-sizing: border-box;
+}
+
+/* Mobile Topbar & 3-Dot Button */
+
+/* ============================================================
+   MOBILE TOP BAR
+   ============================================================ */
+
+.customer-mobile-topbar {
+    display: none;
+
+    position: sticky;
+
+    top: 0;
+    left: 0;
+    right: 0;
+
+    z-index: 90;
+    background: #1E3A8A;
+
+    height: 58px;
+
+    background: #1e3a8a;
+
+    color: white;
+    padding: 12px 18px;
+
+    padding: 9px 14px;
+
+    align-items: center;
+    justify-content: space-between;
+
+    box-sizing: border-box;
+
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.15);
+}
+
+
+/* ============================================================
+   MOBILE BRAND
+   ============================================================ */
+
+.customer-mobile-brand {
+    display: flex;
+
+    align-items: center;
+
+    gap: 8px;
+
+    cursor: pointer;
+
+    min-width: 0;
+}
+
+.customer-mobile-brand h2 {
+    color: white;
+
+    font-size: 20px;
+
+    margin: 0;
+
+    font-weight: 700;
+}
+
+.customer-mobile-brand span {
+    background: rgba(255, 255, 255, 0.2);
+
+    color: white;
+
+    font-size: 11px;
+    padding: 2px 7px;
+
+    padding: 3px 7px;
+
+    border-radius: 6px;
+
+    font-weight: 600;
+}
+
+
+/* ============================================================
+   MOBILE RIGHT SIDE
+   ============================================================ */
+
+.customer-mobile-right {
+    display: flex;
+
+    align-items: center;
+    gap: 8px;
+
+    gap: 6px;
+}
+
+
+/* ============================================================
+   MOBILE CART BUTTON
+   ============================================================ */
+
+.customer-mobile-cart-btn {
+    background: rgba(255, 255, 255, 0.15);
+    border: none;
+    position: relative;
+
+    width: 40px;
+    height: 40px;
+
+    padding: 0;
+
+    background: rgba(255, 255, 255, 0.12);
+
+    border: 1px solid rgba(255, 255, 255, 0.15);
+
+    border-radius: 8px;
+
+    color: white;
+    padding: 8px 12px;
+    border-radius: 8px;
+    font-size: 15px;
+
+    cursor: pointer;
+
+    display: flex;
+
+    align-items: center;
+    gap: 5px;
+    justify-content: center;
+
+    gap: 4px;
+
+    transition: background 0.2s ease;
+}
+
+.customer-mobile-cart-btn:hover {
+    background: rgba(255, 255, 255, 0.22);
+}
+
+.customer-mobile-cart-btn .mobile-badge {
+    position: absolute;
+
+    top: -4px;
+    right: -4px;
+
+    min-width: 17px;
+    height: 17px;
+
+    padding: 0 4px;
+
+    background: #ef4444;
+
+    color: white;
+    font-size: 11px;
+    padding: 1px 6px;
+
+    border-radius: 999px;
+
+    font-size: 10px;
+    font-weight: 800;
+
+    display: flex;
+
+    align-items: center;
+    justify-content: center;
+}
+
+/* 3-Dot Kebab Toggle Button */
+
+/* ============================================================
+   MOBILE THREE-DOT BUTTON
+   ============================================================ */
+
+.mobile-kebab-btn {
+    background: transparent;
+    border: none;
+    color: white;
+    width: 40px;
+    height: 40px;
+
+    padding: 0;
+
+    background: transparent;
+
+    border: 1px solid rgba(255, 255, 255, 0.18);
+
+    border-radius: 8px;
+
+    color: white;
+
+    cursor: pointer;
+
+    display: flex;
+
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+
+    transition: background 0.2s ease;
+}
+
+.mobile-kebab-btn:hover,
+.mobile-kebab-btn:hover {
+    background: rgba(255, 255, 255, 0.18);
+}
+
+.mobile-kebab-btn:active {
+    background: rgba(255, 255, 255, 0.2);
+    background: rgba(255, 255, 255, 0.25);
+}
+
+
+/* ============================================================
+   MOBILE BACKDROP
+   ============================================================ */
+
+.customer-sidebar-backdrop {
+    display: none;
+}
+
+/* Responsive Breakpoint for Compressed Screens */
+@media (max-width: 850px) {
+
+/* ============================================================
+   MOBILE / TABLET
+   ============================================================ */
+
+@media (max-width: 900px) {
+
+    /* Mobile top bar */
+
+    .customer-mobile-topbar {
+        display: flex;
+    }
+
+    .sidebar-close-btn {
+        display: block;
+    }
+
+    .customer-sidebar-backdrop {
+        display: block;
+        position: fixed;
+        inset: 0;
+        background: rgba(15, 23, 42, 0.5);
+        z-index: 95;
+        backdrop-filter: blur(2px);
+    }
+    /* Sidebar becomes drawer */
+
+    .customer-sidebar {
+        position: fixed !important;
+
+        top: 0;
+        left: 0;
+        bottom: 0;
+        width: 270px;
+        max-width: 80vw;
+
+        width: 280px;
+        max-width: 82vw;
+
+        height: 100vh;
+        z-index: 100;
+        transform: translateX(-100%);
+        transition: transform 0.28s cubic-bezier(0.4, 0, 0.2, 1);
+        box-shadow: 4px 0 25px rgba(0, 0, 0, 0.3);
+
+        z-index: 110;
+
+        padding: 22px 16px;
+
+        box-sizing: border-box;
+
+        transform: translateX(-105%);
+
+        transition:
+            transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+
+        box-shadow: 6px 0 30px rgba(0, 0, 0, 0.28);
+    }
+
+
+    /* Open drawer */
+
+    .customer-sidebar.mobile-open {
+        transform: translateX(0);
+    }
+
+    /* Layout column wrap & content margins */
+
+    /* Show close button */
+
+    .sidebar-close-btn {
+        display: flex;
+    }
+
+
+    /* Dark overlay */
+
+    .customer-sidebar-backdrop {
+        display: block;
+
+        position: fixed;
+
+        inset: 0;
+
+        z-index: 105;
+
+        background: rgba(15, 23, 42, 0.55);
+
+        backdrop-filter: blur(2px);
+    }
+
+
+    /* Full-width page layouts */
+
+    .dashboard-container,
+    .customer-dashboard-container,
+    .customer-dashboard-layout,
+    .customer-products-layout,
+    .customer-cart-layout,
+    .customer-wishlist-layout,
+    .customer-returns-layout,
+    .customer-notifications-layout,
+    .orders-layout,
+    .customer-checkout-layout,
+    .customer-profile-layout {
+        flex-direction: column !important;
+
+        width: 100% !important;
+        max-width: 100% !important;
+
+        margin: 0 !important;
+    }
+
+
+    /* Remove desktop content margin */
+
+    .dashboard-container > .dashboard-main,
+    .customer-dashboard-container > .dashboard-main,
+    .customer-dashboard-layout > .customer-dashboard-page,
+    .customer-products-layout > .browse-page,
+    .customer-cart-layout > .cart-page,
+    .customer-wishlist-layout > .wishlist-page,
+    .customer-returns-layout > .customer-returns-page,
+    .customer-notifications-layout > .customer-notifications-page,
+    .orders-layout > .orders-page,
+    .customer-checkout-layout > .checkout-page,
+    .customer-profile-layout > .customer-profile-container {
+        margin-left: 0 !important;
+
+        width: 100% !important;
+        max-width: 100% !important;
+
+        min-width: 0;
+
+        box-sizing: border-box;
+    }
+}
+}
+
+
+/* ============================================================
+   SMALL PHONES
+   ============================================================ */
+
+@media (max-width: 480px) {
+
+    .customer-mobile-topbar {
+        height: 56px;
+
+        padding: 8px 12px;
+    }
+
+    .customer-mobile-brand h2 {
+        font-size: 18px;
+    }
+
+    .customer-mobile-brand span {
+        font-size: 10px;
+
+        padding: 2px 6px;
+    }
+
+    .customer-mobile-right {
+        gap: 5px;
+    }
+
+    .customer-mobile-cart-btn,
+    .mobile-kebab-btn {
+        width: 38px;
+        height: 38px;
+    }
+
+    .customer-sidebar {
+        width: 275px;
+        max-width: 84vw;
+    }
+}
+
+
+/* ============================================================
+VERY SMALL PHONES
+   ============================================================ */
+
+@media (max-width: 360px) {
+
+    .customer-mobile-brand span {
+        display: none;
+    }
+
+    .customer-sidebar {
+        width: 260px;
+        max-width: 86vw;
+    }
+}

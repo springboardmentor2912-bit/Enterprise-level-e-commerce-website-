@@ -1,0 +1,242 @@
+/* ============================================================
+   VENDOR SIDEBAR & MOBILE 3-DOT NAVIGATION
+   ============================================================ */
+
+/* Desktop Sidebar */
+.sidebar {
+    width: 260px;
+    height: 100vh;
+    position: fixed;
+    left: 0;
+    top: 0;
+    bottom: 0;
+    z-index: 100;
+    align-self: flex-start;
+    overflow-y: auto;
+    background: #1E3A8A;
+    display: flex;
+    flex-direction: column;
+    padding: 25px 18px;
+    box-shadow: 2px 0 10px rgba(0, 0, 0, 0.12);
+}
+
+.sidebar::-webkit-scrollbar {
+    width: 6px;
+}
+
+.sidebar::-webkit-scrollbar-thumb {
+    background: rgba(255, 255, 255, 0.2);
+    border-radius: 10px;
+}
+
+/* Logo */
+.sidebar-logo {
+    text-align: center;
+    padding-bottom: 24px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.20);
+    margin-bottom: 20px;
+    position: relative;
+}
+
+.sidebar-logo-content h2 {
+    color: white;
+    font-size: 26px;
+    margin: 0;
+    font-weight: 700;
+    letter-spacing: 0.5px;
+}
+
+.sidebar-logo-content p {
+    color: #DBEAFE;
+    margin-top: 6px;
+    font-size: 13px;
+}
+
+.sidebar-close-btn {
+    display: none;
+    position: absolute;
+    right: 0;
+    top: 0;
+    background: transparent;
+    border: none;
+    color: white;
+    font-size: 20px;
+    cursor: pointer;
+    padding: 4px 8px;
+    border-radius: 6px;
+}
+
+/* Nav Buttons */
+.sidebar button {
+    width: 100%;
+    padding: 13px 16px;
+    margin-bottom: 10px;
+    border: none;
+    border-radius: 10px;
+    background: transparent;
+    color: white;
+    font-size: 15px;
+    font-weight: 500;
+    cursor: pointer;
+    text-align: left;
+    transition: all 0.2s ease;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.sidebar button:hover {
+    background: white;
+    color: #1E3A8A;
+    transform: translateX(4px);
+}
+
+.sidebar .active {
+    background: white;
+    color: #1E3A8A;
+    font-weight: 700;
+    box-shadow: 0 3px 8px rgba(0, 0, 0, 0.12);
+}
+
+/* Logout Button */
+.logout-btn {
+    margin-top: auto !important;
+    border: 1px solid rgba(255, 255, 255, 0.35) !important;
+}
+
+.logout-btn:hover {
+    background: #DC2626 !important;
+    color: white !important;
+    transform: none;
+    border-color: #DC2626 !important;
+}
+
+/* Desktop content gutter */
+.dashboard-container,
+.vendor-orders-layout > main,
+.vendor-notifications-layout > main,
+.vendor-add-layout > main,
+.vendor-profile-container {
+    margin-left: 260px !important;
+    width: calc(100% - 260px) !important;
+    min-width: 0;
+}
+
+/* Mobile Topbar & 3-Dot Button */
+.vendor-mobile-topbar {
+    display: none;
+    position: sticky;
+    top: 0;
+    left: 0;
+    right: 0;
+    z-index: 90;
+    background: #1E3A8A;
+    color: white;
+    padding: 12px 18px;
+    align-items: center;
+    justify-content: space-between;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.15);
+}
+
+.vendor-mobile-brand {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    cursor: pointer;
+}
+
+.vendor-mobile-brand h2 {
+    color: white;
+    font-size: 20px;
+    margin: 0;
+    font-weight: 700;
+}
+
+.vendor-mobile-brand span {
+    background: rgba(255, 255, 255, 0.2);
+    color: white;
+    font-size: 11px;
+    padding: 2px 7px;
+    border-radius: 6px;
+    font-weight: 600;
+}
+
+/* 3-Dot Kebab Toggle Button */
+.mobile-kebab-btn {
+    background: transparent;
+    border: none;
+    color: white;
+    width: 40px;
+    height: 40px;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: background 0.2s ease;
+}
+
+.mobile-kebab-btn:hover,
+.mobile-kebab-btn:active {
+    background: rgba(255, 255, 255, 0.2);
+}
+
+.vendor-sidebar-backdrop {
+    display: none;
+}
+
+/* Responsive Breakpoint for Compressed Screens */
+@media (max-width: 850px) {
+    .vendor-mobile-topbar {
+        display: flex;
+    }
+
+    .sidebar-close-btn {
+        display: block;
+    }
+
+    .vendor-sidebar-backdrop {
+        display: block;
+        position: fixed;
+        inset: 0;
+        background: rgba(15, 23, 42, 0.5);
+        z-index: 95;
+        backdrop-filter: blur(2px);
+    }
+
+    .sidebar {
+        position: fixed !important;
+        top: 0;
+        left: 0;
+        bottom: 0;
+        width: 270px;
+        max-width: 80vw;
+        height: 100vh;
+        z-index: 100;
+        transform: translateX(-100%);
+        transition: transform 0.28s cubic-bezier(0.4, 0, 0.2, 1);
+        box-shadow: 4px 0 25px rgba(0, 0, 0, 0.3);
+    }
+
+    .sidebar.mobile-open {
+        transform: translateX(0);
+    }
+
+    /* Layout column wrap & content margins */
+    .vendor-orders-layout,
+    .vendor-notifications-layout,
+    .vendor-add-layout,
+    .vendor-profile-layout,
+    .vendor-products-layout {
+        flex-direction: column !important;
+    }
+
+    .dashboard-container,
+    .vendor-orders-layout > main,
+    .vendor-notifications-layout > main,
+    .vendor-add-layout > main,
+    .vendor-profile-container {
+        margin-left: 0 !important;
+        width: 100% !important;
+    }
+}

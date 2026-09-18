@@ -1,0 +1,14 @@
+# Database Configuration
+spring.datasource.url=YOUR_DATABASE_URL
+spring.datasource.username=YOUR_USERNAME
+spring.datasource.password=YOUR_PASSWORD
+
+# JWT Configuration
+jwt.secret=YOUR_JWT_SECRET
+
+# Server
+server.port=8080
+
+# Razorpay Test Mode
+razorpay.key.id=YOUR_RAZORPAY_TEST_KEY_ID
+razorpay.key.secret=YOUR_RAZORPAY_TEST_KEY_SECRET
