@@ -1,0 +1,13 @@
+package com.shopstack.entity;
+
+public enum ReturnStatus {
+    RETURN_REQUESTED,
+    RETURN_APPROVED,
+    RETURN_REJECTED,
+    PRODUCT_RETURNED,
+    RETURN_RECEIVED,
+    RETURN_ACCEPTED,
+    REFUND_INITIATED,
+    REFUNDED,
+    REFUND_FAILED
+}

@@ -1,0 +1,46 @@
+# ============================================================
+# ShopStack — Root .gitignore
+# ============================================================
+
+# ----- Environment / Secrets --------------------------------
+.env
+.env.local
+.env.production
+.env.*.local
+*.env
+
+# ----- Java / Maven -----------------------------------------
+backend/target/
+backend/*.class
+backend/*.jar
+backend/*.war
+*.iml
+.mvn/wrapper/maven-wrapper.jar
+
+# ----- Node / Frontend --------------------------------------
+shopstack-frontend/node_modules/
+shopstack-frontend/dist/
+shopstack-frontend/dist-ssr/
+shopstack-frontend/*.local
+
+# ----- Backend node_modules (if any) ------------------------
+backend/node_modules/
+
+# ----- IDE --------------------------------------------------
+.idea/
+.vscode/
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
+.DS_Store
+Thumbs.db
+
+# ----- Logs -------------------------------------------------
+logs/
+*.log
+npm-debug.log*
+
+# ----- Docker volumes / overrides ---------------------------
+docker-compose.override.yml

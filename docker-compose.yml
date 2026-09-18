@@ -1,0 +1,75 @@
+version: '3.9'
+
+# ─────────────────────────────────────────────────────────────
+# ShopStack — Local Docker Compose
+# Used for testing the full stack locally before deploying.
+#
+# Usage:
+#   1. Copy .env.example → .env and fill in real values
+#   2. docker compose up --build
+#   3. Frontend: http://localhost:80
+#      Backend:  http://localhost:8080/api
+# ─────────────────────────────────────────────────────────────
+
+services:
+
+  # ── PostgreSQL ──────────────────────────────────────────────
+  postgres:
+    image: postgres:16-alpine
+    container_name: shopstack_postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: shopstack_db
+      POSTGRES_USER: ${DB_USERNAME:-postgres}
+      POSTGRES_PASSWORD: ${DB_PASSWORD:-postgres}
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${DB_USERNAME:-postgres}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # ── Spring Boot Backend ─────────────────────────────────────
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: shopstack_backend
+    restart: unless-stopped
+    depends_on:
+      postgres:
+        condition: service_healthy
+    environment:
+      DB_URL: jdbc:postgresql://postgres:5432/shopstack_db
+      DB_USERNAME: ${DB_USERNAME:-postgres}
+      DB_PASSWORD: ${DB_PASSWORD:-postgres}
+      JWT_SECRET: ${JWT_SECRET}
+      RAZORPAY_KEY_ID: ${RAZORPAY_KEY_ID}
+      RAZORPAY_KEY_SECRET: ${RAZORPAY_KEY_SECRET}
+      MAIL_USERNAME: ${MAIL_USERNAME}
+      MAIL_PASSWORD: ${MAIL_PASSWORD}
+      MAIL_FROM: ${MAIL_FROM:-noreply@shopstack.com}
+      MAIL_ENABLED: ${MAIL_ENABLED:-true}
+      ALLOWED_ORIGINS: http://localhost:80,http://localhost:5173
+    ports:
+      - "8080:8080"
+
+  # ── React / Nginx Frontend ──────────────────────────────────
+  frontend:
+    build:
+      context: ./shopstack-frontend
+      dockerfile: Dockerfile
+      args:
+        VITE_API_URL: http://localhost:8080/api
+    container_name: shopstack_frontend
+    restart: unless-stopped
+    depends_on:
+      - backend
+    ports:
+      - "80:80"
+
+volumes:
+  postgres_data:
