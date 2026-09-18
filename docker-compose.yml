@@ -1,0 +1,43 @@
+services:
+  postgres:
+    image: postgres:16-alpine
+    container_name: shopstack-db
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB:-shopstack}
+      POSTGRES_USER: ${POSTGRES_USER:-shopstack}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-shopstack123}
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-shopstack} -d ${POSTGRES_DB:-shopstack}"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+    restart: unless-stopped
+
+  backend:
+    build: ./backend
+    container_name: shopstack-backend
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/${POSTGRES_DB:-shopstack}
+      SPRING_DATASOURCE_USERNAME: ${POSTGRES_USER:-shopstack}
+      SPRING_DATASOURCE_PASSWORD: ${POSTGRES_PASSWORD:-shopstack123}
+    depends_on:
+      postgres:
+        condition: service_healthy
+    restart: unless-stopped
+
+  frontend:
+    build:
+      context: ./frontend
+      args:
+        VITE_API_BASE_URL: /api
+    container_name: shopstack-frontend
+    ports:
+      - "3000:80"
+    depends_on:
+      - backend
+    restart: unless-stopped
+
+volumes:
+  pgdata:

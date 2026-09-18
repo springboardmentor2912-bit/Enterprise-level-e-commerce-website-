@@ -1,0 +1,109 @@
+name: Deploy ShopStack to EC2
+
+on:
+  push:
+    branches: [ main ]
+  workflow_dispatch:
+
+env:
+  AWS_REGION: ${{ secrets.AWS_REGION }}
+  ECR_REGISTRY: ${{ secrets.ECR_REGISTRY }}
+
+jobs:
+  build-and-push:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ env.AWS_REGION }}
+
+      - name: Login to Amazon ECR
+        uses: aws-actions/amazon-ecr-login@v2
+
+      - name: Build & push backend
+        run: |
+          docker build -t $ECR_REGISTRY/shopstack-backend:latest ./backend
+          docker push $ECR_REGISTRY/shopstack-backend:latest
+
+      - name: Build & push frontend
+        run: |
+          docker build --build-arg VITE_API_BASE_URL=/api \
+            -t $ECR_REGISTRY/shopstack-frontend:latest ./frontend
+          docker push $ECR_REGISTRY/shopstack-frontend:latest
+
+  deploy:
+    needs: build-and-push
+    runs-on: ubuntu-latest
+    steps:
+      - name: Deploy to EC2 via SSH
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ secrets.EC2_HOST }}
+          username: ${{ secrets.EC2_USER }}
+          key: ${{ secrets.EC2_SSH_KEY }}
+          envs: ECR_REGISTRY
+          script: |
+            # 1. Login to ECR on EC2
+            aws ecr get-login-password --region us-east-1 | \
+              docker login --username AWS --password-stdin $ECR_REGISTRY
+            
+            # 2. Setup app directory
+            sudo mkdir -p /opt/shopstack && sudo chown ubuntu:ubuntu /opt/shopstack
+            cd /opt/shopstack
+            
+            # 3. Create docker-compose.yml (Uses $ECR_REGISTRY variable)
+            cat << EOF > docker-compose.yml
+            services:
+              postgres:
+                image: postgres:16-alpine
+                container_name: shopstack-db
+                environment:
+                  POSTGRES_DB: shopstack
+                  POSTGRES_USER: shopstack
+                  POSTGRES_PASSWORD: ShopStackDB_123!
+                volumes:
+                  - pgdata:/var/lib/postgresql/data
+                restart: unless-stopped
+                healthcheck:
+                  test: ["CMD-SHELL", "pg_isready -U shopstack -d shopstack"]
+                  interval: 5s
+                  timeout: 5s
+                  retries: 10
+
+              backend:
+                image: $ECR_REGISTRY/shopstack-backend:latest
+                container_name: shopstack-backend
+                environment:
+                  SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/shopstack
+                  SPRING_DATASOURCE_USERNAME: shopstack
+                  SPRING_DATASOURCE_PASSWORD: ShopStackDB_123!
+                  JWT_SECRET: SuperSecretKey_For_Production_12345
+                restart: unless-stopped
+                depends_on:
+                  postgres:
+                    condition: service_healthy
+
+              frontend:
+                image: $ECR_REGISTRY/shopstack-frontend:latest
+                container_name: shopstack-frontend
+                ports:
+                  - "80:80"
+                restart: unless-stopped
+                depends_on:
+                  - backend
+
+            volumes:
+              pgdata:
+            EOF
+            
+            # 4. Pull new images and restart
+            docker compose pull
+            docker compose up -d
+            docker image prune -f
+            
+            echo "✅ Deployed successfully at $(date -u)"
