@@ -1,0 +1,93 @@
+services:
+  # ---------------------------------------------------
+  # 1. PostgreSQL Database Service
+  # ---------------------------------------------------
+  db:
+    image: postgres:16-alpine
+    container_name: shopstack-db
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB:-shopstack_db}
+      POSTGRES_USER: ${POSTGRES_USER:-postgres}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-ShopStack@Prod2026}
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-postgres} -d ${POSTGRES_DB:-shopstack_db}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+    networks:
+      - shopstack-net
+
+  # ---------------------------------------------------
+  # 2. Spring Boot 4.x Backend REST API Service
+  # ---------------------------------------------------
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    image: shopstack-backend:latest
+    container_name: shopstack-backend
+    restart: unless-stopped
+    depends_on:
+      db:
+        condition: service_healthy
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:postgresql://db:5432/${POSTGRES_DB:-shopstack_db}
+      SPRING_DATASOURCE_USERNAME: ${POSTGRES_USER:-postgres}
+      SPRING_DATASOURCE_PASSWORD: ${POSTGRES_PASSWORD:-your-postgres-password}
+      APP_UPLOAD_DIR: /app/uploads/products/
+      APP_BACKEND_BASE_URL: ${APP_BACKEND_BASE_URL:-http://localhost:8080}
+      RAZORPAY_KEY_ID: ${RAZORPAY_KEY_ID:-rzp_test_placeholder}
+      RAZORPAY_KEY_SECRET: ${RAZORPAY_KEY_SECRET:-your-razorpay-key-secret}
+      MAIL_HOST: ${MAIL_HOST:-smtp.gmail.com}
+      MAIL_PORT: ${MAIL_PORT:-587}
+      MAIL_USERNAME: ${MAIL_USERNAME:-your-email@gmail.com}
+      MAIL_PASSWORD: ${MAIL_PASSWORD:-your-16-char-smtp-app-password}
+      MAIL_FROM: ${MAIL_FROM:-support@shopstack.com}
+      SHOPSTACK_COMMISSION_PERCENTAGE: ${SHOPSTACK_COMMISSION_PERCENTAGE:-10.0}
+    volumes:
+      - backend_uploads:/app/uploads
+    ports:
+      - "8080:8080"
+    networks:
+      - shopstack-net
+
+  # ---------------------------------------------------
+  # 3. React Vite Frontend + Nginx Web Server (HTTP & HTTPS)
+  # ---------------------------------------------------
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    image: shopstack-frontend:latest
+    container_name: shopstack-frontend
+    restart: unless-stopped
+    depends_on:
+      - backend
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - /etc/letsencrypt:/etc/letsencrypt:ro
+      - /var/www/certbot:/var/www/certbot:ro
+    networks:
+      - shopstack-net
+
+# ---------------------------------------------------
+# Persistent Storage Volumes & Network Bridges
+# ---------------------------------------------------
+volumes:
+  postgres_data:
+    name: shopstack_postgres_data
+  backend_uploads:
+    name: shopstack_backend_uploads
+
+networks:
+  shopstack-net:
+    name: shopstack-network
+    driver: bridge

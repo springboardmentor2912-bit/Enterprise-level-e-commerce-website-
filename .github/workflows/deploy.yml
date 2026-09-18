@@ -1,0 +1,112 @@
+name: Deploy ShopStack to AWS EC2
+
+on:
+  push:
+    branches: [ "main" ]
+  workflow_dispatch:
+
+concurrency:
+  group: aws-ec2-deployment
+  cancel-in-progress: true
+
+jobs:
+  deploy:
+    name: Deploy to AWS EC2
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Repository Code
+        uses: actions/checkout@v4
+
+      - name: Validate GitHub Secrets
+        env:
+          EC2_HOST: ${{ secrets.EC2_HOST }}
+          EC2_USER: ${{ secrets.EC2_USER }}
+          EC2_SSH_KEY: ${{ secrets.EC2_SSH_KEY }}
+        run: |
+          echo "🔍 Validating GitHub Repository Secrets..."
+          ERRORS=0
+          if [ -z "$EC2_HOST" ]; then
+            echo "❌ Missing secret: EC2_HOST (should be 13.48.47.35)"
+            ERRORS=$((ERRORS + 1))
+          else
+            echo "✅ EC2_HOST is configured."
+          fi
+
+          if [ -z "$EC2_USER" ]; then
+            echo "❌ Missing secret: EC2_USER (should be ubuntu)"
+            ERRORS=$((ERRORS + 1))
+          else
+            echo "✅ EC2_USER is configured."
+          fi
+
+          if [ -z "$EC2_SSH_KEY" ]; then
+            echo "❌ Missing secret: EC2_SSH_KEY (your RSA private key)"
+            ERRORS=$((ERRORS + 1))
+          else
+            echo "✅ EC2_SSH_KEY is configured."
+          fi
+
+          if [ $ERRORS -gt 0 ]; then
+            echo "⚠️ Please configure the missing secrets in GitHub Repository Settings -> Secrets and variables -> Actions."
+            exit 1
+          fi
+
+      - name: Setup SSH Key
+        env:
+          SSH_KEY: ${{ secrets.EC2_SSH_KEY }}
+        run: |
+          mkdir -p ~/.ssh
+          chmod 700 ~/.ssh
+          printf "%s\n" "$SSH_KEY" | tr -d '\r' > ~/.ssh/ec2_key
+          chmod 600 ~/.ssh/ec2_key
+
+      - name: Test SSH Connection to EC2
+        env:
+          EC2_HOST: ${{ secrets.EC2_HOST }}
+          EC2_USER: ${{ secrets.EC2_USER }}
+        run: |
+          echo "🔌 Verifying SSH connection to EC2..."
+          ssh -i ~/.ssh/ec2_key -o StrictHostKeyChecking=no -o ConnectTimeout=15 "${EC2_USER}@${EC2_HOST}" "echo '✅ SSH connection established successfully!'"
+
+      - name: Sync Repository Code & Deploy on EC2
+        env:
+          EC2_HOST: ${{ secrets.EC2_HOST }}
+          EC2_USER: ${{ secrets.EC2_USER }}
+        run: |
+          echo "🚀 Pulling latest code and building on EC2 host..."
+          ssh -i ~/.ssh/ec2_key -o StrictHostKeyChecking=no "${EC2_USER}@${EC2_HOST}" 'bash -s' << 'EOF'
+            set -e
+            cd /home/ubuntu/ShopStack
+
+            # Pull latest git commits from main
+            git fetch origin main
+            git reset --hard origin/main
+
+            # Create .env from template if missing
+            if [ ! -f .env ]; then
+              echo "⚙️ Creating .env from .env.example..."
+              cp .env.example .env
+            fi
+
+            # Set execution permissions for scripts
+            chmod +x deploy/*.sh 2>/dev/null || true
+
+            # Free up Docker build cache, dangling layers, and apt cache to prevent ENOSPC disk exhaustion
+            echo "🧹 Cleaning Docker build caches..."
+            sudo docker builder prune -af || true
+            sudo docker image prune -af || true
+            sudo apt-get clean || true
+
+            # Build and deploy with Docker Compose
+            echo "🏗️ Rebuilding Docker containers from latest source..."
+            sudo docker compose down --remove-orphans || true
+            sudo docker compose build
+            sudo docker compose up -d --force-recreate --remove-orphans
+
+            echo "========================================="
+            echo "📊 Docker Container Status:"
+            sudo docker compose ps
+            echo "========================================="
+            echo "🎉 Deployment to AWS EC2 successfully completed!"
+          EOF

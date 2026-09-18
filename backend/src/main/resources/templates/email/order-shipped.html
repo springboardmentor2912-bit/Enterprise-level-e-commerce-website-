@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Your Order Has Shipped! - ShopStack</title>
+    <style>
+        body { margin: 0; padding: 0; background-color: #f4f5f9; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; color: #1e293b; }
+        .container { max-width: 600px; margin: 24px auto; background-color: #ffffff; border-radius: 12px; overflow: hidden; box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05); }
+        .header { background: linear-gradient(135deg, #2563eb 0%, #3b82f6 100%); padding: 32px 24px; text-align: center; color: #ffffff; }
+        .header .icon { font-size: 40px; line-height: 1; margin-bottom: 8px; }
+        .header h1 { margin: 0; font-size: 22px; font-weight: 700; letter-spacing: -0.5px; }
+        .header p { margin: 8px 0 0 0; font-size: 14px; opacity: 0.95; }
+        .content { padding: 32px 24px; }
+        .greeting { font-size: 18px; font-weight: 600; margin-bottom: 12px; color: #0f172a; }
+        .badge { display: inline-block; padding: 4px 12px; border-radius: 9999px; font-size: 12px; font-weight: 600; background-color: #dbeafe; color: #1e40af; }
+        .card { background-color: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px; padding: 18px; margin: 20px 0; }
+        .details-grid { width: 100%; border-collapse: collapse; }
+        .details-grid td { padding: 8px 0; font-size: 14px; vertical-align: top; }
+        .details-grid td.label { color: #64748b; width: 45%; }
+        .details-grid td.value { color: #0f172a; font-weight: 600; text-align: right; }
+        .address-box { margin-top: 16px; padding: 14px; background-color: #f1f5f9; border-radius: 8px; font-size: 13px; line-height: 1.5; color: #334155; }
+        .footer { background-color: #f8fafc; padding: 24px; text-align: center; font-size: 12px; color: #94a3b8; border-top: 1px solid #e2e8f0; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Header -->
+        <div class="header">
+            <div class="icon">📦</div>
+            <h1>Your Order is On Its Way!</h1>
+            <p>Dispatched and in transit to your address</p>
+        </div>
+
+        <!-- Content -->
+        <div class="content">
+            <div class="greeting">
+                Hello, <span th:text="${recipientName != null ? recipientName : 'Customer'}">Customer</span> 🚚
+            </div>
+            <p style="font-size: 14px; line-height: 1.6; color: #475569; margin: 0 0 16px 0;">
+                Great news! Your package for order <strong th:text="${orderId}">ORD-123456</strong> has been packed and handed over to our logistics partner.
+            </p>
+
+            <!-- Shipment Details -->
+            <div class="card">
+                <table class="details-grid">
+                    <tr>
+                        <td class="label">Order ID</td>
+                        <td class="value" th:text="${orderId}">ORD-123456</td>
+                    </tr>
+                    <tr>
+                        <td class="label">Current Status</td>
+                        <td class="value">
+                            <span class="badge" th:text="${status != null ? status : 'SHIPPED'}">SHIPPED</span>
+                        </td>
+                    </tr>
+                    <tr th:if="${trackingNumber != null and !trackingNumber.isEmpty()}">
+                        <td class="label">Tracking Number</td>
+                        <td class="value" th:text="${trackingNumber}">TRK-987654321</td>
+                    </tr>
+                    <tr th:if="${carrierOrWarehouse != null and !carrierOrWarehouse.isEmpty()}">
+                        <td class="label">Fulfillment Center / Carrier</td>
+                        <td class="value" th:text="${carrierOrWarehouse}">Main Warehouse</td>
+                    </tr>
+                    <tr th:if="${shippedAt != null and !shippedAt.isEmpty()}">
+                        <td class="label">Dispatched Date</td>
+                        <td class="value" th:text="${shippedAt}">Jan 02, 2026</td>
+                    </tr>
+                </table>
+            </div>
+
+            <!-- Destination Address -->
+            <div class="address-box" th:if="${deliveryAddress != null and !deliveryAddress.isEmpty()}">
+                <strong style="color: #0f172a; display: block; margin-bottom: 4px;">Delivering To:</strong>
+                <span th:text="${recipientName}">Customer Name</span><br/>
+                <span th:text="${deliveryAddress}">123 Main Street, City, State</span>
+            </div>
+
+            <p style="font-size: 13px; color: #64748b; line-height: 1.5; margin: 16px 0 0 0;">
+                Please ensure someone is available at the delivery location to receive the package.
+            </p>
+        </div>
+
+        <!-- Footer -->
+        <div class="footer">
+            <p style="margin: 0 0 6px 0;">Track your orders anytime in your ShopStack profile.</p>
+            <p style="margin: 0;">&copy; 2026 ShopStack Multi-Vendor Marketplace. All rights reserved.</p>
+        </div>
+    </div>
+</body>
+</html>

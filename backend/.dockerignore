@@ -1,0 +1,10 @@
+target/
+.mvn/
+*.cmd
+.git/
+.gitignore
+.idea/
+.vscode/
+*.iml
+*.log
+uploads/

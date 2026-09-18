@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Order Confirmation - ShopStack</title>
+    <style>
+        body { margin: 0; padding: 0; background-color: #f4f5f9; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; color: #1e293b; }
+        .container { max-width: 600px; margin: 24px auto; background-color: #ffffff; border-radius: 12px; overflow: hidden; box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05); }
+        .header { background: linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%); padding: 32px 24px; text-align: center; color: #ffffff; }
+        .header h1 { margin: 0; font-size: 24px; font-weight: 700; letter-spacing: -0.5px; }
+        .header p { margin: 8px 0 0 0; font-size: 14px; opacity: 0.9; }
+        .content { padding: 32px 24px; }
+        .greeting { font-size: 18px; font-weight: 600; margin-bottom: 12px; color: #0f172a; }
+        .badge { display: inline-block; padding: 4px 10px; border-radius: 9999px; font-size: 12px; font-weight: 600; background-color: #ecfdf5; color: #059669; }
+        .card { background-color: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px; padding: 16px; margin: 20px 0; }
+        .details-grid { width: 100%; border-collapse: collapse; margin-bottom: 8px; }
+        .details-grid td { padding: 6px 0; font-size: 14px; vertical-align: top; }
+        .details-grid td.label { color: #64748b; width: 40%; }
+        .details-grid td.value { color: #0f172a; font-weight: 500; }
+        .table-items { width: 100%; border-collapse: collapse; margin-top: 16px; }
+        .table-items th { text-align: left; padding: 10px 8px; font-size: 12px; color: #64748b; text-transform: uppercase; border-bottom: 1px solid #e2e8f0; }
+        .table-items td { padding: 12px 8px; font-size: 14px; border-bottom: 1px solid #f1f5f9; color: #334155; }
+        .total-row td { border-bottom: none; font-weight: 700; font-size: 16px; color: #0f172a; padding-top: 16px; }
+        .address-box { margin-top: 20px; padding: 14px; background-color: #f1f5f9; border-radius: 8px; font-size: 13px; line-height: 1.5; color: #334155; }
+        .footer { background-color: #f8fafc; padding: 24px; text-align: center; font-size: 12px; color: #94a3b8; border-top: 1px solid #e2e8f0; }
+        .footer a { color: #4f46e5; text-decoration: none; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Header -->
+        <div class="header">
+            <h1>ShopStack</h1>
+            <p>Your Order Has Been Placed Successfully!</p>
+        </div>
+
+        <!-- Body -->
+        <div class="content">
+            <div class="greeting">
+                Hello, <span th:text="${recipientName != null ? recipientName : 'Customer'}">Customer</span> 👋
+            </div>
+            <p style="font-size: 14px; line-height: 1.6; color: #475569; margin: 0 0 16px 0;">
+                Thank you for shopping with <strong>ShopStack</strong>. We're thrilled to let you know that your order has been received and confirmed.
+            </p>
+
+            <!-- Order Overview Box -->
+            <div class="card">
+                <table class="details-grid">
+                    <tr>
+                        <td class="label">Order ID</td>
+                        <td class="value"><strong th:text="${orderId}">ORD-123456</strong></td>
+                    </tr>
+                    <tr>
+                        <td class="label">Order Date</td>
+                        <td class="value" th:text="${orderDate}">Jan 01, 2026</td>
+                    </tr>
+                    <tr>
+                        <td class="label">Status</td>
+                        <td class="value">
+                            <span class="badge" th:text="${orderStatus != null ? orderStatus : 'CONFIRMED'}">CONFIRMED</span>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td class="label">Payment Method</td>
+                        <td class="value" th:text="${paymentMethod != null ? paymentMethod : 'RAZORPAY'}">RAZORPAY</td>
+                    </tr>
+                </table>
+            </div>
+
+            <!-- Items Table -->
+            <h3 style="font-size: 15px; font-weight: 600; margin: 24px 0 8px 0; color: #0f172a;">Items in Your Order</h3>
+            <table class="table-items">
+                <thead>
+                    <tr>
+                        <th>Item</th>
+                        <th style="text-align: center;">Qty</th>
+                        <th style="text-align: right;">Price</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr th:each="item : ${items}">
+                        <td>
+                            <strong th:text="${item.productName != null ? item.productName : 'Product'}">Product Name</strong>
+                        </td>
+                        <td style="text-align: center;" th:text="${item.quantity}">1</td>
+                        <td style="text-align: right;">₹<span th:text="${#numbers.formatDecimal(item.price * item.quantity, 1, 2)}">0.00</span></td>
+                    </tr>
+                    <tr th:if="${couponDiscount != null and couponDiscount > 0}">
+                        <td colspan="2" style="color: #059669;">
+                            Coupon Discount (<span th:text="${couponCode}">PROMO</span>)
+                        </td>
+                        <td style="text-align: right; color: #059669;">-₹<span th:text="${#numbers.formatDecimal(couponDiscount, 1, 2)}">0.00</span></td>
+                    </tr>
+                    <tr class="total-row">
+                        <td colspan="2">Total Amount Paid</td>
+                        <td style="text-align: right; color: #4f46e5;">₹<span th:text="${#numbers.formatDecimal(totalAmount, 1, 2)}">0.00</span></td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <!-- Shipping Address -->
+            <div class="address-box" th:if="${deliveryAddress != null and !deliveryAddress.isEmpty()}">
+                <strong style="color: #0f172a; display: block; margin-bottom: 4px;">Shipping Address:</strong>
+                <span th:text="${recipientName}">Customer Name</span><br/>
+                <span th:text="${deliveryAddress}">123 Main Street, City, State</span><br/>
+                <span th:if="${recipientPhone != null and !recipientPhone.isEmpty()}" th:text="'Phone: ' + ${recipientPhone}">Phone: 9876543210</span>
+            </div>
+        </div>
+
+        <!-- Footer -->
+        <div class="footer">
+            <p style="margin: 0 0 6px 0;">Need help with your order? Reach out to our support team.</p>
+            <p style="margin: 0;">&copy; 2026 ShopStack Multi-Vendor Marketplace. All rights reserved.</p>
+        </div>
+    </div>
+</body>
+</html>
