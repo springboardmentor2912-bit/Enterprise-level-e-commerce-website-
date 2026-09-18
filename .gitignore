@@ -1,0 +1,14 @@
+# Root Environment Variables (CRITICAL)
+.env
+.env.local
+.env.*.local
+
+# Operating System & IDE Files
+.DS_Store
+.idea/
+.vscode/
+*.swp
+
+# Docker Build Logs & Artifacts
+*.log
+node_modules
