@@ -1,0 +1,803 @@
+ /* =========================================================
+    VENDOR PRODUCT MANAGEMENT
+    ========================================================= */
+
+.vendor-products {
+    width: 100%;
+    padding: 30px;
+    box-sizing: border-box;
+}
+
+/* =========================================================
+   HEADER
+   ========================================================= */
+
+.product-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 25px;
+}
+
+.product-header h2 {
+    margin: 0;
+    font-size: 28px;
+    font-weight: 700;
+    color: #111827;
+}
+
+.product-header p {
+    margin: 6px 0 0;
+    color: #6b7280;
+    font-size: 14px;
+}
+
+/* =========================================================
+   TOP ADD PRODUCT BUTTON
+   ========================================================= */
+
+.add-product-button {
+    border: none;
+    padding: 11px 18px;
+    border-radius: 8px;
+
+    background: #111827;
+    color: #ffffff;
+
+    font-size: 14px;
+    font-weight: 600;
+
+    cursor: pointer;
+
+    transition: 0.2s ease;
+}
+
+.add-product-button:hover {
+    background: #1f2937;
+}
+
+/* =========================================================
+   SUCCESS / ERROR
+   ========================================================= */
+
+.success-message {
+    padding: 12px 16px;
+    margin-bottom: 18px;
+
+    border-radius: 8px;
+
+    background: #dcfce7;
+    color: #166534;
+
+    font-size: 14px;
+    font-weight: 600;
+}
+
+.error-message {
+    padding: 12px 16px;
+    margin-bottom: 18px;
+
+    border-radius: 8px;
+
+    background: #fee2e2;
+    color: #991b1b;
+
+    font-size: 14px;
+    font-weight: 600;
+}
+
+/* =========================================================
+   PRODUCT FORM CARD
+   ========================================================= */
+
+.product-form-card {
+    width: 100%;
+    box-sizing: border-box;
+
+    background: #ffffff;
+
+    border-radius: 12px;
+
+    padding: 25px;
+
+    margin-bottom: 25px;
+
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.06);
+
+    overflow: visible;
+
+    height: auto;
+    max-height: none;
+}
+
+.product-form-card h3 {
+    margin: 0 0 22px 0;
+
+    font-size: 20px;
+    font-weight: 700;
+
+    color: #111827;
+}
+
+/* =========================================================
+   FORM
+   ========================================================= */
+
+.product-form-card form {
+    width: 100%;
+
+    display: flex;
+    flex-direction: column;
+
+    overflow: visible;
+
+    height: auto;
+    max-height: none;
+}
+
+/* =========================================================
+   FORM GRID
+   ========================================================= */
+
+.form-grid {
+    width: 100%;
+
+    display: grid;
+
+    grid-template-columns: 1fr 1fr;
+
+    gap: 20px;
+}
+
+/* =========================================================
+   FORM GROUP
+   ========================================================= */
+
+.form-group {
+    width: 100%;
+
+    display: flex;
+    flex-direction: column;
+
+    margin-bottom: 18px;
+
+    box-sizing: border-box;
+}
+
+.form-group label {
+    margin-bottom: 7px;
+
+    font-size: 14px;
+    font-weight: 600;
+
+    color: #374151;
+}
+
+.form-group input,
+.form-group textarea,
+.form-group select {
+    width: 100%;
+
+    box-sizing: border-box;
+
+    padding: 11px 13px;
+
+    border: 1px solid #d1d5db;
+
+    border-radius: 8px;
+
+    background: #ffffff;
+
+    color: #111827;
+
+    font-size: 14px;
+
+    outline: none;
+
+    transition:
+        border-color 0.2s ease,
+        box-shadow 0.2s ease;
+}
+
+.form-group input:focus,
+.form-group textarea:focus,
+.form-group select:focus {
+    border-color: #6366f1;
+
+    box-shadow:
+        0 0 0 3px rgba(99, 102, 241, 0.12);
+}
+
+.form-group textarea {
+    min-height: 120px;
+
+    resize: vertical;
+
+    font-family: inherit;
+}
+
+/* =========================================================
+   IMAGE PREVIEW
+   ========================================================= */
+
+.image-preview {
+    margin-top: 5px;
+    margin-bottom: 18px;
+
+    padding: 12px;
+
+    border: 1px solid #e5e7eb;
+
+    border-radius: 8px;
+
+    background: #f9fafb;
+
+    width: fit-content;
+}
+
+.image-preview img {
+    display: block;
+
+    width: 120px;
+    height: 120px;
+
+    object-fit: cover;
+
+    border-radius: 8px;
+}
+
+/* =========================================================
+   SUBMIT SECTION
+   ========================================================= */
+
+.product-submit-section {
+    display: flex !important;
+
+    align-items: center;
+
+    gap: 12px;
+
+    width: 100%;
+
+    box-sizing: border-box;
+
+    margin-top: 5px;
+
+    padding-top: 20px;
+
+    border-top: 1px solid #e5e7eb;
+
+    /* VERY IMPORTANT */
+    visibility: visible !important;
+    opacity: 1 !important;
+
+    overflow: visible !important;
+
+    height: auto !important;
+    max-height: none !important;
+
+    position: relative;
+
+    z-index: 10;
+}
+
+/* =========================================================
+   ADD PRODUCT / UPDATE PRODUCT
+   ========================================================= */
+
+.save-product-button {
+    display: inline-flex !important;
+
+    align-items: center;
+    justify-content: center;
+
+    min-width: 145px;
+
+    min-height: 44px;
+
+    padding: 11px 22px;
+
+    border: none;
+
+    border-radius: 8px;
+
+    background: #111827;
+
+    color: #ffffff;
+
+    font-size: 14px;
+
+    font-weight: 700;
+
+    cursor: pointer;
+
+    visibility: visible !important;
+
+    opacity: 1 !important;
+
+    position: relative;
+
+    z-index: 20;
+
+    transition: 0.2s ease;
+}
+
+.save-product-button:hover:not(:disabled) {
+    background: #1f2937;
+
+    transform: translateY(-1px);
+}
+
+.save-product-button:disabled {
+    opacity: 0.6 !important;
+
+    cursor: not-allowed;
+}
+
+/* =========================================================
+   CANCEL BUTTON
+   ========================================================= */
+
+.cancel-product-button {
+    display: inline-flex !important;
+
+    align-items: center;
+    justify-content: center;
+
+    min-width: 100px;
+
+    min-height: 44px;
+
+    padding: 11px 20px;
+
+    border: 1px solid #d1d5db;
+
+    border-radius: 8px;
+
+    background: #ffffff;
+
+    color: #374151;
+
+    font-size: 14px;
+
+    font-weight: 600;
+
+    cursor: pointer;
+
+    visibility: visible !important;
+
+    opacity: 1 !important;
+
+    position: relative;
+
+    z-index: 20;
+}
+
+.cancel-product-button:hover {
+    background: #f3f4f6;
+}
+
+/* =========================================================
+   PRODUCT LIST CARD
+   ========================================================= */
+
+.product-list-card {
+    width: 100%;
+
+    background: #ffffff;
+
+    border-radius: 12px;
+
+    padding: 20px;
+
+    box-sizing: border-box;
+
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.06);
+
+    overflow-x: auto;
+}
+
+.product-list-header {
+    display: flex;
+
+    justify-content: space-between;
+
+    align-items: center;
+
+    margin-bottom: 18px;
+}
+
+.product-list-header h3 {
+    margin: 0;
+
+    font-size: 20px;
+
+    font-weight: 700;
+
+    color: #111827;
+}
+
+/* =========================================================
+   PRODUCT TABLE
+   ========================================================= */
+
+.product-table-wrapper {
+    width: 100%;
+
+    overflow-x: auto;
+}
+
+.product-table {
+    width: 100%;
+
+    border-collapse: collapse;
+
+    min-width: 850px;
+}
+
+.product-table th {
+    text-align: left;
+
+    padding: 14px 12px;
+
+    background: #f8fafc;
+
+    color: #374151;
+
+    font-size: 13px;
+
+    font-weight: 700;
+
+    border-bottom: 1px solid #e5e7eb;
+}
+
+.product-table td {
+    padding: 14px 12px;
+
+    vertical-align: middle;
+
+    border-bottom: 1px solid #eeeeee;
+
+    font-size: 14px;
+
+    color: #374151;
+}
+
+.product-table tbody tr:hover {
+    background: #fafafa;
+}
+
+/* =========================================================
+   PRODUCT NAME
+   ========================================================= */
+
+.product-name {
+    display: flex;
+
+    align-items: center;
+
+    gap: 12px;
+
+    min-width: 180px;
+
+    font-weight: 600;
+
+    color: #111827;
+}
+
+.product-image {
+    width: 60px !important;
+
+    height: 60px !important;
+
+    min-width: 60px;
+
+    object-fit: cover;
+
+    border-radius: 8px;
+
+    border: 1px solid #e5e7eb;
+
+    display: block;
+}
+
+.product-placeholder {
+    width: 60px;
+
+    height: 60px;
+
+    min-width: 60px;
+
+    display: flex;
+
+    align-items: center;
+
+    justify-content: center;
+
+    border-radius: 8px;
+
+    background: #f3f4f6;
+
+    font-size: 24px;
+}
+
+/* =========================================================
+   STOCK
+   ========================================================= */
+
+.stock-in {
+    color: #16a34a;
+
+    font-weight: 700;
+}
+
+.stock-low {
+    color: #d97706;
+
+    font-weight: 700;
+}
+
+.stock-out {
+    color: #dc2626;
+
+    font-weight: 700;
+}
+
+/* =========================================================
+   PRODUCT ACTIONS
+   ========================================================= */
+
+.product-actions {
+    display: flex;
+
+    align-items: center;
+
+    gap: 8px;
+
+    flex-wrap: wrap;
+}
+
+.edit-product-button,
+.delete-product-button {
+    border: none;
+
+    padding: 7px 11px;
+
+    border-radius: 6px;
+
+    font-size: 12px;
+
+    font-weight: 600;
+
+    cursor: pointer;
+
+    white-space: nowrap;
+}
+
+.edit-product-button {
+    background: #eef2ff;
+
+    color: #4338ca;
+}
+
+.edit-product-button:hover {
+    background: #e0e7ff;
+}
+
+.delete-product-button {
+    background: #fee2e2;
+
+    color: #dc2626;
+}
+
+.delete-product-button:hover {
+    background: #fecaca;
+}
+
+/* =========================================================
+   NO PRODUCTS
+   ========================================================= */
+
+.no-products {
+    text-align: center;
+
+    padding: 50px 20px;
+
+    color: #6b7280;
+}
+
+.no-products > div {
+    font-size: 40px;
+
+    margin-bottom: 10px;
+}
+
+.no-products h4 {
+    margin: 0 0 8px;
+
+    font-size: 18px;
+
+    color: #374151;
+}
+
+.no-products p {
+    margin: 0;
+
+    font-size: 14px;
+}
+
+/* =========================================================
+   LOADING
+   ========================================================= */
+
+.product-loading {
+    padding: 50px;
+
+    text-align: center;
+
+    font-size: 16px;
+
+    color: #6b7280;
+}
+
+/* =========================================================
+   RESPONSIVE
+   ========================================================= */
+
+@media (max-width: 900px) {
+
+    .vendor-products {
+        padding: 20px;
+    }
+
+    .form-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .product-table {
+        min-width: 850px;
+    }
+}
+
+/* =========================================================
+   MOBILE
+   ========================================================= */
+
+@media (max-width: 600px) {
+
+    .vendor-products {
+        padding: 15px;
+    }
+
+    .product-header {
+        flex-direction: column;
+
+        align-items: flex-start;
+
+        gap: 15px;
+    }
+
+    .product-header h2 {
+        font-size: 23px;
+    }
+
+    .add-product-button {
+        width: 100%;
+    }
+
+    .product-form-card {
+        padding: 18px;
+    }
+
+    .product-submit-section {
+        flex-direction: column;
+
+        align-items: stretch;
+    }
+
+    .save-product-button,
+    .cancel-product-button {
+        width: 100%;
+    }
+
+    .image-preview img {
+        width: 100px;
+        height: 100px;
+    }
+    /* =========================================================
+   EMERGENCY FORM VISIBILITY FIX
+   ========================================================= */
+
+.vendor-products,
+.product-form-card,
+.product-form-card form {
+    overflow: visible !important;
+    height: auto !important;
+    max-height: none !important;
+    min-height: 0 !important;
+}
+
+.product-submit-section {
+    display: flex !important;
+    visibility: visible !important;
+    opacity: 1 !important;
+    position: relative !important;
+    z-index: 9999 !important;
+    height: 70px !important;
+    min-height: 70px !important;
+    max-height: none !important;
+    overflow: visible !important;
+    margin-top: 20px !important;
+    padding: 15px 0 !important;
+}
+
+.save-product-button,
+.cancel-product-button {
+    display: inline-flex !important;
+    visibility: visible !important;
+    opacity: 1 !important;
+    position: relative !important;
+    z-index: 10000 !important;
+    height: 44px !important;
+    min-height: 44px !important;
+    max-height: 44px !important;
+}
+
+.product-form-card {
+    padding-bottom: 40px !important;
+}
+.product-submit-section {
+    display: flex !important;
+    align-items: center !important;
+    gap: 15px !important;
+    width: 100% !important;
+    min-height: 70px !important;
+    margin-top: 25px !important;
+    padding: 15px 0 !important;
+    position: relative !important;
+    z-index: 9999 !important;
+    overflow: visible !important;
+}
+
+.save-product-button,
+.cancel-product-button {
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    visibility: visible !important;
+    opacity: 1 !important;
+    position: relative !important;
+    z-index: 10000 !important;
+    min-width: 140px !important;
+    height: 45px !important;
+    min-height: 45px !important;
+    padding: 0 22px !important;
+    border: none !important;
+    cursor: pointer !important;
+}
+
+.save-product-button {
+    background: #2563eb !important;
+    color: white !important;
+}
+
+.cancel-product-button {
+    background: #e5e7eb !important;
+    color: #111827 !important;
+}
+
+.save-product-button:disabled,
+.cancel-product-button:disabled {
+    opacity: 0.6 !important;
+    cursor: not-allowed !important;
+}
+
+.product-form-card,
+.product-form-card form,
+.vendor-products {
+    height: auto !important;
+    min-height: 0 !important;
+    max-height: none !important;
+    overflow: visible !important;
+}
+}

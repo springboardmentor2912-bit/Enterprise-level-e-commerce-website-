@@ -1,0 +1,386 @@
+/* =========================================================
+   VENDOR STOCK MANAGEMENT
+   ========================================================= */
+
+.vendor-stock-page {
+  padding: 30px;
+  min-height: 100vh;
+  background: #f5f7fb;
+  box-sizing: border-box;
+}
+
+.vendor-stock-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 25px;
+}
+
+.vendor-stock-title {
+  margin: 0;
+  font-size: 28px;
+  font-weight: 700;
+  color: #1f2937;
+}
+
+.vendor-stock-subtitle {
+  margin: 6px 0 0;
+  color: #6b7280;
+  font-size: 14px;
+}
+
+/* =========================================================
+   REFRESH BUTTON
+   ========================================================= */
+
+.vendor-stock-refresh-btn {
+  border: none;
+  background: #4f46e5;
+  color: white;
+  padding: 10px 18px;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 14px;
+  font-weight: 600;
+  transition: 0.2s ease;
+}
+
+.vendor-stock-refresh-btn:hover {
+  background: #4338ca;
+}
+
+/* =========================================================
+   ERROR
+   ========================================================= */
+
+.vendor-stock-error {
+  background: #fee2e2;
+  color: #b91c1c;
+  border: 1px solid #fecaca;
+  padding: 14px 16px;
+  border-radius: 8px;
+  margin-bottom: 20px;
+}
+
+/* =========================================================
+   SUCCESS
+   ========================================================= */
+
+.vendor-stock-success {
+  background: #dcfce7;
+  color: #166534;
+  border: 1px solid #bbf7d0;
+  padding: 14px 16px;
+  border-radius: 8px;
+  margin-bottom: 20px;
+}
+
+/* =========================================================
+   LOADING
+   ========================================================= */
+
+.vendor-stock-loading {
+  text-align: center;
+  padding: 60px 20px;
+  color: #6b7280;
+  font-size: 16px;
+}
+
+/* =========================================================
+   EMPTY STATE
+   ========================================================= */
+
+.vendor-stock-empty {
+  background: white;
+  border-radius: 14px;
+  padding: 60px 20px;
+  text-align: center;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.06);
+}
+
+.vendor-stock-empty-icon {
+  font-size: 50px;
+  margin-bottom: 15px;
+}
+
+.vendor-stock-empty h3 {
+  margin: 0 0 8px;
+  color: #1f2937;
+}
+
+.vendor-stock-empty p {
+  margin: 0;
+  color: #6b7280;
+}
+
+/* =========================================================
+   STOCK TABLE CONTAINER
+   ========================================================= */
+
+.vendor-stock-table-container {
+  background: white;
+  border-radius: 14px;
+  overflow-x: auto;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.06);
+  border: 1px solid #e5e7eb;
+}
+
+/* =========================================================
+   TABLE
+   ========================================================= */
+
+.vendor-stock-table {
+  width: 100%;
+  border-collapse: collapse;
+  min-width: 800px;
+}
+
+.vendor-stock-table th {
+  background: #f9fafb;
+  color: #374151;
+  font-size: 13px;
+  font-weight: 700;
+  text-align: left;
+  padding: 16px;
+  border-bottom: 1px solid #e5e7eb;
+}
+
+.vendor-stock-table td {
+  padding: 16px;
+  color: #4b5563;
+  font-size: 14px;
+  border-bottom: 1px solid #f0f0f0;
+}
+
+.vendor-stock-table tbody tr:hover {
+  background: #fafafa;
+}
+
+.vendor-stock-table tbody tr:last-child td {
+  border-bottom: none;
+}
+
+/* =========================================================
+   PRODUCT NAME
+   ========================================================= */
+
+.vendor-stock-product-name {
+  font-weight: 700;
+  color: #111827;
+}
+
+.vendor-stock-product-description {
+  margin-top: 4px;
+  font-size: 12px;
+  color: #9ca3af;
+}
+
+/* =========================================================
+   CATEGORY / BRAND
+   ========================================================= */
+
+.vendor-stock-category {
+  color: #4b5563;
+}
+
+.vendor-stock-brand {
+  font-weight: 600;
+  color: #374151;
+}
+
+/* =========================================================
+   PRICE
+   ========================================================= */
+
+.vendor-stock-price {
+  font-weight: 700;
+  color: #111827;
+}
+
+/* =========================================================
+   STOCK BADGES
+   ========================================================= */
+
+.vendor-stock-quantity {
+  font-weight: 700;
+}
+
+.stock-in {
+  color: #15803d;
+}
+
+.stock-low {
+  color: #d97706;
+}
+
+.stock-out {
+  color: #dc2626;
+}
+
+.vendor-stock-badge {
+  display: inline-block;
+  padding: 5px 10px;
+  border-radius: 20px;
+  font-size: 11px;
+  font-weight: 700;
+}
+
+.badge-in-stock {
+  background: #dcfce7;
+  color: #166534;
+}
+
+.badge-low-stock {
+  background: #fef3c7;
+  color: #92400e;
+}
+
+.badge-out-stock {
+  background: #fee2e2;
+  color: #b91c1c;
+}
+
+/* =========================================================
+   STOCK UPDATE
+   ========================================================= */
+
+.vendor-stock-update {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.vendor-stock-input {
+  width: 80px;
+  padding: 8px 10px;
+  border: 1px solid #d1d5db;
+  border-radius: 7px;
+  outline: none;
+  font-size: 14px;
+  box-sizing: border-box;
+}
+
+.vendor-stock-input:focus {
+  border-color: #4f46e5;
+  box-shadow: 0 0 0 2px rgba(79, 70, 229, 0.1);
+}
+
+.vendor-stock-update-btn {
+  border: none;
+  background: #4f46e5;
+  color: white;
+  padding: 8px 12px;
+  border-radius: 7px;
+  cursor: pointer;
+  font-size: 12px;
+  font-weight: 600;
+  transition: 0.2s ease;
+}
+
+.vendor-stock-update-btn:hover {
+  background: #4338ca;
+}
+
+.vendor-stock-update-btn:disabled {
+  background: #9ca3af;
+  cursor: not-allowed;
+}
+
+/* =========================================================
+   PRODUCT IMAGE
+   ========================================================= */
+
+.vendor-stock-product-image {
+  width: 55px;
+  height: 55px;
+  object-fit: cover;
+  border-radius: 8px;
+  border: 1px solid #e5e7eb;
+}
+
+.vendor-stock-image-placeholder {
+  width: 55px;
+  height: 55px;
+  border-radius: 8px;
+  background: #f3f4f6;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 22px;
+}
+
+/* =========================================================
+   ACTION BUTTONS
+   ========================================================= */
+
+.vendor-stock-actions {
+  display: flex;
+  gap: 8px;
+}
+
+.vendor-stock-action-btn {
+  border: none;
+  padding: 8px 12px;
+  border-radius: 7px;
+  cursor: pointer;
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.vendor-stock-edit-btn {
+  background: #dbeafe;
+  color: #1d4ed8;
+}
+
+.vendor-stock-edit-btn:hover {
+  background: #bfdbfe;
+}
+
+.vendor-stock-delete-btn {
+  background: #fee2e2;
+  color: #b91c1c;
+}
+
+.vendor-stock-delete-btn:hover {
+  background: #fecaca;
+}
+
+/* =========================================================
+   RESPONSIVE
+   ========================================================= */
+
+@media (max-width: 768px) {
+
+  .vendor-stock-page {
+    padding: 20px;
+  }
+
+  .vendor-stock-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 15px;
+  }
+
+  .vendor-stock-title {
+    font-size: 24px;
+  }
+
+  .vendor-stock-refresh-btn {
+    width: 100%;
+  }
+
+  .vendor-stock-table-container {
+    border-radius: 10px;
+  }
+}
+
+@media (max-width: 480px) {
+
+  .vendor-stock-page {
+    padding: 15px;
+  }
+
+  .vendor-stock-title {
+    font-size: 21px;
+  }
+}

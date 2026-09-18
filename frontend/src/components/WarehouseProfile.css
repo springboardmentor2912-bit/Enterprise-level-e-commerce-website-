@@ -1,0 +1,173 @@
+/* =========================================================
+   WAREHOUSE PROFILE PAGE
+   ========================================================= */
+
+.warehouse-profile-page {
+    min-height: 100vh;
+    padding: 50px 25px;
+    background: #f8fafc;
+    display: flex;
+    justify-content: center;
+    align-items: flex-start;
+}
+
+
+/* =========================================================
+   PROFILE CARD
+   ========================================================= */
+
+.warehouse-profile-card {
+    width: 100%;
+    max-width: 600px;
+    background: white;
+    border-radius: 18px;
+    padding: 40px;
+    box-shadow: 0 10px 35px rgba(0, 0, 0, 0.08);
+    text-align: center;
+}
+
+
+/* =========================================================
+   AVATAR
+   ========================================================= */
+
+.warehouse-profile-avatar {
+    width: 90px;
+    height: 90px;
+    margin: 0 auto 20px;
+
+    border-radius: 50%;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    background: #eff6ff;
+
+    font-size: 42px;
+}
+
+
+/* =========================================================
+   TITLE
+   ========================================================= */
+
+.warehouse-profile-card h1 {
+    margin: 0;
+
+    font-size: 26px;
+    color: #111827;
+}
+
+
+.warehouse-profile-subtitle {
+    margin: 8px 0 30px;
+
+    color: #6b7280;
+    font-size: 14px;
+}
+
+
+/* =========================================================
+   INFORMATION
+   ========================================================= */
+
+.warehouse-profile-info {
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+
+    text-align: left;
+}
+
+
+.profile-info-item {
+    padding: 16px;
+
+    background: #f9fafb;
+
+    border: 1px solid #e5e7eb;
+
+    border-radius: 10px;
+}
+
+
+.profile-info-item span {
+    display: block;
+
+    margin-bottom: 6px;
+
+    color: #6b7280;
+
+    font-size: 12px;
+}
+
+
+.profile-info-item strong {
+    color: #111827;
+
+    font-size: 14px;
+
+    word-break: break-word;
+}
+
+
+.active-status {
+    color: #16a34a !important;
+}
+
+
+/* =========================================================
+   LOGOUT BUTTON
+   ========================================================= */
+
+.warehouse-logout-btn {
+    width: 100%;
+
+    margin-top: 25px;
+
+    padding: 13px 20px;
+
+    border: none;
+    border-radius: 9px;
+
+    background: #dc2626;
+    color: white;
+
+    font-size: 14px;
+    font-weight: 600;
+
+    cursor: pointer;
+
+    transition: 0.2s;
+}
+
+
+.warehouse-logout-btn:hover {
+    background: #b91c1c;
+
+    transform: translateY(-1px);
+}
+
+
+/* =========================================================
+   MOBILE
+   ========================================================= */
+
+@media (max-width: 600px) {
+
+    .warehouse-profile-page {
+        padding: 25px 15px;
+    }
+
+
+    .warehouse-profile-card {
+        padding: 28px 20px;
+    }
+
+
+    .warehouse-profile-card h1 {
+        font-size: 22px;
+    }
+
+}

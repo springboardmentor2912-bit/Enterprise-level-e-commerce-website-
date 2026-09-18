@@ -1,0 +1,840 @@
+/* =========================================================
+   ADMIN ORDER MANAGEMENT
+========================================================= */
+
+.admin-orders {
+  width: 100%;
+  color: #1e293b;
+  box-sizing: border-box;
+}
+
+/* =========================================================
+   PAGE HEADER
+========================================================= */
+
+.admin-orders-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 20px;
+  margin-bottom: 30px;
+}
+
+.admin-orders-header h2 {
+  margin: 0;
+  color: #111827;
+  font-size: 28px;
+  font-weight: 750;
+  letter-spacing: -0.5px;
+}
+
+.admin-orders-header p {
+  margin: 7px 0 0;
+  color: #64748b;
+  font-size: 14px;
+}
+
+.admin-orders-header button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+
+  padding: 11px 18px;
+
+  border: 1px solid #e2e8f0;
+  border-radius: 10px;
+
+  background: #ffffff;
+  color: #334155;
+
+  font-size: 14px;
+  font-weight: 600;
+
+  cursor: pointer;
+
+  box-shadow: 0 3px 10px rgba(15, 23, 42, 0.05);
+
+  transition:
+    background 0.2s ease,
+    border-color 0.2s ease,
+    color 0.2s ease,
+    transform 0.2s ease;
+}
+
+.admin-orders-header button:hover {
+  background: #f8faff;
+  border-color: #c7d2fe;
+  color: #4f46e5;
+  transform: translateY(-1px);
+}
+
+.admin-orders-header button:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  transform: none;
+}
+
+/* =========================================================
+   ERROR MESSAGE
+========================================================= */
+
+.admin-orders .error-message {
+  width: 100%;
+  box-sizing: border-box;
+
+  margin-bottom: 20px;
+  padding: 13px 16px;
+
+  border: 1px solid #fecaca;
+  border-radius: 10px;
+
+  background: #fef2f2;
+  color: #b91c1c;
+
+  font-size: 14px;
+}
+
+/* =========================================================
+   ORDERS TITLE
+========================================================= */
+
+.admin-orders-list-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+
+  margin-bottom: 18px;
+}
+
+.admin-orders-list-header h3 {
+  margin: 0;
+  color: #111827;
+  font-size: 20px;
+  font-weight: 700;
+}
+
+.admin-orders-list-header span {
+  display: block;
+  margin-top: 4px;
+  color: #64748b;
+  font-size: 13px;
+}
+
+/* =========================================================
+   ORDER LIST
+========================================================= */
+
+.admin-orders-container {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+
+  width: 100%;
+}
+
+/* =========================================================
+   ONE ORDER = ONE BOX
+========================================================= */
+
+.admin-order-card {
+  width: 100%;
+  box-sizing: border-box;
+
+  background: #ffffff;
+
+  border: 1px solid #e5e7eb;
+  border-radius: 16px;
+
+  overflow: hidden;
+
+  box-shadow:
+    0 3px 12px rgba(15, 23, 42, 0.04);
+
+  transition:
+    border-color 0.25s ease,
+    box-shadow 0.25s ease,
+    transform 0.25s ease;
+}
+
+.admin-order-card:hover {
+  border-color: #c7d2fe;
+
+  box-shadow:
+    0 10px 28px rgba(15, 23, 42, 0.08);
+
+  transform: translateY(-2px);
+}
+
+/* =========================================================
+   ORDER HEADER
+========================================================= */
+
+.admin-order-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+
+  gap: 20px;
+
+  padding: 20px 24px;
+
+  background:
+    linear-gradient(
+      135deg,
+      #f8fafc 0%,
+      #ffffff 100%
+    );
+
+  border-bottom: 1px solid #e5e7eb;
+}
+
+.admin-order-header h3 {
+  margin: 0 0 8px;
+
+  color: #111827;
+
+  font-size: 18px;
+  font-weight: 750;
+}
+
+.admin-order-header p {
+  margin: 4px 0;
+
+  color: #64748b;
+
+  font-size: 13px;
+}
+
+/* =========================================================
+   ORDER STATUS
+========================================================= */
+
+.admin-order-status {
+  flex-shrink: 0;
+}
+
+.admin-order-status strong {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+
+  min-width: 100px;
+
+  padding: 8px 15px;
+
+  border-radius: 999px;
+
+  background: #eef2ff;
+  border: 1px solid #c7d2fe;
+
+  color: #4f46e5;
+
+  font-size: 12px;
+  font-weight: 750;
+
+  letter-spacing: 0.4px;
+}
+
+/* =========================================================
+   PRODUCTS AREA
+========================================================= */
+
+.admin-order-items {
+  padding: 21px 24px;
+}
+
+.admin-order-items h4 {
+  margin: 0 0 14px;
+
+  color: #334155;
+
+  font-size: 14px;
+  font-weight: 700;
+}
+
+/* =========================================================
+   PRODUCT ITEM
+========================================================= */
+
+.admin-order-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+
+  gap: 20px;
+
+  padding: 15px 17px;
+  margin-bottom: 10px;
+
+  background: #f8fafc;
+
+  border: 1px solid #edf0f4;
+  border-radius: 11px;
+
+  transition:
+    background 0.2s ease,
+    border-color 0.2s ease;
+}
+
+.admin-order-item:last-child {
+  margin-bottom: 0;
+}
+
+.admin-order-item:hover {
+  background: #f5f7fb;
+  border-color: #e2e8f0;
+}
+
+.admin-order-item strong {
+  display: block;
+
+  color: #1e293b;
+
+  font-size: 14px;
+  font-weight: 700;
+}
+
+.admin-order-item p {
+  display: inline-block;
+
+  margin: 7px 18px 0 0;
+
+  color: #64748b;
+
+  font-size: 12px;
+}
+
+.admin-order-item > div:last-child {
+  flex-shrink: 0;
+}
+
+.admin-order-item > div:last-child strong {
+  color: #111827;
+
+  font-size: 15px;
+  font-weight: 750;
+}
+
+/* =========================================================
+   ORDER FOOTER
+========================================================= */
+
+.admin-order-footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+
+  gap: 25px;
+
+  padding: 18px 24px;
+
+  background: #fafafa;
+
+  border-top: 1px solid #e5e7eb;
+}
+
+/* =========================================================
+   TOTAL
+========================================================= */
+
+.admin-order-footer > div:first-child {
+  display: flex;
+  align-items: center;
+
+  gap: 10px;
+}
+
+.admin-order-footer > div:first-child strong {
+  color: #64748b;
+
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.admin-order-footer > div:first-child span {
+  color: #111827;
+
+  font-size: 20px;
+  font-weight: 750;
+}
+
+/* =========================================================
+   STATUS UPDATE
+========================================================= */
+
+.admin-order-actions {
+  display: flex;
+  align-items: center;
+
+  gap: 10px;
+}
+
+.admin-order-actions label {
+  color: #64748b;
+
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.admin-order-actions select {
+  min-width: 150px;
+
+  padding: 9px 12px;
+
+  border: 1px solid #dbe1ea;
+  border-radius: 9px;
+
+  background: #ffffff;
+  color: #334155;
+
+  font-size: 13px;
+  font-weight: 600;
+
+  outline: none;
+
+  cursor: pointer;
+
+  transition:
+    border-color 0.2s ease,
+    box-shadow 0.2s ease;
+}
+
+.admin-order-actions select:hover {
+  border-color: #c7d2fe;
+}
+
+.admin-order-actions select:focus {
+  border-color: #6366f1;
+
+  box-shadow:
+    0 0 0 3px rgba(99, 102, 241, 0.1);
+}
+
+.admin-order-actions select:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.admin-order-actions span {
+  color: #6366f1;
+
+  font-size: 12px;
+  font-weight: 650;
+}
+
+/* =========================================================
+   RETURN & REFUND SECTION
+========================================================= */
+
+.admin-return-section {
+  margin: 0 24px 22px;
+
+  padding: 19px;
+
+  background: #fffbeb;
+
+  border: 1px solid #fde68a;
+  border-radius: 12px;
+}
+
+.admin-return-section h4 {
+  margin: 0 0 15px;
+
+  color: #92400e;
+
+  font-size: 15px;
+  font-weight: 750;
+}
+
+.admin-return-section p {
+  margin: 7px 0;
+
+  color: #78350f;
+
+  font-size: 13px;
+  line-height: 1.5;
+}
+
+.admin-return-section p strong {
+  color: #92400e;
+}
+
+/* =========================================================
+   RETURN / REFUND BUTTONS
+========================================================= */
+
+.admin-refund-actions {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+
+  gap: 10px;
+
+  margin-top: 16px;
+}
+
+.admin-refund-actions p {
+  width: 100%;
+
+  margin: 0 0 4px;
+
+  color: #78350f;
+
+  font-weight: 650;
+}
+
+.admin-refund-actions button {
+  padding: 10px 16px;
+
+  border: none;
+  border-radius: 9px;
+
+  font-size: 13px;
+  font-weight: 650;
+
+  cursor: pointer;
+
+  transition:
+    background 0.2s ease,
+    transform 0.2s ease,
+    opacity 0.2s ease;
+}
+
+.admin-refund-actions button:hover {
+  transform: translateY(-1px);
+}
+
+.admin-refund-actions button:first-of-type {
+  background: #16a34a;
+  color: #ffffff;
+}
+
+.admin-refund-actions button:first-of-type:hover {
+  background: #15803d;
+}
+
+.admin-refund-actions button:nth-of-type(2) {
+  background: #fee2e2;
+  color: #b91c1c;
+}
+
+.admin-refund-actions button:nth-of-type(2):hover {
+  background: #fecaca;
+}
+
+.admin-refund-actions button:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  transform: none;
+}
+
+/* =========================================================
+   REFUND COMPLETED
+========================================================= */
+
+.admin-refund-completed {
+  margin-top: 15px;
+
+  padding: 14px 16px;
+
+  background: #f0fdf4;
+
+  border: 1px solid #bbf7d0;
+  border-radius: 10px;
+}
+
+.admin-refund-completed p {
+  margin: 5px 0;
+
+  color: #166534;
+}
+
+.admin-refund-completed p:first-child {
+  font-weight: 700;
+}
+
+/* =========================================================
+   REFUND REJECTED
+========================================================= */
+
+.admin-refund-rejected {
+  margin-top: 15px;
+
+  padding: 12px 15px;
+
+  background: #fef2f2;
+
+  border: 1px solid #fecaca;
+  border-radius: 9px;
+
+  color: #b91c1c;
+
+  font-size: 13px;
+  font-weight: 650;
+}
+
+/* =========================================================
+   EMPTY ORDERS
+========================================================= */
+
+.no-orders {
+  width: 100%;
+  box-sizing: border-box;
+
+  padding: 65px 20px;
+
+  text-align: center;
+
+  background: #ffffff;
+
+  border: 1px solid #e5e7eb;
+  border-radius: 16px;
+
+  box-shadow:
+    0 3px 12px rgba(15, 23, 42, 0.04);
+}
+
+.no-orders > div {
+  margin-bottom: 12px;
+
+  font-size: 45px;
+}
+
+.no-orders h3 {
+  margin: 0;
+
+  color: #334155;
+
+  font-size: 18px;
+}
+
+.no-orders p {
+  margin-top: 7px;
+
+  color: #64748b;
+
+  font-size: 14px;
+}
+
+/* =========================================================
+   LOADING
+========================================================= */
+
+.admin-orders > p {
+  color: #64748b;
+
+  font-size: 14px;
+}
+
+/* =========================================================
+   LARGE SCREEN
+========================================================= */
+
+@media (min-width: 1400px) {
+
+  .admin-order-card {
+    border-radius: 18px;
+  }
+
+  .admin-order-header {
+    padding: 22px 26px;
+  }
+
+  .admin-order-items {
+    padding: 22px 26px;
+  }
+
+  .admin-order-footer {
+    padding: 19px 26px;
+  }
+
+}
+
+/* =========================================================
+   TABLET
+========================================================= */
+
+@media (max-width: 900px) {
+
+  .admin-order-footer {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .admin-order-actions {
+    width: 100%;
+    flex-wrap: wrap;
+  }
+
+  .admin-order-actions select {
+    flex: 1;
+  }
+
+}
+
+/* =========================================================
+   MOBILE
+========================================================= */
+
+@media (max-width: 650px) {
+
+  .admin-orders-header {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .admin-orders-header button {
+    width: 100%;
+  }
+
+  .admin-order-header {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .admin-order-status {
+    align-self: flex-start;
+  }
+
+  .admin-order-item {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .admin-order-item p {
+    display: block;
+
+    margin-right: 0;
+  }
+
+  .admin-order-item > div:last-child {
+    width: 100%;
+  }
+
+  .admin-order-footer {
+    padding: 17px 18px;
+  }
+
+  .admin-order-footer > div:first-child {
+    width: 100%;
+    justify-content: space-between;
+  }
+
+  .admin-order-actions {
+    align-items: flex-start;
+    flex-direction: column;
+
+    width: 100%;
+  }
+
+  .admin-order-actions select {
+    width: 100%;
+  }
+
+  .admin-return-section {
+    margin: 0 15px 15px;
+  }
+
+}
+
+/* =========================================================
+   SMALL MOBILE
+========================================================= */
+
+@media (max-width: 450px) {
+
+  .admin-orders-header h2 {
+    font-size: 24px;
+  }
+
+  .admin-order-header {
+    padding: 18px;
+  }
+
+  .admin-order-items {
+    padding: 18px;
+  }
+
+  .admin-order-item {
+    padding: 13px;
+  }
+
+  .admin-order-footer {
+    padding: 16px;
+  }
+
+  .admin-return-section {
+    padding: 16px;
+  }
+  /* =========================================================
+   SUCCESS MESSAGE
+========================================================= */
+
+.admin-success-message {
+  width: 100%;
+  box-sizing: border-box;
+  margin-bottom: 20px;
+  padding: 13px 16px;
+  border: 1px solid #bbf7d0;
+  border-radius: 10px;
+  background: #f0fdf4;
+  color: #166534;
+  font-size: 14px;
+  font-weight: 600;
+  line-height: 1.5;
+}
+
+/* =========================================================
+   LONG TEXT SAFETY
+========================================================= */
+
+.admin-order-card,
+.admin-order-item,
+.admin-return-section,
+.admin-refund-completed,
+.admin-refund-rejected {
+  overflow-wrap: anywhere;
+  word-break: break-word;
+}
+
+/* =========================================================
+   VERY SMALL MOBILE
+========================================================= */
+
+@media (max-width: 360px) {
+
+  .admin-orders-header h2 {
+    font-size: 21px;
+  }
+
+  .admin-order-header h3 {
+    font-size: 16px;
+  }
+
+  .admin-order-status strong {
+    min-width: auto;
+    padding: 7px 11px;
+  }
+
+  .admin-order-footer > div:first-child {
+    align-items: flex-start;
+    flex-direction: column;
+    gap: 4px;
+  }
+
+  .admin-order-footer > div:first-child span {
+    font-size: 18px;
+  }
+
+  .admin-refund-actions {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .admin-refund-actions button {
+    width: 100%;
+  }
+}
+
+}

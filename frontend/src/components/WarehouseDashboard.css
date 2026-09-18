@@ -1,0 +1,576 @@
+* {
+    box-sizing: border-box;
+}
+
+.warehouse-layout {
+    display: flex;
+    min-height: 100vh;
+    background: #f5f7fb;
+    font-family: Arial, sans-serif;
+}
+
+/* SIDEBAR */
+
+.warehouse-sidebar {
+    width: 240px;
+    min-height: 100vh;
+    background: #111827;
+    color: white;
+    padding: 25px 15px;
+    display: flex;
+    flex-direction: column;
+    position: fixed;
+    left: 0;
+    top: 0;
+    bottom: 0;
+}
+
+.warehouse-logo {
+    font-size: 25px;
+    font-weight: 700;
+    text-align: center;
+    margin-bottom: 8px;
+}
+
+.warehouse-role {
+    text-align: center;
+    color: #9ca3af;
+    font-size: 13px;
+    margin-bottom: 30px;
+}
+
+.warehouse-sidebar > button {
+    border: none;
+    background: transparent;
+    color: #d1d5db;
+    text-align: left;
+    padding: 13px 16px;
+    margin-bottom: 6px;
+    border-radius: 8px;
+    font-size: 15px;
+    cursor: pointer;
+    transition: 0.2s;
+}
+
+.warehouse-sidebar > button:hover {
+    background: #1f2937;
+    color: white;
+}
+
+.warehouse-sidebar > button.active {
+    background: #2563eb;
+    color: white;
+}
+
+/* LOGOUT */
+
+.warehouse-sidebar-bottom {
+    margin-top: auto;
+}
+
+.logout-button {
+    width: 100%;
+    border: none;
+    padding: 12px;
+    border-radius: 8px;
+    background: #dc2626 !important;
+    color: white !important;
+    cursor: pointer;
+    font-size: 14px;
+}
+
+.logout-button:hover {
+    background: #b91c1c !important;
+}
+
+/* MAIN */
+
+.warehouse-main {
+    margin-left: 240px;
+    width: calc(100% - 240px);
+    padding: 35px;
+    min-height: 100vh;
+}
+
+.warehouse-dashboard-home h1,
+.warehouse-page h1 {
+    margin: 0;
+    font-size: 28px;
+    color: #111827;
+}
+
+.warehouse-subtitle {
+    margin-top: 8px;
+    color: #6b7280;
+}
+
+/* DASHBOARD CARDS */
+
+.warehouse-cards {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 20px;
+    margin-top: 30px;
+}
+
+.warehouse-card {
+    background: white;
+    border-radius: 12px;
+    padding: 25px;
+    box-shadow: 0 3px 12px rgba(0, 0, 0, 0.08);
+    border: 1px solid #e5e7eb;
+}
+
+.warehouse-card h2 {
+    margin: 0;
+    font-size: 32px;
+    color: #2563eb;
+}
+
+.warehouse-card p {
+    margin: 8px 0 0;
+    color: #6b7280;
+}
+
+/* TABLE */
+
+.warehouse-table-wrapper {
+    margin-top: 25px;
+    background: white;
+    border-radius: 12px;
+    overflow-x: auto;
+    box-shadow: 0 3px 12px rgba(0, 0, 0, 0.07);
+    border: 1px solid #e5e7eb;
+}
+
+.warehouse-table-wrapper table {
+    width: 100%;
+    border-collapse: collapse;
+    min-width: 750px;
+}
+
+.warehouse-table-wrapper th {
+    background: #f3f4f6;
+    color: #374151;
+    padding: 15px;
+    text-align: left;
+    font-size: 14px;
+}
+
+.warehouse-table-wrapper td {
+    padding: 15px;
+    border-top: 1px solid #e5e7eb;
+    color: #4b5563;
+    font-size: 14px;
+}
+
+.warehouse-table-wrapper tr:hover {
+    background: #f9fafb;
+}
+
+/* STATUS */
+
+.status-active {
+    display: inline-block;
+    padding: 5px 10px;
+    border-radius: 20px;
+    background: #dcfce7;
+    color: #166534;
+    font-size: 12px;
+    font-weight: 600;
+}
+
+.status-inactive {
+    display: inline-block;
+    padding: 5px 10px;
+    border-radius: 20px;
+    background: #fee2e2;
+    color: #991b1b;
+    font-size: 12px;
+    font-weight: 600;
+}
+
+.status-badge {
+    display: inline-block;
+    padding: 6px 10px;
+    border-radius: 20px;
+    background: #dbeafe;
+    color: #1d4ed8;
+    font-size: 12px;
+    font-weight: 600;
+}
+
+.ready-text {
+    color: #2563eb;
+    font-weight: 600;
+}
+
+.delivered-text {
+    color: #16a34a;
+    font-weight: 600;
+}
+
+.cancelled-text {
+    color: #dc2626;
+    font-weight: 600;
+}
+
+/* ACTION BUTTONS */
+
+.warehouse-table-wrapper td button {
+    border: none;
+    padding: 8px 12px;
+    border-radius: 6px;
+    background: #2563eb;
+    color: white;
+    cursor: pointer;
+    font-size: 12px;
+}
+
+.warehouse-table-wrapper td button:hover {
+    background: #1d4ed8;
+}
+
+/* ERROR */
+
+.warehouse-error {
+    margin-top: 20px;
+    padding: 12px 15px;
+    border-radius: 8px;
+    background: #fee2e2;
+    color: #991b1b;
+    border: 1px solid #fecaca;
+}
+
+/* RESPONSIVE */
+
+@media (max-width: 900px) {
+
+    .warehouse-sidebar {
+        width: 200px;
+    }
+
+    .warehouse-main {
+        margin-left: 200px;
+        width: calc(100% - 200px);
+        padding: 25px;
+    }
+
+    .warehouse-cards {
+        grid-template-columns: 1fr;
+    }
+}
+
+@media (max-width: 650px) {
+
+    .warehouse-sidebar {
+        width: 100%;
+        height: auto;
+        min-height: auto;
+        position: relative;
+    }
+
+    .warehouse-layout {
+        flex-direction: column;
+    }
+
+    .warehouse-main {
+        margin-left: 0;
+        width: 100%;
+        padding: 20px;
+    }
+
+    .warehouse-sidebar-bottom {
+        margin-top: 20px;
+    }
+
+    /* =========================================================
+   EXTRA WAREHOUSE MANAGEMENT STYLES
+   Existing design is preserved
+   ========================================================= */
+
+.warehouse-page-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 20px;
+    margin-bottom: 5px;
+}
+
+.warehouse-page-header .warehouse-subtitle {
+    margin-bottom: 0;
+}
+
+.warehouse-primary-button {
+    border: none;
+    padding: 11px 18px;
+    border-radius: 8px;
+    background: #2563eb;
+    color: white;
+    cursor: pointer;
+    font-size: 14px;
+    font-weight: 600;
+    transition: 0.2s;
+}
+
+.warehouse-primary-button:hover {
+    background: #1d4ed8;
+}
+
+.warehouse-loading {
+    margin-top: 20px;
+    color: #6b7280;
+}
+
+.warehouse-empty-state {
+    margin-top: 25px;
+    padding: 30px;
+    text-align: center;
+    background: white;
+    border: 1px solid #e5e7eb;
+    border-radius: 12px;
+    color: #6b7280;
+    box-shadow: 0 3px 12px rgba(0, 0, 0, 0.07);
+}
+
+/* TABLE ACTIONS */
+
+.warehouse-action-buttons {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    flex-wrap: wrap;
+}
+
+.warehouse-table-wrapper td .warehouse-action-buttons button {
+    padding: 7px 10px;
+    font-size: 11px;
+}
+
+.warehouse-edit-button {
+    background: #2563eb !important;
+}
+
+.warehouse-edit-button:hover {
+    background: #1d4ed8 !important;
+}
+
+.warehouse-toggle-button {
+    background: #6b7280 !important;
+}
+
+.warehouse-toggle-button:hover {
+    background: #4b5563 !important;
+}
+
+.warehouse-delete-button {
+    background: #dc2626 !important;
+}
+
+.warehouse-delete-button:hover {
+    background: #b91c1c !important;
+}
+
+/* =========================================================
+   MODAL
+   ========================================================= */
+
+.warehouse-modal-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(17, 24, 39, 0.55);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+    z-index: 1000;
+}
+
+.warehouse-modal {
+    width: 100%;
+    max-width: 600px;
+    max-height: 90vh;
+    overflow-y: auto;
+    background: white;
+    border-radius: 12px;
+    box-shadow: 0 15px 45px rgba(0, 0, 0, 0.2);
+    padding: 25px;
+}
+
+.warehouse-modal-header {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 20px;
+    margin-bottom: 22px;
+}
+
+.warehouse-modal-header h2 {
+    margin: 0;
+    color: #111827;
+    font-size: 22px;
+}
+
+.warehouse-modal-header p {
+    margin: 6px 0 0;
+    color: #6b7280;
+    font-size: 13px;
+}
+
+.warehouse-modal-close {
+    width: 34px;
+    height: 34px;
+    border: none;
+    border-radius: 7px;
+    background: #f3f4f6;
+    color: #374151;
+    font-size: 22px;
+    cursor: pointer;
+    line-height: 1;
+}
+
+.warehouse-modal-close:hover {
+    background: #e5e7eb;
+}
+
+/* =========================================================
+   FORM
+   ========================================================= */
+
+.warehouse-form-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 15px;
+}
+
+.warehouse-form-group {
+    margin-bottom: 16px;
+}
+
+.warehouse-form-group label {
+    display: block;
+    margin-bottom: 7px;
+    color: #374151;
+    font-size: 13px;
+    font-weight: 600;
+}
+
+.warehouse-form-group input,
+.warehouse-form-group select,
+.warehouse-form-group textarea {
+    width: 100%;
+    border: 1px solid #d1d5db;
+    border-radius: 7px;
+    padding: 10px 12px;
+    font-family: Arial, sans-serif;
+    font-size: 14px;
+    color: #374151;
+    background: white;
+    outline: none;
+    transition: 0.2s;
+}
+
+.warehouse-form-group input:focus,
+.warehouse-form-group select:focus,
+.warehouse-form-group textarea:focus {
+    border-color: #2563eb;
+    box-shadow: 0 0 0 2px rgba(37, 99, 235, 0.1);
+}
+
+.warehouse-form-group input[readonly] {
+    background: #f3f4f6;
+    color: #6b7280;
+}
+
+.warehouse-form-group textarea {
+    resize: vertical;
+}
+
+.warehouse-checkbox-group {
+    display: flex;
+    align-items: center;
+    gap: 9px;
+    margin: 5px 0 20px;
+    color: #374151;
+    font-size: 14px;
+    cursor: pointer;
+}
+
+.warehouse-checkbox-group input {
+    width: 16px;
+    height: 16px;
+    cursor: pointer;
+}
+
+/* =========================================================
+   MODAL BUTTONS
+   ========================================================= */
+
+.warehouse-modal-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 10px;
+    margin-top: 20px;
+    padding-top: 18px;
+    border-top: 1px solid #e5e7eb;
+}
+
+.warehouse-modal-actions button {
+    border: none;
+    padding: 10px 16px;
+    border-radius: 7px;
+    background: #2563eb;
+    color: white;
+    cursor: pointer;
+    font-size: 13px;
+    font-weight: 600;
+}
+
+.warehouse-modal-actions button:hover {
+    background: #1d4ed8;
+}
+
+.warehouse-modal-actions button:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+}
+
+.warehouse-modal-actions .warehouse-cancel-button {
+    background: #e5e7eb;
+    color: #374151;
+}
+
+.warehouse-modal-actions .warehouse-cancel-button:hover {
+    background: #d1d5db;
+}
+
+/* =========================================================
+   RESPONSIVE MODAL
+   ========================================================= */
+
+@media (max-width: 650px) {
+
+    .warehouse-page-header {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+
+    .warehouse-form-row {
+        grid-template-columns: 1fr;
+        gap: 0;
+    }
+
+    .warehouse-modal {
+        padding: 20px;
+    }
+
+    .warehouse-modal-actions {
+        flex-direction: column-reverse;
+    }
+
+    .warehouse-modal-actions button {
+        width: 100%;
+    }
+
+}
+}

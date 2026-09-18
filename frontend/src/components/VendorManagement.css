@@ -1,0 +1,280 @@
+
+.vendor-management {
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.vendor-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 25px;
+}
+
+.vendor-label {
+  margin: 0 0 8px;
+  color: #6366f1;
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 1.5px;
+}
+
+.vendor-header h2 {
+  margin: 0;
+  color: #1f2937;
+  font-size: 28px;
+}
+
+.vendor-header p {
+  margin-top: 8px;
+  color: #6b7280;
+  font-size: 14px;
+}
+
+.vendor-count {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  min-width: 110px;
+  padding: 15px 20px;
+  background: white;
+  border-radius: 14px;
+  box-shadow: 0 5px 20px rgba(0, 0, 0, 0.08);
+}
+
+.vendor-count span {
+  color: #6366f1;
+  font-size: 28px;
+  font-weight: 700;
+}
+
+.vendor-count small {
+  color: #6b7280;
+  font-size: 12px;
+}
+
+.vendor-toolbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 15px;
+}
+
+.vendor-toolbar h3 {
+  margin: 0;
+  color: #1f2937;
+  font-size: 20px;
+}
+
+.refresh-vendor-button {
+  border: none;
+  padding: 9px 16px;
+  border-radius: 8px;
+  background: #6366f1;
+  color: white;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.refresh-vendor-button:hover {
+  background: #4f46e5;
+}
+
+.vendor-table-wrapper {
+  width: 100%;
+  overflow-x: auto;
+  background: white;
+  border-radius: 16px;
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.07);
+}
+
+.vendor-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.vendor-table thead {
+  background: #f8fafc;
+}
+
+.vendor-table th {
+  padding: 15px;
+  text-align: left;
+  color: #64748b;
+  font-size: 13px;
+  font-weight: 700;
+  border-bottom: 1px solid #e5e7eb;
+}
+
+.vendor-table td {
+  padding: 16px 15px;
+  color: #374151;
+  font-size: 14px;
+  border-bottom: 1px solid #f1f5f9;
+}
+
+.vendor-table tbody tr:hover {
+  background: #f8fafc;
+}
+
+.vendor-id {
+  color: #64748b;
+  font-weight: 600;
+}
+
+.vendor-name {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.vendor-avatar {
+  width: 38px;
+  height: 38px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  background: #6366f1;
+  color: white;
+  font-weight: 700;
+}
+
+.vendor-email {
+  color: #64748b;
+}
+
+.role-badge {
+  display: inline-block;
+  padding: 6px 12px;
+  border-radius: 20px;
+  background: #eef2ff;
+  color: #4f46e5;
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.status-badge {
+  display: inline-block;
+  padding: 6px 12px;
+  border-radius: 20px;
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.status-badge.approved {
+  background: #dcfce7;
+  color: #15803d;
+}
+
+.status-badge.rejected {
+  background: #fee2e2;
+  color: #dc2626;
+}
+
+.status-badge.pending {
+  background: #fef3c7;
+  color: #b45309;
+}
+
+.action-buttons {
+  display: flex;
+  gap: 8px;
+}
+
+.approve-button,
+.reject-button {
+  border: none;
+  padding: 8px 12px;
+  border-radius: 7px;
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.approve-button {
+  background: #dcfce7;
+  color: #15803d;
+}
+
+.approve-button:hover {
+  background: #bbf7d0;
+}
+
+.reject-button {
+  background: #fee2e2;
+  color: #dc2626;
+}
+
+.reject-button:hover {
+  background: #fecaca;
+}
+
+.approve-button:disabled,
+.reject-button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.vendor-message {
+  min-height: 300px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  background: white;
+  border-radius: 16px;
+  color: #6b7280;
+}
+
+.vendor-message h3 {
+  margin: 10px 0 5px;
+  color: #374151;
+}
+
+.vendor-message p {
+  margin: 0;
+}
+
+.vendor-empty-icon {
+  font-size: 45px;
+}
+
+.vendor-error {
+  min-height: 300px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  background: white;
+  border-radius: 16px;
+}
+
+.vendor-error p {
+  color: #dc2626;
+}
+
+@media (max-width: 768px) {
+  .vendor-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 20px;
+  }
+
+  .vendor-count {
+    align-self: stretch;
+  }
+
+  .vendor-toolbar {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 12px;
+  }
+
+  .action-buttons {
+    flex-direction: column;
+  }
+}

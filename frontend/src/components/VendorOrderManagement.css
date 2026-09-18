@@ -1,0 +1,433 @@
+/* =========================================================
+   VENDOR ORDER MANAGEMENT
+   ========================================================= */
+
+.vendor-orders-page {
+  padding: 30px;
+  min-height: 100vh;
+  background: #f5f7fb;
+  box-sizing: border-box;
+}
+
+.vendor-orders-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 25px;
+}
+
+.vendor-orders-title {
+  margin: 0;
+  font-size: 28px;
+  font-weight: 700;
+  color: #1f2937;
+}
+
+.vendor-orders-subtitle {
+  margin: 6px 0 0;
+  color: #6b7280;
+  font-size: 14px;
+}
+
+/* =========================================================
+   REFRESH BUTTON
+   ========================================================= */
+
+.refresh-orders-btn {
+  border: none;
+  background: #4f46e5;
+  color: white;
+  padding: 10px 18px;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 14px;
+  font-weight: 600;
+  transition: 0.2s ease;
+}
+
+.refresh-orders-btn:hover {
+  background: #4338ca;
+}
+
+/* =========================================================
+   ERROR
+   ========================================================= */
+
+.vendor-orders-error {
+  background: #fee2e2;
+  color: #b91c1c;
+  border: 1px solid #fecaca;
+  padding: 14px 16px;
+  border-radius: 8px;
+  margin-bottom: 20px;
+}
+
+/* =========================================================
+   LOADING
+   ========================================================= */
+
+.vendor-orders-loading {
+  text-align: center;
+  padding: 60px 20px;
+  color: #6b7280;
+  font-size: 16px;
+}
+
+/* =========================================================
+   EMPTY STATE
+   ========================================================= */
+
+.vendor-orders-empty {
+  background: white;
+  border-radius: 14px;
+  padding: 60px 20px;
+  text-align: center;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.06);
+}
+
+.vendor-orders-empty-icon {
+  font-size: 50px;
+  margin-bottom: 15px;
+}
+
+.vendor-orders-empty h3 {
+  margin: 0 0 8px;
+  color: #1f2937;
+}
+
+.vendor-orders-empty p {
+  margin: 0;
+  color: #6b7280;
+}
+
+/* =========================================================
+   ORDERS LIST
+   ========================================================= */
+
+.vendor-orders-list {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+/* =========================================================
+   ORDER CARD
+   ========================================================= */
+
+.vendor-order-card {
+  background: white;
+  border-radius: 14px;
+  padding: 22px;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.06);
+  border: 1px solid #e5e7eb;
+}
+
+/* =========================================================
+   ORDER HEADER
+   ========================================================= */
+
+.vendor-order-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 15px;
+  padding-bottom: 18px;
+  border-bottom: 1px solid #e5e7eb;
+}
+
+.vendor-order-number {
+  margin: 0;
+  font-size: 19px;
+  font-weight: 700;
+  color: #111827;
+}
+
+.vendor-order-date {
+  margin: 6px 0 0;
+  color: #6b7280;
+  font-size: 13px;
+}
+
+/* =========================================================
+   STATUS
+   ========================================================= */
+
+.vendor-order-status {
+  padding: 7px 13px;
+  border-radius: 20px;
+  font-size: 12px;
+  font-weight: 700;
+  text-transform: uppercase;
+}
+
+.status-pending {
+  background: #fef3c7;
+  color: #92400e;
+}
+
+.status-confirmed {
+  background: #dbeafe;
+  color: #1d4ed8;
+}
+
+.status-shipped {
+  background: #e0e7ff;
+  color: #4338ca;
+}
+
+.status-delivered {
+  background: #dcfce7;
+  color: #166534;
+}
+
+.status-cancelled {
+  background: #fee2e2;
+  color: #b91c1c;
+}
+
+/* =========================================================
+   ORDER INFO
+   ========================================================= */
+
+.vendor-order-info {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 15px;
+  margin: 20px 0;
+}
+
+.vendor-info-box {
+  background: #f9fafb;
+  padding: 15px;
+  border-radius: 10px;
+}
+
+.vendor-info-label {
+  display: block;
+  color: #6b7280;
+  font-size: 12px;
+  margin-bottom: 5px;
+}
+
+.vendor-info-value {
+  font-size: 16px;
+  font-weight: 700;
+  color: #111827;
+}
+
+/* =========================================================
+   CUSTOMER INFORMATION
+   ========================================================= */
+
+.vendor-customer-section {
+  margin-bottom: 20px;
+}
+
+.vendor-section-title {
+  margin: 0 0 12px;
+  font-size: 16px;
+  font-weight: 700;
+  color: #1f2937;
+}
+
+.vendor-customer-card {
+  background: #f9fafb;
+  padding: 15px;
+  border-radius: 10px;
+}
+
+.vendor-customer-card p {
+  margin: 5px 0;
+  font-size: 14px;
+  color: #4b5563;
+}
+
+/* =========================================================
+   PRODUCTS
+   ========================================================= */
+
+.vendor-products-section {
+  margin-top: 20px;
+}
+
+.vendor-products-list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.vendor-product-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 15px;
+  padding: 14px;
+  background: #f9fafb;
+  border-radius: 10px;
+  border: 1px solid #e5e7eb;
+}
+
+.vendor-product-name {
+  font-weight: 600;
+  color: #1f2937;
+}
+
+.vendor-product-quantity {
+  color: #6b7280;
+  font-size: 13px;
+}
+
+.vendor-product-price {
+  font-weight: 600;
+  color: #374151;
+}
+
+.vendor-product-subtotal {
+  font-weight: 700;
+  color: #111827;
+}
+
+/* =========================================================
+   TOTAL
+   ========================================================= */
+
+.vendor-order-total {
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+  gap: 15px;
+  margin-top: 20px;
+  padding-top: 18px;
+  border-top: 1px solid #e5e7eb;
+}
+
+.vendor-order-total-label {
+  font-size: 15px;
+  color: #6b7280;
+}
+
+.vendor-order-total-value {
+  font-size: 22px;
+  font-weight: 800;
+  color: #111827;
+}
+
+/* =========================================================
+   ACTIONS
+   ========================================================= */
+
+.vendor-order-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+  margin-top: 18px;
+}
+
+.vendor-action-btn {
+  border: none;
+  padding: 10px 18px;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 13px;
+  font-weight: 600;
+  transition: 0.2s ease;
+}
+
+.vendor-confirm-btn {
+  background: #2563eb;
+  color: white;
+}
+
+.vendor-confirm-btn:hover {
+  background: #1d4ed8;
+}
+
+.vendor-ship-btn {
+  background: #7c3aed;
+  color: white;
+}
+
+.vendor-ship-btn:hover {
+  background: #6d28d9;
+}
+
+.vendor-deliver-btn {
+  background: #16a34a;
+  color: white;
+}
+
+.vendor-deliver-btn:hover {
+  background: #15803d;
+}
+
+.vendor-cancel-btn {
+  background: #dc2626;
+  color: white;
+}
+
+.vendor-cancel-btn:hover {
+  background: #b91c1c;
+}
+
+/* =========================================================
+   RESPONSIVE
+   ========================================================= */
+
+@media (max-width: 768px) {
+
+  .vendor-orders-page {
+    padding: 20px;
+  }
+
+  .vendor-orders-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 15px;
+  }
+
+  .vendor-order-header {
+    flex-direction: column;
+  }
+
+  .vendor-order-info {
+    grid-template-columns: 1fr;
+  }
+
+  .vendor-product-item {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .vendor-order-total {
+    justify-content: space-between;
+  }
+
+  .vendor-order-actions {
+    flex-wrap: wrap;
+    justify-content: flex-start;
+  }
+}
+
+@media (max-width: 480px) {
+
+  .vendor-orders-page {
+    padding: 15px;
+  }
+
+  .vendor-orders-title {
+    font-size: 23px;
+  }
+
+  .vendor-order-card {
+    padding: 16px;
+  }
+
+  .vendor-order-total {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .vendor-action-btn {
+    width: 100%;
+  }
+}
