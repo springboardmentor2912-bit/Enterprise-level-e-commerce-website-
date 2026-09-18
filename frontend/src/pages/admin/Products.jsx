@@ -1,0 +1,7 @@
+function Products() {
+    return (
+        <h1>Product Management</h1>
+    );
+}
+
+export default Products;

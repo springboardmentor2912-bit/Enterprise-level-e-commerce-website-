@@ -1,0 +1,50 @@
+spring:
+  application:
+    name: shopstack-backend
+
+  datasource:
+    url: jdbc:postgresql://${DB_HOST:localhost}:${DB_PORT:5432}/${DB_NAME:shopstack}
+    username: ${DB_USERNAME:postgres}
+    password: ${DB_PASSWORD:}
+    driver-class-name: org.postgresql.Driver
+
+  jpa:
+    hibernate:
+      ddl-auto: update
+
+    show-sql: true
+
+    properties:
+      hibernate:
+        format_sql: true
+
+  # ==========================================
+  # EMAIL / NOTIFICATIONS
+  # ==========================================
+  mail:
+    host: ${MAIL_HOST:}
+    port: ${MAIL_PORT:587}
+    username: ${MAIL_USERNAME:}
+    password: ${MAIL_PASSWORD:}
+    properties:
+      mail:
+        smtp:
+          auth: true
+          starttls:
+            enable: true
+
+server:
+  port: ${SERVER_PORT:8080}
+
+logging:
+  level:
+    org.springframework.security: INFO
+
+# ==========================================
+# RAZORPAY
+# ==========================================
+
+razorpay:
+  key:
+    id: ${RAZORPAY_KEY_ID:YOUR_RAZORPAY_TEST_KEY_ID}
+    secret: ${RAZORPAY_KEY_SECRET:YOUR_RAZORPAY_TEST_KEY_SECRET}
