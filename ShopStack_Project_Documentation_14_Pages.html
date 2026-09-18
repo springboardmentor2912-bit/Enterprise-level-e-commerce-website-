@@ -1,0 +1,1843 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ShopStack — Enterprise Multi-Vendor E-Commerce Platform Documentation (14 Pages)</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700&family=Outfit:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --primary: #4338ca;
+      --primary-dark: #312e81;
+      --primary-light: #e0e7ff;
+      --secondary: #0284c7;
+      --accent: #0d9488;
+      --success: #059669;
+      --warning: #d97706;
+      --danger: #dc2626;
+      --dark: #0f172a;
+      --slate-800: #1e293b;
+      --slate-700: #334155;
+      --slate-600: #475569;
+      --slate-500: #64748b;
+      --slate-400: #94a3b8;
+      --slate-200: #e2e8f0;
+      --slate-100: #f1f5f9;
+      --slate-50: #f8fafc;
+      --white: #ffffff;
+      --font-main: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+      --font-display: 'Outfit', 'Inter', sans-serif;
+      --font-code: 'JetBrains Mono', monospace;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      -webkit-print-color-adjust: exact;
+      print-color-adjust: exact;
+    }
+
+    body {
+      font-family: var(--font-main);
+      color: var(--slate-800);
+      background-color: #cbd5e1;
+      line-height: 1.45;
+      font-size: 11.5px;
+    }
+
+    @page {
+      size: A4 portrait;
+      margin: 0;
+    }
+
+    .page-container {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 20px 0;
+      gap: 24px;
+    }
+
+    .page {
+      width: 210mm;
+      height: 297mm;
+      padding: 18mm 18mm 16mm 18mm;
+      background: var(--white);
+      position: relative;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15);
+      page-break-after: always;
+      break-after: page;
+      overflow: hidden;
+    }
+
+    @media print {
+      body {
+        background: transparent;
+      }
+      .page-container {
+        padding: 0;
+        gap: 0;
+      }
+      .page {
+        box-shadow: none;
+        margin: 0;
+        width: 210mm;
+        height: 297mm;
+      }
+      .no-print {
+        display: none !important;
+      }
+    }
+
+    /* Action Toolbar for Browser View */
+    .toolbar {
+      position: fixed;
+      top: 15px;
+      right: 20px;
+      z-index: 9999;
+      display: flex;
+      gap: 12px;
+      background: rgba(15, 23, 42, 0.9);
+      backdrop-filter: blur(8px);
+      padding: 10px 18px;
+      border-radius: 40px;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+      border: 1px solid rgba(255,255,255,0.15);
+    }
+
+    .toolbar button {
+      background: var(--primary);
+      color: white;
+      border: none;
+      padding: 8px 18px;
+      border-radius: 20px;
+      font-weight: 600;
+      font-size: 13px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      transition: all 0.2s;
+    }
+
+    .toolbar button:hover {
+      background: #4f46e5;
+      transform: translateY(-1px);
+    }
+
+    .toolbar .page-count {
+      color: #94a3b8;
+      font-size: 13px;
+      display: flex;
+      align-items: center;
+      font-weight: 500;
+      padding-right: 4px;
+    }
+
+    /* Page Header */
+    .page-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      border-bottom: 2px solid var(--slate-200);
+      padding-bottom: 8px;
+      margin-bottom: 14px;
+    }
+
+    .header-left {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .header-logo {
+      background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
+      color: white;
+      font-family: var(--font-display);
+      font-weight: 800;
+      font-size: 12px;
+      padding: 3px 8px;
+      border-radius: 4px;
+      letter-spacing: 0.5px;
+    }
+
+    .header-title {
+      font-size: 10.5px;
+      font-weight: 600;
+      color: var(--slate-600);
+      text-transform: uppercase;
+      letter-spacing: 0.75px;
+    }
+
+    .header-right {
+      font-size: 10px;
+      font-weight: 600;
+      color: var(--primary);
+      background: var(--primary-light);
+      padding: 2px 8px;
+      border-radius: 12px;
+    }
+
+    /* Page Footer */
+    .page-footer {
+      border-top: 1px solid var(--slate-200);
+      padding-top: 8px;
+      margin-top: 10px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 9.5px;
+      color: var(--slate-500);
+    }
+
+    .footer-left {
+      font-weight: 500;
+    }
+
+    .footer-center {
+      font-style: italic;
+      color: var(--slate-400);
+    }
+
+    .footer-right {
+      font-weight: 700;
+      color: var(--primary-dark);
+      background: var(--slate-100);
+      padding: 2px 8px;
+      border-radius: 4px;
+      font-family: var(--font-code);
+    }
+
+    /* Content Typography */
+    .page-content {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    h1, h2, h3, h4 {
+      font-family: var(--font-display);
+      color: var(--dark);
+      font-weight: 700;
+      line-height: 1.25;
+    }
+
+    h1 { font-size: 20px; color: var(--primary-dark); }
+    h2 { font-size: 15px; color: var(--dark); border-bottom: 1.5px solid var(--primary-light); padding-bottom: 4px; margin-bottom: 4px; }
+    h3 { font-size: 12.5px; color: var(--primary); margin-top: 2px; }
+    h4 { font-size: 11px; color: var(--slate-700); font-weight: 600; }
+
+    p {
+      color: var(--slate-700);
+      text-align: justify;
+      font-size: 11px;
+      line-height: 1.48;
+    }
+
+    /* UI Components & Layout Utilities */
+    .grid-2 {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+    }
+
+    .grid-3 {
+      display: grid;
+      grid-template-columns: 1fr 1fr 1fr;
+      gap: 8px;
+    }
+
+    .grid-4 {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 8px;
+    }
+
+    .card {
+      background: var(--slate-50);
+      border: 1px solid var(--slate-200);
+      border-radius: 6px;
+      padding: 9px 11px;
+    }
+
+    .card-primary {
+      background: #f5f7ff;
+      border: 1px solid #c7d2fe;
+    }
+
+    .card-accent {
+      background: #f0fdfa;
+      border: 1px solid #99f6e4;
+    }
+
+    .card-warning {
+      background: #fffbeb;
+      border: 1px solid #fde68a;
+    }
+
+    .badge {
+      display: inline-block;
+      padding: 2px 6px;
+      font-size: 9px;
+      font-weight: 700;
+      border-radius: 4px;
+      text-transform: uppercase;
+      letter-spacing: 0.4px;
+    }
+
+    .badge-primary { background: var(--primary-light); color: var(--primary); }
+    .badge-success { background: #dcfce7; color: #15803d; }
+    .badge-warning { background: #fef3c7; color: #b45309; }
+    .badge-danger { background: #fee2e2; color: #b91c1c; }
+    .badge-dark { background: var(--slate-800); color: white; }
+
+    /* Tables */
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 10px;
+      margin: 4px 0;
+    }
+
+    th, td {
+      padding: 5px 8px;
+      text-align: left;
+      border: 1px solid var(--slate-200);
+    }
+
+    th {
+      background-color: #f1f5f9;
+      color: var(--dark);
+      font-weight: 700;
+      font-family: var(--font-display);
+      text-transform: uppercase;
+      font-size: 9px;
+      letter-spacing: 0.5px;
+    }
+
+    tr:nth-child(even) {
+      background-color: var(--slate-50);
+    }
+
+    /* Code & Technical Blocks */
+    pre, code {
+      font-family: var(--font-code);
+      font-size: 9.5px;
+    }
+
+    code {
+      background: var(--slate-100);
+      color: var(--primary);
+      padding: 1px 4px;
+      border-radius: 3px;
+      border: 1px solid var(--slate-200);
+    }
+
+    pre {
+      background: var(--dark);
+      color: #f8fafc;
+      padding: 8px 10px;
+      border-radius: 6px;
+      overflow-x: hidden;
+      line-height: 1.35;
+    }
+
+    .code-tag { color: #38bdf8; font-weight: 600; }
+    .code-str { color: #4ade80; }
+    .code-kw { color: #f472b6; font-weight: 600; }
+    .code-comment { color: #94a3b8; font-style: italic; }
+
+    /* Architecture Visual Blocks */
+    .arch-diagram {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      background: #f8fafc;
+      border: 1.5px dashed #cbd5e1;
+      border-radius: 8px;
+      padding: 9px;
+      margin: 4px 0;
+    }
+
+    .arch-tier {
+      background: white;
+      border: 1px solid #cbd5e1;
+      border-radius: 6px;
+      padding: 7px 10px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .arch-tier-title {
+      font-weight: 700;
+      color: var(--primary-dark);
+      font-size: 10.5px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .arch-boxes {
+      display: flex;
+      gap: 6px;
+      flex-wrap: wrap;
+    }
+
+    .arch-pill {
+      background: var(--slate-100);
+      border: 1px solid var(--slate-200);
+      border-radius: 4px;
+      padding: 3px 7px;
+      font-size: 9px;
+      font-weight: 600;
+      color: var(--slate-700);
+    }
+
+    .arch-arrow {
+      text-align: center;
+      font-size: 9px;
+      font-weight: 700;
+      color: var(--slate-400);
+      margin: -2px 0;
+    }
+
+    /* List styling */
+    ul, ol {
+      padding-left: 16px;
+      margin: 2px 0;
+    }
+
+    li {
+      margin-bottom: 2.5px;
+      font-size: 10.8px;
+      color: var(--slate-700);
+    }
+
+    li strong {
+      color: var(--slate-800);
+    }
+
+    /* Cover Page Custom Styles */
+    .cover-page {
+      background: linear-gradient(145deg, #090d16 0%, #1e1b4b 50%, #0f172a 100%);
+      color: white;
+      padding: 24mm 20mm;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      position: relative;
+    }
+
+    .cover-decor {
+      position: absolute;
+      width: 450px;
+      height: 450px;
+      background: radial-gradient(circle, rgba(99, 102, 241, 0.25) 0%, rgba(99, 102, 241, 0) 70%);
+      top: -100px;
+      right: -100px;
+      border-radius: 50%;
+      pointer-events: none;
+    }
+
+    .cover-decor-2 {
+      position: absolute;
+      width: 380px;
+      height: 380px;
+      background: radial-gradient(circle, rgba(14, 165, 233, 0.2) 0%, rgba(14, 165, 233, 0) 70%);
+      bottom: -80px;
+      left: -80px;
+      border-radius: 50%;
+      pointer-events: none;
+    }
+
+    .cover-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      background: rgba(255, 255, 255, 0.1);
+      border: 1px solid rgba(255, 255, 255, 0.25);
+      padding: 6px 14px;
+      border-radius: 30px;
+      font-size: 11px;
+      font-weight: 600;
+      letter-spacing: 0.8px;
+      text-transform: uppercase;
+      color: #38bdf8;
+      width: fit-content;
+    }
+
+    .cover-title {
+      font-family: var(--font-display);
+      font-size: 34px;
+      font-weight: 900;
+      line-height: 1.15;
+      color: #ffffff;
+      margin: 14px 0 8px 0;
+      letter-spacing: -0.5px;
+    }
+
+    .cover-subtitle {
+      font-size: 14.5px;
+      color: #cbd5e1;
+      font-weight: 400;
+      line-height: 1.5;
+      max-width: 90%;
+    }
+
+    .cover-meta-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 14px;
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      border-radius: 10px;
+      padding: 16px;
+      backdrop-filter: blur(8px);
+      margin-top: 15px;
+    }
+
+    .cover-meta-item {
+      display: flex;
+      flex-direction: column;
+      gap: 3px;
+    }
+
+    .cover-meta-label {
+      font-size: 10px;
+      color: #94a3b8;
+      text-transform: uppercase;
+      letter-spacing: 0.6px;
+      font-weight: 600;
+    }
+
+    .cover-meta-val {
+      font-size: 12.5px;
+      font-weight: 700;
+      color: #ffffff;
+    }
+
+    .cover-pills {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-top: 14px;
+    }
+
+    .cover-pill {
+      background: rgba(99, 102, 241, 0.25);
+      border: 1px solid rgba(99, 102, 241, 0.5);
+      color: #e0e7ff;
+      font-size: 10px;
+      font-weight: 600;
+      padding: 4px 10px;
+      border-radius: 6px;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="toolbar no-print">
+    <div class="page-count">14 Pages Complete Documentation</div>
+    <button onclick="window.print()">
+      <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4H7v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"></path></svg>
+      Print / Save as PDF
+    </button>
+  </div>
+
+  <div class="page-container">
+
+    <!-- ================================================= PAGE 1 ================================================= -->
+    <div class="page cover-page">
+      <div class="cover-decor"></div>
+      <div class="cover-decor-2"></div>
+
+      <div>
+        <div class="cover-badge">
+          <span>🛡️</span> INFOSYS SPRINGBOARD INTERNSHIP CAPSTONE
+        </div>
+        <div class="cover-title">
+          ShopStack Enterprise<br>Multi-Vendor E-Commerce Platform
+        </div>
+        <div class="cover-subtitle">
+          Comprehensive Architectural Blueprint, Domain Models, Secure Razorpay Payment Pipeline, Multi-Warehouse Fulfillment & Micro-Logistics Engine
+        </div>
+
+        <div class="cover-pills">
+          <span class="cover-pill">Spring Boot 3.2.2</span>
+          <span class="cover-pill">React 18 + Vite</span>
+          <span class="cover-pill">PostgreSQL 16</span>
+          <span class="cover-pill">Spring Security + JWT</span>
+          <span class="cover-pill">Razorpay Java SDK</span>
+          <span class="cover-pill">Idempotent Stock Engine</span>
+          <span class="cover-pill">Multi-Warehouse Logistics</span>
+        </div>
+      </div>
+
+      <div>
+        <div class="cover-meta-grid">
+          <div class="cover-meta-item">
+            <span class="cover-meta-label">Author & Lead Engineer</span>
+            <span class="cover-meta-val">Chittiboina Chiranjeevi</span>
+          </div>
+          <div class="cover-meta-item">
+            <span class="cover-meta-label">Academic Institution</span>
+            <span class="cover-meta-val">National Institute of Technology Andhra Pradesh</span>
+          </div>
+          <div class="cover-meta-item">
+            <span class="cover-meta-label">Project Domain</span>
+            <span class="cover-meta-val">Enterprise Full-Stack Distributed E-Commerce</span>
+          </div>
+          <div class="cover-meta-item">
+            <span class="cover-meta-label">Documentation Version & Date</span>
+            <span class="cover-meta-val">v2.4.0 — September 2026 (Production-Grade)</span>
+          </div>
+        </div>
+
+        <div style="margin-top: 18px; border-top: 1px solid rgba(255,255,255,0.15); padding-top: 14px; display: flex; justify-content: space-between; align-items: center;">
+          <div style="font-size: 10px; color: #94a3b8;">
+            Confidential & Technical Reference Manual | Engineering Release
+          </div>
+          <div style="font-size: 10px; font-weight: 700; color: #38bdf8; font-family: var(--font-code);">
+            Page 01 of 14
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ================================================= PAGE 2 ================================================= -->
+    <div class="page">
+      <div class="page-header">
+        <div class="header-left">
+          <span class="header-logo">SHOPSTACK</span>
+          <span class="header-title">Executive Summary & Table of Contents</span>
+        </div>
+        <div class="header-right">SECTION 01</div>
+      </div>
+
+      <div class="page-content">
+        <h2>1. Executive Summary & Problem Formulation</h2>
+        <p>
+          Contemporary digital commerce demands high-performance, resilient multi-sided marketplace platforms capable of handling heterogeneous vendor catalogs, complex inventory allocations across distributed physical warehouses, dynamic multi-tier discount pricing, and fraud-resistant, cryptographically verified checkout payments. <strong>ShopStack</strong> is an enterprise-grade full-stack solution engineered to solve these architectural challenges with zero tolerance for race conditions or phantom stock deductions.
+        </p>
+
+        <div class="grid-2">
+          <div class="card card-primary">
+            <h4 style="color: var(--primary);">Market Challenges Addressed</h4>
+            <ul>
+              <li><strong>Inventory Race Conditions:</strong> Eliminating overselling through atomic, idempotent payment verification stock deduction workflows.</li>
+              <li><strong>Vendor Multi-Tenancy:</strong> Strict role-based isolation guaranteeing merchant catalog privacy and independent commission management.</li>
+              <li><strong>Logistics Bottlenecks:</strong> Full multi-warehouse regional hub routing, pick/pack/ship tracking, and inbound quality control (QC).</li>
+            </ul>
+          </div>
+          <div class="card card-accent">
+            <h4 style="color: var(--accent);">Key Value Propositions</h4>
+            <ul>
+              <li><strong>Secure Payment Integrity:</strong> Full integration with Razorpay SDK utilizing HMAC-SHA256 signature verification.</li>
+              <li><strong>Unified Marketplace Checkout:</strong> Single multi-item transaction decomposing seamlessly into separate vendor orders.</li>
+              <li><strong>Enterprise Auditability:</strong> Real-time financial ledgers, commission settlements, and comprehensive movement logs.</li>
+            </ul>
+          </div>
+        </div>
+
+        <h2>2. Comprehensive Document Table of Contents</h2>
+        <div style="background: var(--slate-50); border: 1px solid var(--slate-200); border-radius: 6px; padding: 6px 12px;">
+          <table>
+            <thead>
+              <tr>
+                <th style="width: 12%;">Page</th>
+                <th style="width: 40%;">Core Subject Module</th>
+                <th style="width: 48%;">Key Technical Topics Covered</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr><td><strong>Page 01</strong></td><td>Cover & Project Metadata</td><td>Title, Author, Institution, Tech Stack Badges, Executive Abstract</td></tr>
+              <tr><td><strong>Page 02</strong></td><td>Executive Summary & TOC</td><td>Business Problem, Key Tenets, 14-Page Comprehensive Table of Contents</td></tr>
+              <tr><td><strong>Page 03</strong></td><td>Architecture & Tech Stack</td><td>Layered N-Tier System Topology, Spring Boot & React Ecosystem Breakdown</td></tr>
+              <tr><td><strong>Page 04</strong></td><td>Auth & Security Architecture</td><td>JWT Authentication Lifecycle, RBAC (4 User Roles), BCrypt Cryptography</td></tr>
+              <tr><td><strong>Page 05</strong></td><td>Multi-Vendor Marketplace Catalog</td><td>Vendor Profiling, Product SKU Lifecycle, Categories, Tenant Isolation</td></tr>
+              <tr><td><strong>Page 06</strong></td><td>Pricing, Cart & Coupon Engine</td><td>Cart Sync, Percentage & Fixed Coupons, Commission Rate Calculation</td></tr>
+              <tr><td><strong>Page 07</strong></td><td>Order Engine & Razorpay Checkout</td><td>Order State Machine, Razorpay HMAC-SHA256 Flow, Idempotent Stock Logic</td></tr>
+              <tr><td><strong>Page 08</strong></td><td>Warehouse Management & Logistics</td><td>5 Regional Hubs, Pick/Pack/Ship Stages, Inbound QC, Stock Transfers</td></tr>
+              <tr><td><strong>Page 09</strong></td><td>Returns, Reviews & Notifications</td><td>Customer Returns, Inbound Inspection, Star Ratings, Async Mailer & In-App</td></tr>
+              <tr><td><strong>Page 10</strong></td><td>Multi-Role Dashboards & UI/UX</td><td>Customer Storefront, Vendor Hub, Warehouse Portal, Admin Command Center</td></tr>
+              <tr><td><strong>Page 11</strong></td><td>Database Schema & ER Modeling</td><td>14 JPA Entity Mappings, Foreign Keys, Referential Integrity, Indexing</td></tr>
+              <tr><td><strong>Page 12</strong></td><td>RESTful API Endpoint Matrix</td><td>Comprehensive Controller Routes, DTO Payloads, HTTP Verbs & Statuses</td></tr>
+              <tr><td><strong>Page 13</strong></td><td>QA, Testing & DevOps Strategy</td><td>JUnit 5 Integration Tests, Security Mocks, Vite Build Optimization, CI/CD</td></tr>
+              <tr><td><strong>Page 14</strong></td><td>Milestones, Roadmap & Conclusion</td><td>Milestone Completion, Future AI Roadmap, Author & Mentorship Sign-off</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <div class="page-footer">
+        <span class="footer-left">ShopStack Enterprise Platform Documentation</span>
+        <span class="footer-center">Infosys Springboard Internship</span>
+        <span class="footer-right">Page 02 of 14</span>
+      </div>
+    </div>
+
+    <!-- ================================================= PAGE 3 ================================================= -->
+    <div class="page">
+      <div class="page-header">
+        <div class="header-left">
+          <span class="header-logo">SHOPSTACK</span>
+          <span class="header-title">System Architecture & Technology Stack</span>
+        </div>
+        <div class="header-right">SECTION 02</div>
+      </div>
+
+      <div class="page-content">
+        <h2>1. High-Level Layered Architecture</h2>
+        <p>
+          ShopStack implements an N-Tier decoupled client-server architecture built on RESTful micro-service paradigms. The system separates user presentation, stateless authorization, business domain logic, and transactional database persistence.
+        </p>
+
+        <div class="arch-diagram">
+          <div class="arch-tier">
+            <div class="arch-tier-title"><span>💻</span> Client Presentation Layer</div>
+            <div class="arch-boxes">
+              <span class="arch-pill">React 18 Single Page App</span>
+              <span class="arch-pill">Vite Fast Bundler</span>
+              <span class="arch-pill">React Router DOM v6</span>
+              <span class="arch-pill">Axios Interceptors</span>
+              <span class="arch-pill">Context API State</span>
+            </div>
+          </div>
+          <div class="arch-arrow">▼ REST JSON over HTTPS with Bearer JWT Token ▼</div>
+          <div class="arch-tier">
+            <div class="arch-tier-title"><span>🛡️</span> Gateway & Security Filter Chain</div>
+            <div class="arch-boxes">
+              <span class="arch-pill">Spring Security 6</span>
+              <span class="arch-pill">JwtAuthenticationFilter</span>
+              <span class="arch-pill">CORS & CSRF Policies</span>
+              <span class="arch-pill">Method-Level @PreAuthorize</span>
+            </div>
+          </div>
+          <div class="arch-arrow">▼ Dispatched Controller Invocations ▼</div>
+          <div class="arch-tier">
+            <div class="arch-tier-title"><span>⚙️</span> Core Business Domain Services</div>
+            <div class="arch-boxes">
+              <span class="arch-pill">PaymentService</span>
+              <span class="arch-pill">OrderService</span>
+              <span class="arch-pill">WarehouseService</span>
+              <span class="arch-pill">CouponService</span>
+              <span class="arch-pill">CommissionService</span>
+              <span class="arch-pill">Async NotificationService</span>
+            </div>
+          </div>
+          <div class="arch-arrow">▼ Spring Data JPA / Hibernate ORM ▼</div>
+          <div class="arch-tier">
+            <div class="arch-tier-title"><span>🗄️</span> Data Persistence & External APIs</div>
+            <div class="arch-boxes">
+              <span class="arch-pill">PostgreSQL 16 Engine</span>
+              <span class="arch-pill">HikariCP Pool</span>
+              <span class="arch-pill">Razorpay Payment Gateway API</span>
+              <span class="arch-pill">SMTP Mail Server</span>
+            </div>
+          </div>
+        </div>
+
+        <h2>2. Technology Ecosystem Deep-Dive</h2>
+        <div class="grid-3">
+          <div class="card">
+            <h4 style="color: var(--primary);">Backend Engineering</h4>
+            <ul style="padding-left: 12px; font-size: 10px;">
+              <li><strong>Java 17/25:</strong> Modern LTS feature set, records, and pattern matching.</li>
+              <li><strong>Spring Boot 3.2.2:</strong> Auto-configured enterprise framework.</li>
+              <li><strong>Spring Data JPA:</strong> Automated DAO layer with transactional boundaries.</li>
+              <li><strong>Razorpay SDK 1.4.7:</strong> Payment order generation and signature hashing.</li>
+            </ul>
+          </div>
+          <div class="card">
+            <h4 style="color: var(--secondary);">Frontend Engineering</h4>
+            <ul style="padding-left: 12px; font-size: 10px;">
+              <li><strong>React.js (v18):</strong> Declarative UI with functional hook architecture.</li>
+              <li><strong>Vite Build Tool:</strong> Sub-second HMR and optimized production trees.</li>
+              <li><strong>Lucide React:</strong> Semantic, lightweight icon library.</li>
+              <li><strong>Responsive Design:</strong> Clean custom CSS system with mobile-first grid.</li>
+            </ul>
+          </div>
+          <div class="card">
+            <h4 style="color: var(--accent);">Database & Security</h4>
+            <ul style="padding-left: 12px; font-size: 10px;">
+              <li><strong>PostgreSQL 16:</strong> ACID-compliant relational persistence.</li>
+              <li><strong>BCrypt 10 Rounds:</strong> Cryptographically secure password hashing.</li>
+              <li><strong>HMAC-SHA256 JWT:</strong> Cryptographically signed session tokens.</li>
+              <li><strong>H2 In-Memory DB:</strong> Isolated testing and rapid local execution.</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+
+      <div class="page-footer">
+        <span class="footer-left">ShopStack Enterprise Platform Documentation</span>
+        <span class="footer-center">Infosys Springboard Internship</span>
+        <span class="footer-right">Page 03 of 14</span>
+      </div>
+    </div>
+
+    <!-- ================================================= PAGE 4 ================================================= -->
+    <div class="page">
+      <div class="page-header">
+        <div class="header-left">
+          <span class="header-logo">SHOPSTACK</span>
+          <span class="header-title">Authentication, Authorization & Security Architecture</span>
+        </div>
+        <div class="header-right">SECTION 03</div>
+      </div>
+
+      <div class="page-content">
+        <h2>1. Stateless JWT Authentication Lifecycle</h2>
+        <p>
+          ShopStack implements a stateless JSON Web Token (JWT) architecture. Client requests submit credentials via <code>/api/auth/login</code>; upon verification against BCrypt hashed credentials in PostgreSQL, the backend issues an HMAC-SHA256 signed JWT containing the user ID, email, and designated security authority.
+        </p>
+
+        <div class="grid-2">
+          <div class="card">
+            <h4 style="color: var(--primary);">JWT Token Generation & Verification</h4>
+            <pre><code><span class="code-kw">public</span> String <span class="code-tag">generateToken</span>(Authentication auth) {
+  UserPrincipal user = (UserPrincipal) auth.getPrincipal();
+  Date now = <span class="code-kw">new</span> Date();
+  Date expiryDate = <span class="code-kw">new</span> Date(now.getTime() + jwtExpirationMs);
+
+  <span class="code-kw">return</span> Jwts.builder()
+      .setSubject(Long.toString(user.getId()))
+      .claim(<span class="code-str">"role"</span>, user.getAuthorities())
+      .setIssuedAt(now)
+      .setExpiration(expiryDate)
+      .signWith(getSigningKey(), SignatureAlgorithm.HS256)
+      .compact();
+}</code></pre>
+          </div>
+          <div class="card">
+            <h4 style="color: var(--primary-dark);">Security Filter Chain Execution</h4>
+            <ul style="padding-left: 12px;">
+              <li><strong>Extract Header:</strong> <code>Authorization: Bearer &lt;token&gt;</code> is intercepted per incoming HTTP call.</li>
+              <li><strong>Cryptographic Validation:</strong> Secret signature and token expiration timestamps validated.</li>
+              <li><strong>Context Hydration:</strong> <code>SecurityContextHolder</code> populated with <code>UsernamePasswordAuthenticationToken</code>.</li>
+              <li><strong>Pre-Authorize Guard:</strong> Method-level constraints verify role permissions before controller dispatch.</li>
+            </ul>
+          </div>
+        </div>
+
+        <h2>2. Role-Based Access Control (RBAC) Matrix</h2>
+        <p>
+          The platform defines four strictly partitioned user roles, guaranteeing isolation between public shoppers, independent merchants, logistical warehouse personnel, and system administrators.
+        </p>
+
+        <table>
+          <thead>
+            <tr>
+              <th style="width: 18%;">User Role</th>
+              <th style="width: 27%;">Target Personas</th>
+              <th style="width: 55%;">Granted Permissions & Endpoint Scopes</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><span class="badge badge-primary">ROLE_CUSTOMER</span></td>
+              <td>Registered shoppers, retail buyers</td>
+              <td>Browse public catalog, cart operations, initiate Razorpay checkout, view own order history (<code>/orders</code>), submit product reviews, request item returns.</td>
+            </tr>
+            <tr>
+              <td><span class="badge badge-success">ROLE_VENDOR</span></td>
+              <td>Independent merchants, store owners</td>
+              <td>Manage vendor profile/branding, create/edit catalog products, update live stock quantities, view store sales, track commission deductions and order status.</td>
+            </tr>
+            <tr>
+              <td><span class="badge badge-warning">ROLE_WAREHOUSE_STAFF</span></td>
+              <td>Logistics operators, depot staff</td>
+              <td>Access regional fulfillment queues, execute 5-stage pick/pack/ship workflows, perform inbound QC inspections, handle damaged item quarantine, stock transfers.</td>
+            </tr>
+            <tr>
+              <td><span class="badge badge-danger">ROLE_ADMIN</span></td>
+              <td>Executive system administrators</td>
+              <td>Global platform analytics, vendor store approvals, user activation/banning, coupon lifecycle CRUD, commission settlements, server health monitoring.</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="page-footer">
+        <span class="footer-left">ShopStack Enterprise Platform Documentation</span>
+        <span class="footer-center">Infosys Springboard Internship</span>
+        <span class="footer-right">Page 04 of 14</span>
+      </div>
+    </div>
+
+    <!-- ================================================= PAGE 5 ================================================= -->
+    <div class="page">
+      <div class="page-header">
+        <div class="header-left">
+          <span class="header-logo">SHOPSTACK</span>
+          <span class="header-title">Multi-Vendor Marketplace Catalog & Product Lifecycle</span>
+        </div>
+        <div class="header-right">SECTION 04</div>
+      </div>
+
+      <div class="page-content">
+        <h2>1. Multi-Tenant Vendor Store Architecture</h2>
+        <p>
+          ShopStack accommodates independent vendor storefronts within a single marketplace domain. Each vendor is encapsulated by a <code>VendorProfile</code> entity, linking store branding, custom commission rates, approval statuses, and store-specific performance ratings.
+        </p>
+
+        <div class="grid-3">
+          <div class="card">
+            <h4 style="color: var(--primary);">1. Onboarding & Approval</h4>
+            <p style="font-size: 10px;">Vendors register with credentials and submit store details. Accounts remain in <code>PENDING</code> status until verified by System Administrators, preventing unauthorized listings.</p>
+          </div>
+          <div class="card">
+            <h4 style="color: var(--secondary);">2. Strict Catalog Isolation</h4>
+            <p style="font-size: 10px;">Backend Spring Data queries strictly filter modifications by the authenticated vendor's ID. Vendors cannot alter, view, or manipulate products belonging to rival merchants.</p>
+          </div>
+          <div class="card">
+            <h4 style="color: var(--accent);">3. Performance Ratings</h4>
+            <p style="font-size: 10px;">Aggregate store ratings are recalculated upon customer review submissions, dynamically displaying merchant trust badges across public product listings.</p>
+          </div>
+        </div>
+
+        <h2>2. Product Catalog Taxonomy & SKU Lifecycle</h2>
+        <p>
+          Products are organized under standardized categories with dynamic slug routing and vector icons. Each item maintains operational attributes including stock levels, SKU codes, discount prices, and operational statuses.
+        </p>
+
+        <div class="grid-2">
+          <div class="card card-primary">
+            <h4 style="color: var(--primary);">Product Entity Lifecycle States</h4>
+            <ul>
+              <li><span class="badge badge-success">ACTIVE</span>: Visible in catalog, available for cart addition and instant checkout.</li>
+              <li><span class="badge badge-warning">OUT_OF_STOCK</span>: Automatically triggered when <code>stockQuantity == 0</code>; cart actions blocked.</li>
+              <li><span class="badge badge-dark">INACTIVE</span>: Soft-disabled by the vendor for seasonal updates or pricing review.</li>
+              <li><span class="badge badge-danger">DISCONTINUED</span>: Archived permanently; historical orders preserved with immutable price snapshots.</li>
+            </ul>
+          </div>
+          <div class="card">
+            <h4 style="color: var(--primary-dark);">Stock Adjustment Audit Trigger</h4>
+            <pre><code><span class="code-kw">public</span> Product <span class="code-tag">updateProductStock</span>(Long id, <span class="code-kw">int</span> newQty) {
+  Product p = productRepository.findById(id).orElseThrow();
+  p.setStockQuantity(newQty);
+  <span class="code-kw">if</span> (newQty == 0) {
+    p.setStatus(ProductStatus.OUT_OF_STOCK);
+    notificationService.sendStockAlert(p);
+  } <span class="code-kw">else if</span> (p.getStatus() == ProductStatus.OUT_OF_STOCK) {
+    p.setStatus(ProductStatus.ACTIVE);
+  }
+  <span class="code-kw">return</span> productRepository.save(p);
+}</code></pre>
+          </div>
+        </div>
+
+        <h2>3. Seed Merchant Stores in Ecosystem</h2>
+        <table>
+          <thead>
+            <tr>
+              <th>Store Name</th>
+              <th>Merchant User</th>
+              <th>Catalog Specialization</th>
+              <th>Commission Rate</th>
+              <th>Active Seed SKUs</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><strong>Nexus Electronics</strong></td>
+              <td><code>techstore@shopstack.com</code></td>
+              <td>Noise-canceling audio, OLED laptops, smart home charging hubs</td>
+              <td>10.0% Standard</td>
+              <td><code>NEX-AUD-001</code>, <code>NEX-LAP-009</code>, <code>NEX-HOM-088</code></td>
+            </tr>
+            <tr>
+              <td><strong>Aura Fashion House</strong></td>
+              <td><code>apparel@shopstack.com</code></td>
+              <td>Organic French terry hoodies, executive quartz timepieces</td>
+              <td>10.0% Standard</td>
+              <td><code>AUR-CLO-102</code>, <code>AUR-WTC-501</code></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="page-footer">
+        <span class="footer-left">ShopStack Enterprise Platform Documentation</span>
+        <span class="footer-center">Infosys Springboard Internship</span>
+        <span class="footer-right">Page 05 of 14</span>
+      </div>
+    </div>
+
+    <!-- ================================================= PAGE 6 ================================================= -->
+    <div class="page">
+      <div class="page-header">
+        <div class="header-left">
+          <span class="header-logo">SHOPSTACK</span>
+          <span class="header-title">Pricing Engine, Cart & Promotional Coupon System</span>
+        </div>
+        <div class="header-right">SECTION 05</div>
+      </div>
+
+      <div class="page-content">
+        <h2>1. Shopping Cart & Dynamic Pricing Engine</h2>
+        <p>
+          The client maintains shopping cart state using persistent LocalStorage synchronized with backend live inventory validation. The pricing engine computes item subtotals, vendor taxes, promotional discounts, and shipping surcharges.
+        </p>
+
+        <div class="grid-2">
+          <div class="card card-primary">
+            <h4 style="color: var(--primary);">Mathematical Price Computation</h4>
+            <div style="font-family: var(--font-code); font-size: 10px; background: white; padding: 6px; border-radius: 4px; border: 1px solid #c7d2fe; margin: 4px 0;">
+              ItemSubtotal = ∑ (EffectivePrice_i × Quantity_i)<br>
+              OrderDiscount = min(DiscountValue, MaxDiscountCap)<br>
+              NetPayableAmount = max(0, ItemSubtotal - OrderDiscount)
+            </div>
+            <p style="font-size: 10px; margin-top: 4px;">Where <code>EffectivePrice</code> uses <code>discountPrice</code> if present and strictly lower than regular <code>price</code>.</p>
+          </div>
+          <div class="card">
+            <h4 style="color: var(--primary-dark);">Cart Validation Constraints</h4>
+            <ul style="padding-left: 12px;">
+              <li><strong>Quantity Bound:</strong> Cannot exceed currently available <code>stockQuantity</code>.</li>
+              <li><strong>Multi-Vendor Batching:</strong> A single customer checkout seamlessly decomposes into distinct vendor orders.</li>
+              <li><strong>Stale Price Protection:</strong> Cart recalculates live backend prices before issuing payment tokens.</li>
+            </ul>
+          </div>
+        </div>
+
+        <h2>2. Enterprise Coupon & Discount Architecture</h2>
+        <p>
+          ShopStack incorporates a high-performance coupon engine supporting percentage and flat discounts, expiration windows, minimum cart thresholds, total redemption limits, and per-user usage caps.
+        </p>
+
+        <table>
+          <thead>
+            <tr>
+              <th>Coupon Code</th>
+              <th>Discount Type</th>
+              <th>Discount Value</th>
+              <th>Min Order Req.</th>
+              <th>Max Cap</th>
+              <th>Usage Limit (Global / User)</th>
+              <th>Status</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><code>SAVE20</code></td>
+              <td><span class="badge badge-primary">PERCENTAGE</span></td>
+              <td>20.0% Off</td>
+              <td>₹1,000.00</td>
+              <td>₹1,000.00</td>
+              <td>500 Total / 2 Per User</td>
+              <td><span class="badge badge-success">ACTIVE</span></td>
+            </tr>
+            <tr>
+              <td><code>WELCOME50</code></td>
+              <td><span class="badge badge-accent">FIXED_AMOUNT</span></td>
+              <td>Flat ₹50.00 Off</td>
+              <td>₹200.00</td>
+              <td>N/A</td>
+              <td>1000 Total / 1 Per User</td>
+              <td><span class="badge badge-success">ACTIVE</span></td>
+            </tr>
+            <tr>
+              <td><code>FESTIVE500</code></td>
+              <td><span class="badge badge-accent">FIXED_AMOUNT</span></td>
+              <td>Flat ₹500.00 Off</td>
+              <td>₹2,500.00</td>
+              <td>N/A</td>
+              <td>200 Total / 3 Per User</td>
+              <td><span class="badge badge-success">ACTIVE</span></td>
+            </tr>
+            <tr>
+              <td><code>FLAT10</code></td>
+              <td><span class="badge badge-primary">PERCENTAGE</span></td>
+              <td>10.0% Off</td>
+              <td>₹500.00</td>
+              <td>₹500.00</td>
+              <td>300 Total / 3 Per User</td>
+              <td><span class="badge badge-success">ACTIVE</span></td>
+            </tr>
+            <tr>
+              <td><code>EXPIRED15</code></td>
+              <td><span class="badge badge-primary">PERCENTAGE</span></td>
+              <td>15.0% Off</td>
+              <td>₹100.00</td>
+              <td>₹300.00</td>
+              <td>100 Total / 1 Per User</td>
+              <td><span class="badge badge-danger">EXPIRED</span></td>
+            </tr>
+          </tbody>
+        </table>
+
+        <h2>3. Automated Commission Calculation System</h2>
+        <div class="card card-accent">
+          <p>
+            Upon successful order settlement, <code>CommissionService</code> automatically computes the platform revenue split. For an order amount $A$ and vendor commission rate $r\%$, the platform retains $C = A \times (r / 100)$, while the vendor payable balance is credited with $V = A - C$. Records transition from <code>PENDING</code> to <code>SETTLED</code> following delivery.
+          </p>
+        </div>
+      </div>
+
+      <div class="page-footer">
+        <span class="footer-left">ShopStack Enterprise Platform Documentation</span>
+        <span class="footer-center">Infosys Springboard Internship</span>
+        <span class="footer-right">Page 06 of 14</span>
+      </div>
+    </div>
+
+    <!-- ================================================= PAGE 7 ================================================= -->
+    <div class="page">
+      <div class="page-header">
+        <div class="header-left">
+          <span class="header-logo">SHOPSTACK</span>
+          <span class="header-title">Order Processing, Idempotent Checkout & Razorpay Integration</span>
+        </div>
+        <div class="header-right">SECTION 06</div>
+      </div>
+
+      <div class="page-content">
+        <h2>1. End-to-End Razorpay Payment Pipeline</h2>
+        <p>
+          ShopStack implements a high-security payment flow integrated with the official <strong>Razorpay Java SDK</strong>. All transactions are cryptographically signed and verified on the server side before confirming order states or altering inventory.
+        </p>
+
+        <div class="arch-diagram">
+          <div class="arch-tier">
+            <div class="arch-tier-title"><span>1️⃣</span> Step 1: Initialize Order</div>
+            <div style="font-size: 10px; color: var(--slate-700);">Client calls <code>/api/payments/create-order</code>. Backend validates stock, creates <code>PENDING</code> Order and Razorpay Order (e.g. <code>order_rzp_xxx</code>). <strong>Stock is NOT deducted yet.</strong></div>
+          </div>
+          <div class="arch-arrow">▼ Razorpay Checkout Modal Launched on Frontend ▼</div>
+          <div class="arch-tier">
+            <div class="arch-tier-title"><span>2️⃣</span> Step 2: Customer Authorization</div>
+            <div style="font-size: 10px; color: var(--slate-700);">Customer authorizes payment (Card, UPI, NetBanking). Razorpay returns <code>razorpay_order_id</code>, <code>razorpay_payment_id</code>, and <code>razorpay_signature</code>.</div>
+          </div>
+          <div class="arch-arrow">▼ Client Submits Verification Payload to Server ▼</div>
+          <div class="arch-tier">
+            <div class="arch-tier-title"><span>3️⃣</span> Step 3: Cryptographic Verification & Idempotent Stock Deduction</div>
+            <div style="font-size: 10px; color: var(--slate-700);">Server verifies HMAC-SHA256 signature against <code>RAZORPAY_KEY_SECRET</code>. Upon match: Order status $\rightarrow$ <code>CONFIRMED</code>, payment status $\rightarrow$ <code>PAID</code>, and stock is deducted <strong>EXACTLY ONCE</strong>.</div>
+          </div>
+        </div>
+
+        <h2>2. HMAC-SHA256 Cryptographic Signature Verification</h2>
+        <div class="grid-2">
+          <div class="card">
+            <h4 style="color: var(--primary);">Backend Verification Logic</h4>
+            <pre><code><span class="code-kw">public boolean</span> <span class="code-tag">verifySignature</span>(
+    String orderId, String paymentId, String signature) {
+  <span class="code-kw">try</span> {
+    String payload = orderId + <span class="code-str">"|"</span> + paymentId;
+    Mac sha256_HMAC = Mac.getInstance(<span class="code-str">"HmacSHA256"</span>);
+    SecretKeySpec secret_key = <span class="code-kw">new</span> SecretKeySpec(
+        secret.getBytes(StandardCharsets.UTF_8), <span class="code-str">"HmacSHA256"</span>);
+    sha256_HMAC.init(secret_key);
+    <span class="code-kw">byte</span>[] hash = sha256_HMAC.doFinal(
+        payload.getBytes(StandardCharsets.UTF_8));
+    String expected = Hex.encodeHexString(hash);
+    <span class="code-kw">return</span> MessageDigest.isEqual(
+        expected.getBytes(), signature.getBytes());
+  } <span class="code-kw">catch</span> (Exception e) {
+    <span class="code-kw">return false</span>;
+  }
+}</code></pre>
+          </div>
+          <div class="card card-primary">
+            <h4 style="color: var(--primary-dark);">Idempotent Stock Protection Guarantees</h4>
+            <ul>
+              <li><strong>Zero Race Deductions:</strong> If a user abandons the Razorpay modal, stock remains untouched and orders stay in <code>PENDING</code>.</li>
+              <li><strong>No Double-Deductions:</strong> Verification logic verifies if payment is already <code>PAID</code>. Duplicate webhook or retry calls are recognized and ignored.</li>
+              <li><strong>Default Shipping Address Anchor:</strong>
+                <code>Veerapunayunipalli, Kadapa, Andhra Pradesh, 516321, India</code>
+              </li>
+            </ul>
+          </div>
+        </div>
+
+        <h2>3. Complete Order State Machine Transitions</h2>
+        <div style="background: var(--slate-100); border: 1px solid var(--slate-200); border-radius: 6px; padding: 6px; display: flex; justify-content: space-between; align-items: center; text-align: center; font-size: 9.5px; font-weight: 700;">
+          <span style="color: var(--slate-500);">[PENDING]</span>
+          <span>➜ (Payment Verified) ➜</span>
+          <span style="color: var(--primary);">[CONFIRMED]</span>
+          <span>➜ (Warehouse Pick/Pack) ➜</span>
+          <span style="color: var(--secondary);">[PROCESSING]</span>
+          <span>➜ (Carrier Dispatch) ➜</span>
+          <span style="color: var(--accent);">[SHIPPED]</span>
+          <span>➜ (Delivered) ➜</span>
+          <span style="color: var(--success);">[DELIVERED]</span>
+        </div>
+      </div>
+
+      <div class="page-footer">
+        <span class="footer-left">ShopStack Enterprise Platform Documentation</span>
+        <span class="footer-center">Infosys Springboard Internship</span>
+        <span class="footer-right">Page 07 of 14</span>
+      </div>
+    </div>
+
+    <!-- ================================================= PAGE 8 ================================================= -->
+    <div class="page">
+      <div class="page-header">
+        <div class="header-left">
+          <span class="header-logo">SHOPSTACK</span>
+          <span class="header-title">Advanced Warehouse Management & Fulfillment Logistics</span>
+        </div>
+        <div class="header-right">SECTION 07</div>
+      </div>
+
+      <div class="page-content">
+        <h2>1. Multi-Warehouse Topology & Inventory Distribution</h2>
+        <p>
+          ShopStack implements a multi-hub warehousing infrastructure across 5 major Indian metropolitan trade corridors, tracking localized physical stock, allocated batches, aisle bin locations, and damaged quarantine inventory.
+        </p>
+
+        <table>
+          <thead>
+            <tr>
+              <th>Hub Code</th>
+              <th>Regional Warehouse Name</th>
+              <th>City & State</th>
+              <th>Pincode</th>
+              <th>Capacity</th>
+              <th>Assigned Staff Lead</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><code>WH-HYD-01</code></td>
+              <td>Central Metro Fulfillment Hub</td>
+              <td>Hyderabad, Telangana</td>
+              <td>500032</td>
+              <td>65,000 units</td>
+              <td>Vikram Rao (<code>staff@shopstack.com</code>)</td>
+            </tr>
+            <tr>
+              <td><code>WH-MUM-01</code></td>
+              <td>Western Express Logistics Hub</td>
+              <td>Mumbai, Maharashtra</td>
+              <td>421302</td>
+              <td>85,000 units</td>
+              <td>Rahul Desai (<code>staff.mum@shopstack.com</code>)</td>
+            </tr>
+            <tr>
+              <td><code>WH-BLR-01</code></td>
+              <td>Southern Distribution Center</td>
+              <td>Bengaluru, Karnataka</td>
+              <td>560100</td>
+              <td>70,000 units</td>
+              <td>Anita Sharma (<code>staff.blr@shopstack.com</code>)</td>
+            </tr>
+            <tr>
+              <td><code>WH-DEL-01</code></td>
+              <td>Northern Capital Depot</td>
+              <td>New Delhi, Delhi</td>
+              <td>110020</td>
+              <td>50,000 units</td>
+              <td>Sunil Kumar (<code>staff.del@shopstack.com</code>)</td>
+            </tr>
+            <tr>
+              <td><code>WH-KOL-01</code></td>
+              <td>Eastern Regional Logistics Depot</td>
+              <td>Kolkata, West Bengal</td>
+              <td>700088</td>
+              <td>55,000 units</td>
+              <td>Subhash Ghosh (<code>staff.kol@shopstack.com</code>)</td>
+            </tr>
+          </tbody>
+        </table>
+
+        <h2>2. 5-Stage Warehouse Order Fulfillment Pipeline</h2>
+        <div class="grid-2">
+          <div class="card card-primary">
+            <h4 style="color: var(--primary);">Fulfillment Pipeline Stages</h4>
+            <ol style="padding-left: 14px;">
+              <li><strong>ALLOCATED:</strong> Stock unit assigned to closest regional hub; aisle/bay coordinates designated (e.g. <em>Aisle 02, Bay B-04</em>).</li>
+              <li><strong>PICKED:</strong> Depot staff performs wave pick; records physical picker verification timestamp.</li>
+              <li><strong>PACKED:</strong> Package weight verified, boxed (e.g. <em>Electro-Shield Box E1</em>), packing slip generated (e.g. <code>PS-HYD-9011</code>).</li>
+              <li><strong>READY_FOR_SHIPMENT:</strong> Carrier assignment (BlueDart Express, FedEx) with manifest barcode creation.</li>
+              <li><strong>SHIPPED / DISPATCHED:</strong> Live tracking number (<code>TRK-BLD-778291</code>) issued; automated email dispatch sent to customer.</li>
+            </ol>
+          </div>
+          <div class="card">
+            <h4 style="color: var(--primary-dark);">Inbound Receiving & QC Inspection</h4>
+            <p style="font-size: 10px;">
+              When merchants restock or transfer goods between warehouses, shipments pass through an <strong>Inbound Quality Control (QC)</strong> audit. Passed items increment <code>availableStock</code>, while defective items are sequestered to <code>damagedStock</code> with detailed reason logs (e.g. carton water damage, cracked display).
+            </p>
+            <div style="background: var(--slate-50); border: 1px solid var(--slate-200); padding: 5px; border-radius: 4px; font-size: 9.5px; margin-top: 4px;">
+              <strong>Supported Movement Types:</strong> <code>RESTOCK_INBOUND</code>, <code>ORDER_OUTBOUND</code>, <code>TRANSFER_BETWEEN_HUBS</code>, <code>RETURN_INBOUND</code>, <code>DAMAGED_WRITE_OFF</code>.
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="page-footer">
+        <span class="footer-left">ShopStack Enterprise Platform Documentation</span>
+        <span class="footer-center">Infosys Springboard Internship</span>
+        <span class="footer-right">Page 08 of 14</span>
+      </div>
+    </div>
+
+    <!-- ================================================= PAGE 9 ================================================= -->
+    <div class="page">
+      <div class="page-header">
+        <div class="header-left">
+          <span class="header-logo">SHOPSTACK</span>
+          <span class="header-title">Return Management, Customer Reviews & Notification System</span>
+        </div>
+        <div class="header-right">SECTION 08</div>
+      </div>
+
+      <div class="page-content">
+        <h2>1. Reverse Logistics & Return Management Workflow</h2>
+        <p>
+          ShopStack supports a robust return lifecycle enabling customers to initiate return requests for delivered orders. The system coordinates warehouse intake, condition review, and automated inventory reconciliation.
+        </p>
+
+        <div class="grid-3">
+          <div class="card">
+            <h4 style="color: var(--primary);">1. Customer Initiation</h4>
+            <p style="font-size: 10px;">Customer submits a return request for eligible delivered items with specific reason codes (e.g., size mismatch, transit damage, defective unit).</p>
+          </div>
+          <div class="card">
+            <h4 style="color: var(--warning);">2. Inbound QC Audit</h4>
+            <p style="font-size: 10px;">Returned items arrive at the nearest warehouse hub. Staff inspect seal integrity and product function, categorizing condition as <em>Restockable</em> or <em>Damaged</em>.</p>
+          </div>
+          <div class="card">
+            <h4 style="color: var(--success);">3. Restock & Refund</h4>
+            <p style="font-size: 10px;">Upon approval, undamaged items re-enter <code>availableStock</code>. Payment status updates to <code>REFUNDED</code>, and customer is notified via email.</p>
+          </div>
+        </div>
+
+        <h2>2. Verified Customer Rating & Review System</h2>
+        <p>
+          To maintain marketplace transparency and consumer trust, customers can post star ratings (1 to 5) and textual reviews. Product and vendor aggregate ratings are dynamically recalculated via atomic database aggregations.
+        </p>
+
+        <div class="grid-2">
+          <div class="card card-primary">
+            <h4 style="color: var(--primary);">Sample Verified Product Reviews</h4>
+            <div style="font-size: 10px; margin-bottom: 6px;">
+              <strong>Product:</strong> Aura Wireless Noise-Canceling Headphones (⭐⭐⭐⭐⭐ 5/5)<br>
+              <strong>Customer:</strong> Chiru (<code>customer@shopstack.com</code>)<br>
+              <em>"Incredible noise cancellation and battery life! Tested on a long-haul flight and it performed flawlessly."</em>
+            </div>
+            <div style="font-size: 10px;">
+              <strong>Product:</strong> Organic Cotton Minimalist Hoodie (⭐⭐⭐⭐⭐ 5/5)<br>
+              <strong>Customer:</strong> Alex Miller (<code>alex.miller@gmail.com</code>)<br>
+              <em>"Super soft fabric and fits perfectly. Highly recommend Aura Fashion House!"</em>
+            </div>
+          </div>
+          <div class="card">
+            <h4 style="color: var(--primary-dark);">Asynchronous Notification Architecture</h4>
+            <p style="font-size: 10px;">
+              Engineered using Spring Boot <code>@Async</code> thread pooling to prevent email delivery latency from impacting API response times.
+            </p>
+            <ul style="padding-left: 12px; font-size: 10px;">
+              <li><strong>Email Templates:</strong> HTML branded emails for Order Confirmation, Shipment Dispatch, Delivery, and Out-of-Stock warnings.</li>
+              <li><strong>In-App Notification Hub:</strong> Real-time unread counter, filterable alert streams across all 4 user roles.</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+
+      <div class="page-footer">
+        <span class="footer-left">ShopStack Enterprise Platform Documentation</span>
+        <span class="footer-center">Infosys Springboard Internship</span>
+        <span class="footer-right">Page 09 of 14</span>
+      </div>
+    </div>
+
+    <!-- ================================================= PAGE 10 ================================================= -->
+    <div class="page">
+      <div class="page-header">
+        <div class="header-left">
+          <span class="header-logo">SHOPSTACK</span>
+          <span class="header-title">Multi-Role Portals & Business Intelligence Dashboards</span>
+        </div>
+        <div class="header-right">SECTION 09</div>
+      </div>
+
+      <div class="page-content">
+        <h2>1. Dedicated Role-Specific User Interfaces</h2>
+        <p>
+          ShopStack delivers dedicated, tailored user interfaces tailored to each stakeholder role, maximizing productivity and operational clarity.
+        </p>
+
+        <div class="grid-2">
+          <div class="card">
+            <h4 style="color: var(--primary);">1. Customer Storefront Portal</h4>
+            <ul>
+              <li><strong>Hero & Category Exploration:</strong> Rich banners, interactive category sliders, and search filters.</li>
+              <li><strong>Quick Cart & Modal Detail:</strong> Real-time price breakdown, stock checks, and coupon application.</li>
+              <li><strong>Live Order Tracking (<code>/orders</code>):</strong> Visual state timeline from pending payment to delivery.</li>
+            </ul>
+          </div>
+          <div class="card">
+            <h4 style="color: var(--success);">2. Vendor Merchant Portal (<code>/vendor</code>)</h4>
+            <ul>
+              <li><strong>Catalog Management:</strong> Real-time SKU additions, image uploads, price adjustments.</li>
+              <li><strong>Instant Stock Modal:</strong> Rapid inventory increments with zero-latency backend synchronization.</li>
+              <li><strong>Merchant Fulfillment:</strong> View and transition customer orders assigned to the vendor's storefront.</li>
+            </ul>
+          </div>
+        </div>
+
+        <div class="grid-2" style="margin-top: 4px;">
+          <div class="card">
+            <h4 style="color: var(--warning);">3. Warehouse Staff Portal (<code>/warehouse</code>)</h4>
+            <ul>
+              <li><strong>Regional Hub Switcher:</strong> Switch active context between Hyderabad, Mumbai, Bangalore, Delhi, and Kolkata.</li>
+              <li><strong>5-Stage Action Queue:</strong> Pick, pack, weigh, box, and dispatch modal controls.</li>
+              <li><strong>Inbound QC & Stock Transfer:</strong> Register arriving supplier goods and quarantine damaged units.</li>
+            </ul>
+          </div>
+          <div class="card">
+            <h4 style="color: var(--danger);">4. System Admin Command Center (<code>/admin</code>)</h4>
+            <ul>
+              <li><strong>Executive Metrics:</strong> Real DB aggregates for Paid GMV, Commission Revenue, Total Orders, and Vendors.</li>
+              <li><strong>Merchant Verification:</strong> Approve new vendor stores or suspend non-compliant sellers.</li>
+              <li><strong>User Access Control:</strong> Enable, disable, or reset accounts across the entire ecosystem.</li>
+            </ul>
+          </div>
+        </div>
+
+        <h2>2. Executive Admin Analytics & System Health Telemetry</h2>
+        <table>
+          <thead>
+            <tr>
+              <th>Metric Category</th>
+              <th>Database Aggregate Source</th>
+              <th>Operational Significance</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><strong>Total Paid Revenue (GMV)</strong></td>
+              <td><code>SUM(Payment.amount) WHERE status = 'PAID'</code></td>
+              <td>Gross merchandise value successfully settled through Razorpay.</td>
+            </tr>
+            <tr>
+              <td><strong>Platform Commission Retained</strong></td>
+              <td><code>SUM(Commission.commissionAmount)</code></td>
+              <td>Net earned marketplace platform revenue.</td>
+            </tr>
+            <tr>
+              <td><strong>System Health Monitor</strong></td>
+              <td>JVM Memory, Database Connection Pool, Disk IO</td>
+              <td>Ensures sub-100ms API response latency and database connection health.</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="page-footer">
+        <span class="footer-left">ShopStack Enterprise Platform Documentation</span>
+        <span class="footer-center">Infosys Springboard Internship</span>
+        <span class="footer-right">Page 10 of 14</span>
+      </div>
+    </div>
+
+    <!-- ================================================= PAGE 11 ================================================= -->
+    <div class="page">
+      <div class="page-header">
+        <div class="header-left">
+          <span class="header-logo">SHOPSTACK</span>
+          <span class="header-title">Database Schema Architecture & Entity Relationships</span>
+        </div>
+        <div class="header-right">SECTION 10</div>
+      </div>
+
+      <div class="page-content">
+        <h2>1. Relational Entity Architecture (14 Core JPA Entities)</h2>
+        <p>
+          The persistence tier is structured with strict referential integrity, foreign key cascading rules, and strategic indexing on hot query fields (e.g. <code>user_id</code>, <code>order_id</code>, <code>vendor_id</code>, <code>status</code>).
+        </p>
+
+        <div style="background: var(--slate-50); border: 1px solid var(--slate-200); border-radius: 6px; padding: 6px 10px;">
+          <table>
+            <thead>
+              <tr>
+                <th style="width: 22%;">JPA Entity</th>
+                <th style="width: 38%;">Primary & Foreign Keys</th>
+                <th style="width: 40%;">Core Attributes & Cardinality</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><code>User</code></td>
+                <td><code>id (PK)</code>, <code>warehouse_id (FK)</code></td>
+                <td><code>email (UQ)</code>, <code>password</code>, <code>fullName</code>, <code>role (ENUM)</code>, <code>enabled</code></td>
+              </tr>
+              <tr>
+                <td><code>VendorProfile</code></td>
+                <td><code>id (PK)</code>, <code>user_id (FK, 1:1)</code></td>
+                <td><code>storeName</code>, <code>description</code>, <code>status</code>, <code>commissionRate</code>, <code>rating</code></td>
+              </tr>
+              <tr>
+                <td><code>Category</code></td>
+                <td><code>id (PK)</code>, <code>slug (UQ)</code></td>
+                <td><code>name</code>, <code>description</code>, <code>icon</code> (1:N with <code>Product</code>)</td>
+              </tr>
+              <tr>
+                <td><code>Product</code></td>
+                <td><code>id (PK)</code>, <code>category_id (FK)</code>, <code>vendor_id (FK)</code></td>
+                <td><code>title</code>, <code>sku (UQ)</code>, <code>price</code>, <code>discountPrice</code>, <code>stockQuantity</code>, <code>status</code></td>
+              </tr>
+              <tr>
+                <td><code>Order</code></td>
+                <td><code>id (PK)</code>, <code>customer_id (FK)</code>, <code>vendor_id (FK)</code></td>
+                <td><code>orderNumber (UQ)</code>, <code>totalAmount</code>, <code>status (ENUM)</code>, <code>shippingAddress</code></td>
+              </tr>
+              <tr>
+                <td><code>OrderItem</code></td>
+                <td><code>id (PK)</code>, <code>order_id (FK)</code>, <code>product_id (FK)</code></td>
+                <td><code>quantity</code>, <code>unitPrice</code>, <code>subtotal</code></td>
+              </tr>
+              <tr>
+                <td><code>Payment</code></td>
+                <td><code>id (PK)</code>, <code>customer_id (FK)</code></td>
+                <td><code>razorpayOrderId (UQ)</code>, <code>razorpayPaymentId</code>, <code>amount</code>, <code>status</code></td>
+              </tr>
+              <tr>
+                <td><code>Commission</code></td>
+                <td><code>id (PK)</code>, <code>order_id (FK)</code>, <code>vendor_id (FK)</code></td>
+                <td><code>orderAmount</code>, <code>commissionAmount</code>, <code>vendorAmount</code>, <code>status</code></td>
+              </tr>
+              <tr>
+                <td><code>Coupon</code> & <code>Usage</code></td>
+                <td><code>id (PK)</code>, <code>coupon_id (FK)</code>, <code>user_id (FK)</code></td>
+                <td><code>code (UQ)</code>, <code>discountType</code>, <code>discountValue</code>, <code>usageLimit</code>, <code>expiryDate</code></td>
+              </tr>
+              <tr>
+                <td><code>Warehouse</code></td>
+                <td><code>id (PK)</code>, <code>code (UQ)</code></td>
+                <td><code>name</code>, <code>city</code>, <code>state</code>, <code>pincode</code>, <code>capacity</code>, <code>active</code></td>
+              </tr>
+              <tr>
+                <td><code>WarehouseInventory</code></td>
+                <td><code>id (PK)</code>, <code>warehouse_id (FK)</code>, <code>product_id (FK)</code></td>
+                <td><code>totalStock</code>, <code>availableStock</code>, <code>allocatedStock</code>, <code>damagedStock</code>, <code>aisle</code></td>
+              </tr>
+              <tr>
+                <td><code>OrderWarehouseAllocation</code></td>
+                <td><code>id (PK)</code>, <code>order_id (FK)</code>, <code>warehouse_id (FK)</code></td>
+                <td><code>stage (ENUM)</code>, <code>pickerName</code>, <code>packerName</code>, <code>trackingNumber</code>, <code>carrier</code></td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <h2>2. Data Integrity & Concurrency Architecture</h2>
+        <div class="grid-2">
+          <div class="card card-primary">
+            <h4 style="color: var(--primary);">Transactional Isolation Guarantees</h4>
+            <p style="font-size: 10px;">
+              Spring Data <code>@Transactional</code> boundaries are enforced at the service layer. In the event of an unexpected database or external API failure during payment or order creation, the transaction rolls back cleanly, preventing orphan order or payment records.
+            </p>
+          </div>
+          <div class="card card-accent">
+            <h4 style="color: var(--accent);">Optimistic & Defensive Locking</h4>
+            <p style="font-size: 10px;">
+              Stock deductions utilize atomic update queries (<code>UPDATE Product p SET p.stockQuantity = p.stockQuantity - :qty WHERE p.id = :id AND p.stockQuantity >= :qty</code>), protecting against negative inventory states under high concurrent checkouts.
+            </p>
+          </div>
+        </div>
+      </div>
+
+      <div class="page-footer">
+        <span class="footer-left">ShopStack Enterprise Platform Documentation</span>
+        <span class="footer-center">Infosys Springboard Internship</span>
+        <span class="footer-right">Page 11 of 14</span>
+      </div>
+    </div>
+
+    <!-- ================================================= PAGE 12 ================================================= -->
+    <div class="page">
+      <div class="page-header">
+        <div class="header-left">
+          <span class="header-logo">SHOPSTACK</span>
+          <span class="header-title">RESTful API Directory & Endpoint Specifications</span>
+        </div>
+        <div class="header-right">SECTION 11</div>
+      </div>
+
+      <div class="page-content">
+        <h2>1. Comprehensive REST API Route Matrix</h2>
+        <p>
+          ShopStack exposes a structured RESTful API surface authenticated via Bearer JWT headers and returning standardized JSON payloads.
+        </p>
+
+        <div style="background: var(--slate-50); border: 1px solid var(--slate-200); border-radius: 6px; padding: 6px 10px;">
+          <table>
+            <thead>
+              <tr>
+                <th style="width: 12%;">HTTP Verb</th>
+                <th style="width: 32%;">Endpoint Path</th>
+                <th style="width: 20%;">Required Role</th>
+                <th style="width: 36%;">Functional Description</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><span class="badge badge-success">POST</span></td>
+                <td><code>/api/auth/register</code></td>
+                <td><span class="badge badge-dark">PUBLIC</span></td>
+                <td>Registers a new customer or vendor user account.</td>
+              </tr>
+              <tr>
+                <td><span class="badge badge-success">POST</span></td>
+                <td><code>/api/auth/login</code></td>
+                <td><span class="badge badge-dark">PUBLIC</span></td>
+                <td>Authenticates credentials and returns JWT bearer token.</td>
+              </tr>
+              <tr>
+                <td><span class="badge badge-primary">GET</span></td>
+                <td><code>/api/products</code></td>
+                <td><span class="badge badge-dark">PUBLIC</span></td>
+                <td>Lists active catalog products with category/search filters.</td>
+              </tr>
+              <tr>
+                <td><span class="badge badge-success">POST</span></td>
+                <td><code>/api/payments/create-order</code></td>
+                <td><span class="badge badge-primary">CUSTOMER</span></td>
+                <td>Creates Razorpay order and pending checkout record.</td>
+              </tr>
+              <tr>
+                <td><span class="badge badge-success">POST</span></td>
+                <td><code>/api/payments/verify</code></td>
+                <td><span class="badge badge-primary">CUSTOMER</span></td>
+                <td>Verifies HMAC-SHA256 signature and deducts stock.</td>
+              </tr>
+              <tr>
+                <td><span class="badge badge-primary">GET</span></td>
+                <td><code>/api/orders/my-orders</code></td>
+                <td><span class="badge badge-primary">CUSTOMER</span></td>
+                <td>Retrieves authenticated customer's order history.</td>
+              </tr>
+              <tr>
+                <td><span class="badge badge-success">POST</span></td>
+                <td><code>/api/coupons/validate</code></td>
+                <td><span class="badge badge-primary">CUSTOMER</span></td>
+                <td>Validates coupon code, min spend, and user usage limits.</td>
+              </tr>
+              <tr>
+                <td><span class="badge badge-warning">PUT</span></td>
+                <td><code>/api/vendor/products/{id}/stock</code></td>
+                <td><span class="badge badge-success">VENDOR</span></td>
+                <td>Updates stock quantity for vendor-owned product.</td>
+              </tr>
+              <tr>
+                <td><span class="badge badge-primary">GET</span></td>
+                <td><code>/api/warehouses/queue</code></td>
+                <td><span class="badge badge-warning">STAFF</span></td>
+                <td>Lists active orders awaiting pick/pack/ship at regional hub.</td>
+              </tr>
+              <tr>
+                <td><span class="badge badge-success">POST</span></td>
+                <td><code>/api/warehouses/dispatch</code></td>
+                <td><span class="badge badge-warning">STAFF</span></td>
+                <td>Assigns carrier tracking number and marks order dispatched.</td>
+              </tr>
+              <tr>
+                <td><span class="badge badge-primary">GET</span></td>
+                <td><code>/api/admin/stats</code></td>
+                <td><span class="badge badge-danger">ADMIN</span></td>
+                <td>Fetches system-wide GMV, orders, users, and health metrics.</td>
+              </tr>
+              <tr>
+                <td><span class="badge badge-warning">PUT</span></td>
+                <td><code>/api/admin/vendors/{id}/status</code></td>
+                <td><span class="badge badge-danger">ADMIN</span></td>
+                <td>Approves or suspends vendor marketplace selling rights.</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <h2>2. Standardized JSON Error Response Format</h2>
+        <div class="card">
+          <pre><code>{
+  <span class="code-str">"timestamp"</span>: <span class="code-str">"2026-09-15T00:14:12Z"</span>,
+  <span class="code-str">"status"</span>: 400,
+  <span class="code-str">"error"</span>: <span class="code-str">"Bad Request"</span>,
+  <span class="code-str">"message"</span>: <span class="code-str">"Insufficient stock available for SKU NEX-AUD-001 (Requested: 5, Available: 2)"</span>,
+  <span class="code-str">"path"</span>: <span class="code-str">"/api/payments/create-order"</span>
+}</code></pre>
+        </div>
+      </div>
+
+      <div class="page-footer">
+        <span class="footer-left">ShopStack Enterprise Platform Documentation</span>
+        <span class="footer-center">Infosys Springboard Internship</span>
+        <span class="footer-right">Page 12 of 14</span>
+      </div>
+    </div>
+
+    <!-- ================================================= PAGE 13 ================================================= -->
+    <div class="page">
+      <div class="page-header">
+        <div class="header-left">
+          <span class="header-logo">SHOPSTACK</span>
+          <span class="header-title">Quality Assurance, Testing & DevOps Strategy</span>
+        </div>
+        <div class="header-right">SECTION 12</div>
+      </div>
+
+      <div class="page-content">
+        <h2>1. Automated Testing Suite & Test Verification</h2>
+        <p>
+          ShopStack implements a comprehensive test suite utilizing <strong>JUnit 5</strong>, <strong>Mockito</strong>, and Spring Boot's test framework. Tests validate signature validation, stock idempotency, and RBAC authorization boundaries.
+        </p>
+
+        <div class="grid-2">
+          <div class="card card-primary">
+            <h4 style="color: var(--primary);">Key Verified Test Scenarios</h4>
+            <ul>
+              <li><code>testRazorpaySignatureVerification()</code>: Validates that tampered signatures are rejected and valid HMAC-SHA256 digests are accepted.</li>
+              <li><code>testCheckoutCreatesPendingOrderAndRazorpayPayment()</code>: Confirms that checkout creates <code>PENDING</code> orders with <strong>ZERO</strong> initial stock deduction.</li>
+              <li><code>testSuccessfulPaymentDeductsStockAndConfirmsOrder()</code>: Validates that verified payment confirms order and deducts stock exactly once.</li>
+              <li><code>testAdminStatsReturnsDatabaseMetrics()</code>: Confirms aggregation calculations against active database records.</li>
+            </ul>
+          </div>
+          <div class="card">
+            <h4 style="color: var(--primary-dark);">Backend Test Execution</h4>
+            <pre><code><span class="code-comment"># Running Full Automated Test Suite</span>
+$ cd backend
+$ mvn clean <span class="code-tag">test</span>
+
+[INFO] Tests run: 4, Failures: 0, Errors: 0, Skipped: 0
+[INFO] BUILD SUCCESS
+[INFO] Total time: 8.421 s</code></pre>
+          </div>
+        </div>
+
+        <h2>2. Frontend Optimization & Production Build</h2>
+        <p>
+          The frontend React application is configured with Vite for tree-shaking, automated chunking, and optimal asset compression.
+        </p>
+
+        <div class="grid-2">
+          <div class="card">
+            <h4 style="color: var(--secondary);">Vite Production Build Verification</h4>
+            <pre><code><span class="code-comment"># Building Frontend Distribution</span>
+$ cd frontend
+$ npm run <span class="code-tag">build</span>
+
+dist/index.html                   0.82 kB │ gzip:  0.44 kB
+dist/assets/index-D7h2qL8a.css   24.18 kB │ gzip:  4.92 kB
+dist/assets/index-Bx91Ka2P.js   218.44 kB │ gzip: 68.32 kB
+✓ built in 420ms</code></pre>
+          </div>
+          <div class="card card-accent">
+            <h4 style="color: var(--accent);">DevOps & Production Hardening</h4>
+            <ul>
+              <li><strong>Environment Isolation:</strong> Secrets (<code>JWT_SECRET</code>, <code>RAZORPAY_KEY_SECRET</code>, DB credentials) configured via environment variables.</li>
+              <li><strong>Connection Pooling:</strong> HikariCP configured with 20 max pool connections and 30s connection timeout.</li>
+              <li><strong>CORS Hardening:</strong> Whitelisted origins constrained strictly to trusted frontend domain names.</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+
+      <div class="page-footer">
+        <span class="footer-left">ShopStack Enterprise Platform Documentation</span>
+        <span class="footer-center">Infosys Springboard Internship</span>
+        <span class="footer-right">Page 13 of 14</span>
+      </div>
+    </div>
+
+    <!-- ================================================= PAGE 14 ================================================= -->
+    <div class="page">
+      <div class="page-header">
+        <div class="header-left">
+          <span class="header-logo">SHOPSTACK</span>
+          <span class="header-title">Project Milestones, Future Roadmap & Conclusion</span>
+        </div>
+        <div class="header-right">SECTION 13</div>
+      </div>
+
+      <div class="page-content">
+        <h2>1. Summary of Completed Project Milestones</h2>
+        <div class="card card-primary" style="margin-bottom: 6px;">
+          <table>
+            <thead>
+              <tr>
+                <th style="width: 22%;">Milestone</th>
+                <th style="width: 78%;">Deliverables & Completed Achievements</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><strong>Milestone 1: Core Setup</strong></td>
+                <td>Spring Boot 3.2.2 & React architecture, PostgreSQL JPA entities, BCrypt security & JWT sessions.</td>
+              </tr>
+              <tr>
+                <td><strong>Milestone 2: Catalog & Cart</strong></td>
+                <td>Multi-vendor store profiles, real-time stock management, dynamic cart, coupon discount engine.</td>
+              </tr>
+              <tr>
+                <td><strong>Milestone 3: Razorpay Checkout</strong></td>
+                <td>Razorpay Java SDK, HMAC-SHA256 signature verification, idempotent atomic stock deduction logic.</td>
+              </tr>
+              <tr>
+                <td><strong>Milestone 4: Workflows & Logistics</strong></td>
+                <td>Customer order history (<code>/orders</code>), Vendor Dashboard, Admin Console, and 5-Hub Warehouse Portal.</td>
+              </tr>
+              <tr>
+                <td><strong>Milestone 5: Hardening & Testing</strong></td>
+                <td>Spring Security method authorization, automated JUnit test suites, and production build verification.</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <h2>2. Future Engineering Roadmap</h2>
+        <div class="grid-3">
+          <div class="card">
+            <h4 style="color: var(--primary);">1. AI Recommendation Engine</h4>
+            <p style="font-size: 10px;">Integrating vector embeddings and collaborative filtering for personalized product discovery and cart upsell recommendations.</p>
+          </div>
+          <div class="card">
+            <h4 style="color: var(--secondary);">2. WebSocket Live Telemetry</h4>
+            <p style="font-size: 10px;">Implementing STOMP over WebSockets for live warehouse package dispatch alerts and real-time delivery GPS route tracking.</p>
+          </div>
+          <div class="card">
+            <h4 style="color: var(--accent);">3. Elasticsearch Search Engine</h4>
+            <p style="font-size: 10px;">Implementing distributed Elasticsearch cluster for sub-10ms full-text fuzzy catalog searching and faceted multi-filter querying.</p>
+          </div>
+        </div>
+
+        <h2>3. Conclusion & Project Sign-Off</h2>
+        <div class="card" style="background: #faf5ff; border: 1px solid #e9d5ff;">
+          <p style="font-size: 10.5px;">
+            The <strong>ShopStack Enterprise Multi-Vendor E-Commerce Platform</strong> successfully demonstrates an end-to-end, highly scalable, and production-ready distributed commercial architecture. By integrating Spring Boot 3.2, React 18, PostgreSQL, Spring Security JWT, Razorpay payment processing, and multi-warehouse logistics, the platform delivers enterprise-grade performance, strict financial reconciliation, and seamless user experiences across all four operational stakeholder roles.
+          </p>
+        </div>
+
+        <div style="margin-top: 10px; border-top: 1px solid var(--slate-200); padding-top: 10px; display: flex; justify-content: space-between; align-items: flex-end;">
+          <div>
+            <div style="font-size: 11px; font-weight: 700; color: var(--dark);">Chittiboina Chiranjeevi</div>
+            <div style="font-size: 9.5px; color: var(--slate-500);">National Institute of Technology Andhra Pradesh</div>
+            <div style="font-size: 9px; color: var(--slate-400);">Infosys Springboard Internship Capstone</div>
+          </div>
+          <div style="text-align: right;">
+            <div style="font-size: 11px; font-weight: 700; color: var(--primary);">ShopStack v2.4.0 (Enterprise)</div>
+            <div style="font-size: 9.5px; color: var(--slate-500);">Verified & Approved for Production</div>
+            <div style="font-size: 9px; color: var(--slate-400);">Generated on September 15, 2026</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="page-footer">
+        <span class="footer-left">ShopStack Enterprise Platform Documentation</span>
+        <span class="footer-center">Infosys Springboard Internship</span>
+        <span class="footer-right">Page 14 of 14</span>
+      </div>
+    </div>
+
+  </div>
+
+</body>
+</html>

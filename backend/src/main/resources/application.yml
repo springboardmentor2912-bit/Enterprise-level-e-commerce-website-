@@ -1,0 +1,60 @@
+server:
+  port: ${PORT:8081}
+  address: 0.0.0.0
+  servlet:
+    context-path: /
+    
+spring:
+  application:
+    name: shopstack-backend
+  datasource:
+    url: ${SPRING_DATASOURCE_URL:jdbc:h2:mem:shopstackdb;DB_CLOSE_DELAY=-1;DB_CLOSE_ON_EXIT=FALSE}
+    driver-class-name: ${SPRING_DATASOURCE_DRIVER:org.h2.Driver}
+    username: ${SPRING_DATASOURCE_USERNAME:sa}
+    password: ${SPRING_DATASOURCE_PASSWORD:}
+  h2:
+    console:
+      enabled: true
+      path: /h2-console
+      settings:
+        web-allow-others: true
+  jpa:
+    hibernate:
+      ddl-auto: update
+    show-sql: false
+    properties:
+      hibernate:
+        format_sql: true
+  mail:
+    host: ${SPRING_MAIL_HOST:smtp.gmail.com}
+    port: ${SPRING_MAIL_PORT:587}
+    username: ${SPRING_MAIL_USERNAME:}
+    password: ${SPRING_MAIL_PASSWORD:}
+    properties:
+      mail:
+        smtp:
+          auth: ${SPRING_MAIL_AUTH:true}
+          starttls:
+            enable: ${SPRING_MAIL_STARTTLS:true}
+            required: false
+          connectiontimeout: 5000
+          timeout: 5000
+          writetimeout: 5000
+
+jwt:
+  secret: ${JWT_SECRET:9a6f8b1c4e2d7a9b0c3f5e8d1a4b7c0d3e6f9a2b5c8d1e4f7a0b3c6d9e2f5a8b}
+  expirationMs: 86400000 # 24 hours
+
+razorpay:
+  key_id: ${RAZORPAY_KEY_ID:rzp_test_TQoPbBJidnAEvz}
+  key_secret: ${RAZORPAY_KEY_SECRET:hqjk19ry3jRuLxv04CYMkyHn}
+  currency: INR
+
+app:
+  mail:
+    from: ${MAIL_FROM:notifications@shopstack.com}
+    sender-name: ${MAIL_SENDER_NAME:ShopStack Platform}
+    enabled: ${MAIL_ENABLED:true}
+    mock-mode: ${MAIL_MOCK_MODE:false}
+
+

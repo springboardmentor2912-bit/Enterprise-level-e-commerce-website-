@@ -1,0 +1,17 @@
+# Maven build artifacts
+backend/target/
+**/target/
+*.class
+
+# Node / React build artifacts
+frontend/node_modules/
+frontend/dist/
+**/node_modules/
+**/dist/
+
+# IDE files
+.idea/
+.vscode/
+*.iml
+.DS_Store
+frontend/node_modules/
