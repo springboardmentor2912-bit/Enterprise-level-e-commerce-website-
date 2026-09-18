@@ -1,0 +1,10 @@
+package com.shopstack.repository;
+
+import com.shopstack.entity.OrderItem;
+import org.springframework.data.jpa.repository.JpaRepository;
+
+import java.util.List;
+
+public interface OrderItemRepository extends JpaRepository<OrderItem, Long> {
+    List<OrderItem> findByVendorId(Long vendorId);
+}
