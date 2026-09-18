@@ -1,0 +1,15 @@
+# Environment files
+.env
+.env.local
+*.env
+!*.env.example
+!env/*.env.example
+!env/development.env
+
+# Dependencies & build outputs
+node_modules/
+dist/
+target/
+.idea/
+*.log
+.DS_Store

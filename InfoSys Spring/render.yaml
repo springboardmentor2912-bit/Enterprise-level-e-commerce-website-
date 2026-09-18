@@ -1,0 +1,57 @@
+services:
+  - type: web
+    name: obsidian-backend
+    runtime: docker
+    dockerfilePath: backend/Dockerfile
+    dockerContext: backend
+    plan: free
+    region: oregon
+    healthCheckPath: /api/auth/health
+    envVars:
+      - key: DATABASE_URL
+        fromDatabase:
+          name: obsidian-db
+          property: connectionString
+      - key: JWT_SECRET
+        generateValue: true
+      - key: JWT_EXPIRATION
+        value: "86400000"
+      - key: CORS_ALLOWED_ORIGINS
+        value: "https://*.vercel.app,http://localhost:5173"
+      - key: RAZORPAY_KEY_ID
+        sync: false
+      - key: RAZORPAY_KEY_SECRET
+        sync: false
+      - key: RAZORPAY_CURRENCY
+        value: "INR"
+      - key: SHOPSTACK_COMMISSION_RATE
+        value: "10.0"
+
+  - type: static
+    name: obsidian-frontend
+    plan: free
+    rootDir: frontend
+    buildCommand: npm install && npm run build
+    staticPublishPath: dist
+    routes:
+      - type: rewrite
+        source: /*
+        destination: /index.html
+    envVars:
+      - key: VITE_API_BASE_URL
+        fromService:
+          type: web
+          name: obsidian-backend
+          envVarKey: RENDER_EXTERNAL_URL
+          property: host
+      - key: VITE_RAZORPAY_KEY_ID
+        value: rzp_test_5Xv8eZ4Q9X0123
+      - key: VITE_APP_NAME
+        value: "Obsidian Luxury"
+
+databases:
+  - name: obsidian-db
+    plan: free
+    databaseName: authdb
+    user: postgres
+    region: oregon
