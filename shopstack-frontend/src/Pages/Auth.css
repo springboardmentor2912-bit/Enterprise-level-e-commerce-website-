@@ -1,0 +1,261 @@
+/* Auth Page Background */
+.auth-page {
+    min-height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background: linear-gradient(135deg, #0f172a, #1e3a8a);
+    font-family: "Inter", "Segoe UI", sans-serif;
+}
+
+
+/* Authentication Card */
+.auth-container {
+    width: 400px;
+    background: white;
+    padding: 40px;
+    border-radius: 16px;
+    box-shadow: 0 20px 40px rgba(0,0,0,0.15);
+}
+
+
+/* Heading */
+.auth-container h2 {
+    text-align: center;
+    margin-bottom: 30px;
+    font-size: 28px;
+    color: #0f172a;
+}
+
+
+/* Input Fields */
+.auth-container input {
+
+    width: 100%;
+    box-sizing: border-box;
+
+    padding: 14px 16px;
+    margin-bottom: 18px;
+
+    border: 1px solid #cbd5e1;
+    border-radius: 10px;
+
+    font-size: 15px;
+
+    outline: none;
+
+    transition: 0.3s;
+}
+
+
+.auth-container input:focus {
+
+    border-color: #2563eb;
+
+    box-shadow: 0 0 0 3px rgba(37,99,235,0.15);
+
+}
+
+
+/* Button */
+.auth-container button {
+
+    width: 100%;
+
+    padding: 14px;
+
+    border: none;
+
+    border-radius: 10px;
+
+    background: #2563eb;
+
+    color: white;
+
+    font-size: 16px;
+
+    font-weight: 600;
+
+    cursor: pointer;
+
+    transition: 0.3s;
+
+}
+
+
+.auth-container button:hover {
+
+    background: #1d4ed8;
+
+    transform: translateY(-2px);
+
+}
+
+
+/* Bottom Text */
+
+.auth-container p {
+
+    margin-top: 25px;
+
+    text-align: center;
+
+    color: #64748b;
+
+    font-size: 14px;
+
+}
+
+
+.auth-container a {
+
+    color: #2563eb;
+
+    text-decoration: none;
+
+    font-weight: 600;
+
+}
+
+
+.auth-container a:hover {
+
+    text-decoration: underline;
+
+}
+
+
+
+/* Mobile Responsive */
+
+@media(max-width:500px){
+
+    .auth-container{
+
+        width: 90%;
+
+        padding:30px;
+
+    }
+
+}
+
+.role-container {
+
+    width: 420px;
+
+    background: white;
+
+    padding: 45px;
+
+    border-radius: 18px;
+
+    text-align: center;
+
+    box-shadow: 0 20px 40px rgba(0,0,0,0.15);
+
+}
+
+
+.role-container h2 {
+
+    color: #0f172a;
+
+    font-size: 30px;
+
+    margin-bottom: 10px;
+
+}
+
+
+.role-container p {
+
+    color: #64748b;
+
+    margin-bottom: 30px;
+
+}
+
+
+.role-container button {
+
+    width: 100%;
+
+    padding: 15px;
+
+    margin: 12px 0;
+
+    border: none;
+
+    border-radius: 10px;
+
+    background: #2563eb;
+
+    color: white;
+
+    font-size: 16px;
+
+    font-weight: 600;
+
+    cursor: pointer;
+
+}
+
+
+.role-container button:hover {
+
+    background: #1d4ed8;
+
+    transform: translateY(-2px);
+
+}
+
+/* Vendor Type Dropdown */
+
+.auth-container select {
+    width: 100%;
+    padding: 14px 16px;
+
+    margin-bottom: 18px;
+
+    border: 1px solid #cbd5e1;
+    border-radius: 10px;
+
+    background-color: #f8fafc;
+
+    color: #334155;
+
+    font-size: 15px;
+
+    cursor: pointer;
+
+    outline: none;
+
+    appearance: none;
+
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='20' height='20' viewBox='0 0 20 20'%3E%3Cpath fill='%2364748b' d='M5.5 7.5L10 12l4.5-4.5z'/%3E%3C/svg%3E");
+
+    background-repeat: no-repeat;
+
+    background-position: right 15px center;
+
+    background-size: 18px;
+}
+
+
+.auth-container select:hover {
+
+    border-color: #2563eb;
+
+}
+
+
+.auth-container select:focus {
+
+    border-color: #2563eb;
+
+    background-color: white;
+
+    box-shadow: 0 0 0 3px rgba(37,99,235,0.15);
+
+}

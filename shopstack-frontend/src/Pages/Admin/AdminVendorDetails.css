@@ -1,0 +1,800 @@
+/* =========================================================
+   ADMIN VENDOR DETAILS
+   ========================================================= */
+
+.admin-vendor-details-page {
+    min-height: calc(100vh - 70px);
+    background: #f5f7fb;
+    padding: 35px 45px 60px;
+    box-sizing: border-box;
+}
+
+
+/* =========================================================
+   HEADER
+   ========================================================= */
+
+.admin-vendor-details-header {
+    max-width: 1350px;
+    margin: 0 auto 25px;
+
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+
+    gap: 20px;
+}
+
+.admin-page-label {
+    display: block;
+
+    margin-bottom: 7px;
+
+    color: #98a2b3;
+
+    font-size: 10px;
+    font-weight: 700;
+
+    letter-spacing: 0.9px;
+}
+
+.admin-vendor-details-header h1 {
+    margin: 0;
+
+    color: #172033;
+
+    font-size: 30px;
+    line-height: 1.25;
+
+    font-weight: 650;
+}
+
+.admin-vendor-details-header p {
+    margin: 7px 0 0;
+
+    color: #667085;
+
+    font-size: 14px;
+}
+
+
+/* =========================================================
+   BACK BUTTON
+   ========================================================= */
+
+.admin-back-button {
+    border: 1px solid #d0d5dd;
+
+    background: #ffffff;
+    color: #344054;
+
+    padding: 10px 17px;
+
+    border-radius: 6px;
+
+    font-size: 13px;
+    font-weight: 600;
+
+    cursor: pointer;
+}
+
+.admin-back-button:hover {
+    background: #f8fafc;
+}
+
+
+/* =========================================================
+   VENDOR CARD
+   ========================================================= */
+
+.vendor-details-card {
+    max-width: 1350px;
+
+    margin: 0 auto 20px;
+
+    background: #ffffff;
+
+    border: 1px solid #e2e6ec;
+    border-radius: 8px;
+
+    box-shadow:
+        0 1px 2px rgba(16, 24, 40, 0.025);
+
+    overflow: hidden;
+}
+
+
+/* =========================================================
+   VENDOR TITLE
+   ========================================================= */
+
+.vendor-details-title {
+    padding: 23px 26px;
+
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+
+    border-bottom: 1px solid #eaecf0;
+}
+
+.vendor-details-title h2 {
+    margin: 0;
+
+    color: #172033;
+
+    font-size: 20px;
+    font-weight: 650;
+}
+
+.vendor-details-title p {
+    margin: 5px 0 0;
+
+    color: #667085;
+
+    font-size: 12px;
+}
+
+
+/* =========================================================
+   VENDOR STATUS
+   ========================================================= */
+
+.vendor-status {
+    display: inline-flex;
+    align-items: center;
+
+    padding: 6px 11px;
+
+    border-radius: 5px;
+
+    font-size: 11px;
+    font-weight: 700;
+}
+
+.vendor-status.active {
+    background: #ecfdf3;
+    color: #087f5b;
+
+    border: 1px solid #b7e4d2;
+}
+
+
+/* =========================================================
+   VENDOR INFORMATION
+   ========================================================= */
+
+.vendor-information {
+    display: grid;
+
+    grid-template-columns:
+        repeat(4, minmax(0, 1fr));
+}
+
+.vendor-info-item {
+    padding: 20px 25px;
+
+    border-right: 1px solid #eaecf0;
+}
+
+.vendor-info-item:last-child {
+    border-right: none;
+}
+
+.vendor-info-item label {
+    display: block;
+
+    margin-bottom: 7px;
+
+    color: #98a2b3;
+
+    font-size: 10px;
+    font-weight: 700;
+
+    text-transform: uppercase;
+    letter-spacing: 0.6px;
+}
+
+.vendor-info-item p {
+    margin: 0;
+
+    color: #344054;
+
+    font-size: 14px;
+    font-weight: 600;
+}
+
+
+/* =========================================================
+   STATISTICS
+   ========================================================= */
+
+.vendor-statistics {
+    max-width: 1350px;
+
+    margin: 0 auto 24px;
+
+    display: grid;
+
+    grid-template-columns:
+        repeat(4, minmax(0, 1fr));
+
+    gap: 15px;
+}
+
+.vendor-stat-card {
+    min-height: 120px;
+
+    padding: 21px 23px;
+
+    box-sizing: border-box;
+
+    background: #ffffff;
+
+    border: 1px solid #e2e6ec;
+    border-radius: 7px;
+
+    box-shadow:
+        0 1px 2px rgba(16, 24, 40, 0.025);
+}
+
+.vendor-stat-card h3 {
+    margin: 0 0 14px;
+
+    color: #667085;
+
+    font-size: 11px;
+    font-weight: 650;
+
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.vendor-stat-card p {
+    margin: 0;
+
+    color: #172033;
+
+    font-size: 28px;
+    font-weight: 650;
+}
+
+.vendor-stat-card .pending-number {
+    color: #b7791f;
+}
+
+.vendor-stat-card .approved-number {
+    color: #087f5b;
+}
+
+.vendor-stat-card .rejected-number {
+    color: #b42318;
+}
+
+
+/* =========================================================
+   PRODUCTS SECTION
+   ========================================================= */
+
+.vendor-products-section {
+    max-width: 1350px;
+
+    margin: 0 auto;
+
+    background: #ffffff;
+
+    border: 1px solid #e2e6ec;
+    border-radius: 8px;
+
+    box-shadow:
+        0 1px 2px rgba(16, 24, 40, 0.025);
+
+    overflow: hidden;
+}
+
+
+/* =========================================================
+   PRODUCTS HEADER
+   ========================================================= */
+
+.vendor-products-header {
+    padding: 23px 26px;
+
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+
+    border-bottom: 1px solid #eaecf0;
+}
+
+.vendor-products-header h2 {
+    margin: 0;
+
+    color: #172033;
+
+    font-size: 19px;
+    font-weight: 650;
+}
+
+.vendor-products-header p {
+    margin: 6px 0 0;
+
+    color: #667085;
+
+    font-size: 13px;
+}
+
+.product-count-badge {
+    padding: 7px 11px;
+
+    background: #f2f4f7;
+
+    border: 1px solid #e4e7ec;
+    border-radius: 5px;
+
+    color: #475467;
+
+    font-size: 11px;
+    font-weight: 650;
+}
+
+
+/* =========================================================
+   PRODUCT GRID
+   ========================================================= */
+
+.admin-products-grid {
+    display: grid;
+
+    grid-template-columns:
+        repeat(3, minmax(0, 1fr));
+
+    gap: 16px;
+
+    padding: 22px;
+}
+
+
+/* =========================================================
+   PRODUCT CARD
+   ========================================================= */
+
+.admin-product-card {
+    display: flex;
+    flex-direction: column;
+
+    background: #ffffff;
+
+    border: 1px solid #e2e6ec;
+
+    border-radius: 8px;
+
+    overflow: hidden;
+
+    transition:
+        border-color 0.18s ease,
+        box-shadow 0.18s ease;
+}
+
+.admin-product-card:hover {
+    border-color: #cbd2dc;
+
+    box-shadow:
+        0 4px 12px rgba(16, 24, 40, 0.055);
+}
+
+
+/* =========================================================
+   PRODUCT IMAGE
+   ========================================================= */
+
+.admin-product-image {
+    width: 100%;
+    height: 190px;
+
+    background: #f8fafc;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    overflow: hidden;
+
+    border-bottom: 1px solid #eaecf0;
+}
+
+.admin-product-image img {
+    width: 100%;
+    height: 100%;
+
+    object-fit: contain;
+
+    padding: 15px;
+
+    box-sizing: border-box;
+}
+
+.no-product-image {
+    color: #98a2b3;
+
+    font-size: 12px;
+}
+
+
+/* =========================================================
+   PRODUCT CONTENT
+   ========================================================= */
+
+.admin-product-content {
+    padding: 18px;
+}
+
+.product-top-row {
+    display: flex;
+
+    align-items: center;
+    justify-content: space-between;
+
+    gap: 10px;
+
+    margin-bottom: 10px;
+}
+
+.product-category {
+    color: #667085;
+
+    font-size: 11px;
+    font-weight: 600;
+
+    text-transform: uppercase;
+    letter-spacing: 0.4px;
+}
+
+.admin-product-content h3 {
+    margin: 0 0 7px;
+
+    color: #172033;
+
+    font-size: 17px;
+    line-height: 1.35;
+
+    font-weight: 650;
+}
+
+.product-brand {
+    margin: 0 0 11px;
+
+    color: #667085;
+
+    font-size: 12px;
+}
+
+.product-description {
+    margin: 0 0 15px;
+
+    color: #667085;
+
+    font-size: 12px;
+    line-height: 1.55;
+
+    display: -webkit-box;
+    -webkit-line-clamp: 3;
+    -webkit-box-orient: vertical;
+
+    overflow: hidden;
+}
+
+
+/* =========================================================
+   PRODUCT STATUS
+   ========================================================= */
+
+.product-status {
+    display: inline-flex;
+
+    align-items: center;
+
+    padding: 5px 8px;
+
+    border-radius: 4px;
+
+    font-size: 9px;
+    font-weight: 700;
+
+    letter-spacing: 0.4px;
+}
+
+.product-status.pending {
+    background: #fff7e6;
+    color: #946200;
+
+    border: 1px solid #f3d59b;
+}
+
+.product-status.approved {
+    background: #ecfdf3;
+    color: #087f5b;
+
+    border: 1px solid #b7e4d2;
+}
+
+.product-status.rejected {
+    background: #fef3f2;
+    color: #b42318;
+
+    border: 1px solid #fecdca;
+}
+
+
+/* =========================================================
+   PRICE
+   ========================================================= */
+
+.admin-product-price {
+    display: flex;
+
+    align-items: center;
+
+    gap: 9px;
+
+    margin-bottom: 14px;
+}
+
+.admin-product-price strong {
+    color: #087f5b;
+
+    font-size: 20px;
+    font-weight: 700;
+}
+
+.admin-product-price span {
+    padding: 4px 7px;
+
+    background: #e8f7ee;
+
+    color: #198754;
+
+    border-radius: 4px;
+
+    font-size: 9px;
+    font-weight: 700;
+}
+
+
+/* =========================================================
+   STOCK
+   ========================================================= */
+
+.product-stock {
+    display: flex;
+
+    align-items: center;
+    justify-content: space-between;
+
+    padding: 10px 0;
+
+    border-top: 1px solid #eaecf0;
+    border-bottom: 1px solid #eaecf0;
+
+    margin-bottom: 14px;
+}
+
+.product-stock span {
+    color: #667085;
+
+    font-size: 12px;
+}
+
+.product-stock strong {
+    color: #344054;
+
+    font-size: 13px;
+}
+
+
+/* =========================================================
+   ACTION BUTTONS
+   ========================================================= */
+
+.product-actions {
+    display: grid;
+
+    grid-template-columns: 1fr 1fr;
+
+    gap: 9px;
+}
+
+.product-actions button {
+    min-height: 38px;
+
+    border-radius: 5px;
+
+    font-size: 12px;
+    font-weight: 650;
+
+    cursor: pointer;
+}
+
+.approve-product-button {
+    border: 1px solid #087f5b;
+
+    background: #087f5b;
+    color: #ffffff;
+}
+
+.approve-product-button:hover {
+    background: #066c4e;
+}
+
+.reject-product-button {
+    border: 1px solid #d92d20;
+
+    background: #ffffff;
+    color: #b42318;
+}
+
+.reject-product-button:hover {
+    background: #fef3f2;
+}
+
+.product-actions button:disabled {
+    opacity: 0.6;
+
+    cursor: wait;
+}
+
+
+/* =========================================================
+   STATUS MESSAGES
+   ========================================================= */
+
+.product-approved-message {
+    padding: 10px;
+
+    background: #f1fbf6;
+
+    border: 1px solid #d1f0df;
+    border-radius: 5px;
+
+    color: #087f5b;
+
+    font-size: 11px;
+    line-height: 1.4;
+}
+
+.product-rejected-message {
+    padding: 10px;
+
+    background: #fef3f2;
+
+    border: 1px solid #fecdca;
+    border-radius: 5px;
+
+    color: #b42318;
+
+    font-size: 11px;
+    line-height: 1.4;
+}
+
+
+/* =========================================================
+   LOADING / EMPTY
+   ========================================================= */
+
+.admin-vendor-loading,
+.products-loading,
+.products-empty {
+    min-height: 300px;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    color: #667085;
+
+    font-size: 14px;
+}
+
+
+/* =========================================================
+   TABLET
+   ========================================================= */
+
+@media (max-width: 1100px) {
+
+    .admin-vendor-details-page {
+        padding: 28px 25px 45px;
+    }
+
+    .admin-products-grid {
+        grid-template-columns:
+            repeat(2, minmax(0, 1fr));
+    }
+
+    .vendor-information {
+        grid-template-columns:
+            repeat(2, minmax(0, 1fr));
+    }
+
+    .vendor-info-item:nth-child(2) {
+        border-right: none;
+    }
+
+    .vendor-info-item:nth-child(1),
+    .vendor-info-item:nth-child(2) {
+        border-bottom: 1px solid #eaecf0;
+    }
+}
+
+
+/* =========================================================
+   MOBILE
+   ========================================================= */
+
+@media (max-width: 700px) {
+
+    .admin-vendor-details-page {
+        padding: 22px 15px 35px;
+    }
+
+    .admin-vendor-details-header {
+        flex-direction: column;
+    }
+
+    .admin-back-button {
+        width: 100%;
+    }
+
+    .vendor-statistics {
+        grid-template-columns:
+            repeat(2, minmax(0, 1fr));
+    }
+
+    .admin-products-grid {
+        grid-template-columns: 1fr;
+
+        padding: 15px;
+    }
+
+    .vendor-products-header {
+        align-items: flex-start;
+        gap: 15px;
+    }
+
+    .vendor-information {
+        grid-template-columns: 1fr;
+    }
+
+    .vendor-info-item {
+        border-right: none !important;
+        border-bottom: 1px solid #eaecf0;
+    }
+
+    .vendor-info-item:last-child {
+        border-bottom: none;
+    }
+}
+
+
+/* =========================================================
+   SMALL MOBILE
+   ========================================================= */
+
+@media (max-width: 450px) {
+
+    .vendor-statistics {
+        grid-template-columns: 1fr;
+    }
+
+    .vendor-details-title {
+        align-items: flex-start;
+
+        flex-direction: column;
+
+        gap: 12px;
+    }
+
+    .vendor-products-header {
+        flex-direction: column;
+    }
+}

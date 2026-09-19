@@ -1,0 +1,73 @@
+.admin-layout {
+    min-height: 100vh;
+    display: flex;
+    background: #f5f7fb;
+}
+
+.admin-sidebar {
+    width: 240px;
+    min-height: 100vh;
+    background: #0f4c81;
+    color: white;
+    padding: 25px 18px;
+    box-sizing: border-box;
+    position: fixed;
+    left: 0;
+    top: 0;
+    display: flex;
+    flex-direction: column;
+}
+
+.admin-sidebar h2 {
+    margin: 0;
+    font-size: 24px;
+}
+
+.admin-title {
+    margin: 7px 0 30px;
+    font-size: 14px;
+    opacity: 0.8;
+}
+
+.admin-sidebar nav {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.admin-sidebar nav button {
+    border: none;
+    background: transparent;
+    color: white;
+    text-align: left;
+    padding: 12px 14px;
+    border-radius: 7px;
+    font-size: 14px;
+    cursor: pointer;
+}
+
+.admin-sidebar nav button:hover {
+    background: #09355d;
+}
+
+.logout-button {
+    margin-top: auto;
+    border: none;
+    background: #374151;
+    color: white;
+    padding: 11px;
+    border-radius: 7px;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+}
+
+.logout-button:hover {
+    background: #1f2937;
+}
+
+.admin-layout-content {
+    margin-left: 240px;
+    width: calc(100% - 240px);
+    min-height: 100vh;
+}

@@ -1,0 +1,98 @@
+.vendor-dashboard{
+    padding:50px;
+    min-height:100vh;
+    background:#f4f7fb;
+}
+
+.vendor-dashboard h1{
+    color:#0f4c81;
+    font-size:36px;
+    margin-bottom:10px;
+}
+
+.subtitle{
+    color:#666;
+    margin-bottom:50px;
+}
+
+.empty-products{
+
+    width:650px;
+
+    margin:40px auto;
+
+    background:white;
+
+    border-radius:15px;
+
+    padding:60px;
+
+    text-align:center;
+
+    box-shadow:0 8px 30px rgba(0,0,0,.08);
+
+}
+
+.plus-icon{
+
+    width:90px;
+
+    height:90px;
+
+    margin:auto;
+
+    border-radius:50%;
+
+    background:#0f4c81;
+
+    color:white;
+
+    font-size:55px;
+
+    display:flex;
+
+    justify-content:center;
+
+    align-items:center;
+
+}
+
+.empty-products h2{
+
+    margin-top:30px;
+
+    color:#0f4c81;
+
+}
+
+.empty-products p{
+
+    color:#777;
+
+    margin:20px 0;
+
+}
+
+.empty-products button{
+
+    padding:14px 30px;
+
+    background:#0f4c81;
+
+    color:white;
+
+    border:none;
+
+    border-radius:8px;
+
+    cursor:pointer;
+
+    font-size:16px;
+
+}
+
+.empty-products button:hover{
+
+    background:#09355d;
+
+}

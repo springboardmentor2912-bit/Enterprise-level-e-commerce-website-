@@ -1,0 +1,767 @@
+/* =========================================================
+   CUSTOMER ORDER TRACKING
+   CustomerOrderTracking.css
+   ========================================================= */
+
+.customer-tracking-page {
+    min-height: calc(100vh - 72px);
+    padding: 42px 7%;
+    background:
+        radial-gradient(circle at top right, rgba(99, 102, 241, 0.08), transparent 32%),
+        radial-gradient(circle at bottom left, rgba(14, 165, 233, 0.06), transparent 30%),
+        #f6f8fc;
+    color: #172033;
+    font-family: Inter, "Segoe UI", Arial, sans-serif;
+}
+
+
+/* =========================================================
+   HEADER
+   ========================================================= */
+
+.customer-tracking-header {
+    max-width: 1250px;
+    margin: 0 auto 28px;
+    display: flex;
+    align-items: flex-end;
+    justify-content: space-between;
+    gap: 25px;
+}
+
+.tracking-section-label {
+    display: inline-block;
+    margin-bottom: 10px;
+    font-size: 11px;
+    font-weight: 800;
+    letter-spacing: 1.8px;
+    color: #667085;
+}
+
+.customer-tracking-header h1 {
+    margin: 0;
+    font-size: 36px;
+    line-height: 1.15;
+    font-weight: 800;
+    letter-spacing: -0.8px;
+    color: #111827;
+}
+
+.customer-tracking-header p {
+    margin: 9px 0 0;
+    color: #667085;
+    font-size: 15px;
+}
+
+.tracking-header-actions {
+    display: flex;
+    gap: 12px;
+    align-items: center;
+}
+
+
+/* =========================================================
+   BUTTONS
+   ========================================================= */
+
+.tracking-refresh-button,
+.tracking-back-button,
+.tracking-orders-button {
+    border: none;
+    border-radius: 10px;
+    padding: 12px 19px;
+    font-size: 13px;
+    font-weight: 700;
+    cursor: pointer;
+    transition:
+        transform 0.2s ease,
+        box-shadow 0.2s ease,
+        background 0.2s ease;
+}
+
+.tracking-refresh-button {
+    background: #111827;
+    color: white;
+    box-shadow: 0 5px 14px rgba(17, 24, 39, 0.16);
+}
+
+.tracking-refresh-button:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 9px 20px rgba(17, 24, 39, 0.2);
+}
+
+.tracking-refresh-button:disabled {
+    opacity: 0.6;
+    cursor: wait;
+    transform: none;
+}
+
+.tracking-back-button {
+    background: white;
+    color: #344054;
+    border: 1px solid #d9dee8;
+}
+
+.tracking-back-button:hover {
+    background: #f8fafc;
+    border-color: #b9c1cf;
+    transform: translateY(-1px);
+}
+
+.tracking-orders-button {
+    background: #4f46e5;
+    color: white;
+    padding: 13px 24px;
+    box-shadow: 0 7px 18px rgba(79, 70, 229, 0.2);
+}
+
+.tracking-orders-button:hover {
+    background: #4338ca;
+    transform: translateY(-2px);
+}
+
+
+/* =========================================================
+   CURRENT STATUS BANNER
+   ========================================================= */
+
+.tracking-status-banner {
+    max-width: 1250px;
+    margin: 0 auto 22px;
+    padding: 22px 26px;
+    border-radius: 16px;
+    display: flex;
+    align-items: center;
+    gap: 17px;
+    background: linear-gradient(
+        135deg,
+        #eef2ff,
+        #f5f3ff
+    );
+    border: 1px solid #dfe3ff;
+    box-shadow: 0 8px 24px rgba(31, 41, 55, 0.05);
+}
+
+.tracking-status-icon {
+    width: 48px;
+    height: 48px;
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    background: #4f46e5;
+    color: white;
+    font-size: 21px;
+    font-weight: 800;
+    box-shadow: 0 7px 18px rgba(79, 70, 229, 0.25);
+}
+
+.tracking-status-banner span {
+    display: block;
+    margin-bottom: 5px;
+    font-size: 10px;
+    font-weight: 800;
+    letter-spacing: 1.5px;
+    color: #6366f1;
+}
+
+.tracking-status-banner strong {
+    display: block;
+    font-size: 20px;
+    color: #1e1b4b;
+}
+
+
+/* =========================================================
+   SUMMARY CARD
+   ========================================================= */
+
+.tracking-summary-card {
+    max-width: 1250px;
+    margin: 0 auto 22px;
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    background: white;
+    border: 1px solid #e5e7eb;
+    border-radius: 16px;
+    overflow: hidden;
+    box-shadow: 0 7px 25px rgba(15, 23, 42, 0.05);
+}
+
+.tracking-summary-item {
+    min-width: 0;
+    padding: 22px 20px;
+    border-right: 1px solid #edf0f4;
+}
+
+.tracking-summary-item:last-child {
+    border-right: none;
+}
+
+.tracking-summary-item span {
+    display: block;
+    margin-bottom: 8px;
+    color: #8a94a6;
+    font-size: 10px;
+    font-weight: 800;
+    letter-spacing: 1.2px;
+    text-transform: uppercase;
+}
+
+.tracking-summary-item strong {
+    display: block;
+    color: #1f2937;
+    font-size: 15px;
+    font-weight: 750;
+    word-break: break-word;
+}
+
+.tracking-number {
+    color: #4f46e5 !important;
+}
+
+
+/* =========================================================
+   COMMON CARDS
+   ========================================================= */
+
+.tracking-card {
+    max-width: 1250px;
+    margin: 0 auto 22px;
+    padding: 28px;
+    background: white;
+    border: 1px solid #e5e7eb;
+    border-radius: 17px;
+    box-shadow: 0 7px 25px rgba(15, 23, 42, 0.045);
+}
+
+.tracking-card h2 {
+    margin: 0;
+    color: #111827;
+    font-size: 21px;
+    font-weight: 800;
+}
+
+.tracking-description {
+    margin: 7px 0 0;
+    color: #7b8494;
+    font-size: 14px;
+}
+
+
+/* =========================================================
+   TRACKING CARD HEADER
+   ========================================================= */
+
+.tracking-card-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 20px;
+    padding-bottom: 23px;
+    border-bottom: 1px solid #edf0f4;
+}
+
+.delivered-badge {
+    display: inline-flex;
+    align-items: center;
+    padding: 8px 13px;
+    border-radius: 30px;
+    background: #ecfdf3;
+    color: #087443;
+    border: 1px solid #c8f0d9;
+    font-size: 12px;
+    font-weight: 800;
+}
+
+
+/* =========================================================
+   TRACKING TIMELINE
+   ========================================================= */
+
+.tracking-timeline {
+    position: relative;
+    margin-top: 28px;
+    padding-left: 13px;
+}
+
+.tracking-timeline::before {
+    content: "";
+    position: absolute;
+    left: 31px;
+    top: 22px;
+    bottom: 22px;
+    width: 2px;
+    background: #e5e7eb;
+}
+
+.tracking-step {
+    position: relative;
+    display: flex;
+    align-items: flex-start;
+    gap: 20px;
+    min-height: 88px;
+}
+
+.tracking-step-marker {
+    position: relative;
+    z-index: 2;
+    width: 38px;
+    height: 38px;
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    background: white;
+    border: 2px solid #d6dae2;
+    color: #98a2b3;
+    font-size: 13px;
+    font-weight: 800;
+    transition: all 0.25s ease;
+}
+
+.tracking-step.completed .tracking-step-marker {
+    background: #4f46e5;
+    border-color: #4f46e5;
+    color: white;
+    box-shadow: 0 5px 14px rgba(79, 70, 229, 0.22);
+}
+
+.tracking-step.active .tracking-step-marker {
+    box-shadow:
+        0 0 0 6px rgba(79, 70, 229, 0.1),
+        0 6px 16px rgba(79, 70, 229, 0.2);
+}
+
+.tracking-step-content {
+    flex: 1;
+    padding: 1px 0 25px;
+}
+
+.tracking-step-title-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.tracking-step-content h3 {
+    margin: 0;
+    font-size: 15px;
+    font-weight: 750;
+    color: #667085;
+}
+
+.tracking-step.completed .tracking-step-content h3 {
+    color: #1f2937;
+}
+
+.tracking-step-content p {
+    margin: 6px 0 0;
+    max-width: 650px;
+    color: #98a2b3;
+    font-size: 13px;
+    line-height: 1.6;
+}
+
+.tracking-step.completed .tracking-step-content p {
+    color: #667085;
+}
+
+.tracking-current-label {
+    padding: 4px 9px;
+    border-radius: 20px;
+    background: #eef2ff;
+    color: #4f46e5;
+    font-size: 10px;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 0.6px;
+}
+
+
+/* =========================================================
+   DELIVERY / ORDER INFORMATION
+   ========================================================= */
+
+.delivery-information {
+    margin-top: 22px;
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 14px;
+}
+
+.delivery-information > div {
+    min-width: 0;
+    padding: 18px;
+    border-radius: 12px;
+    background: #f8fafc;
+    border: 1px solid #edf0f4;
+    transition:
+        transform 0.2s ease,
+        border-color 0.2s ease,
+        box-shadow 0.2s ease;
+}
+
+.delivery-information > div:hover {
+    transform: translateY(-2px);
+    border-color: #d9ddf5;
+    box-shadow: 0 6px 18px rgba(15, 23, 42, 0.05);
+}
+
+.delivery-information span {
+    display: block;
+    margin-bottom: 8px;
+    color: #8a94a6;
+    font-size: 10px;
+    font-weight: 800;
+    letter-spacing: 1.1px;
+}
+
+.delivery-information strong {
+    display: block;
+    color: #253047;
+    font-size: 14px;
+    line-height: 1.5;
+    overflow-wrap: anywhere;
+}
+
+.delivery-information p {
+    margin: 6px 0 0;
+    color: #7b8494;
+    font-size: 12px;
+    line-height: 1.5;
+}
+
+
+/* =========================================================
+   STATUS COLORS
+   ========================================================= */
+
+.tracking-status {
+    display: inline-block !important;
+    width: fit-content;
+    padding: 6px 11px;
+    border-radius: 20px;
+    background: #f2f4f7;
+    color: #475467 !important;
+    font-size: 11px !important;
+    font-weight: 800 !important;
+}
+
+.tracking-status.created {
+    background: #eef2ff;
+    color: #4338ca !important;
+}
+
+.tracking-status.shipped,
+.tracking-status.in_transit {
+    background: #eff8ff;
+    color: #026aa2 !important;
+}
+
+.tracking-status.out_for_delivery {
+    background: #fff7ed;
+    color: #c2410c !important;
+}
+
+.tracking-status.delivered {
+    background: #ecfdf3;
+    color: #087443 !important;
+}
+
+
+/* =========================================================
+   ORDER ITEMS
+   ========================================================= */
+
+.tracking-card:last-of-type .delivery-information > div {
+    background: #fbfcfe;
+}
+
+.tracking-card .delivery-information strong {
+    font-weight: 750;
+}
+
+
+/* =========================================================
+   BOTTOM ACTIONS
+   ========================================================= */
+
+.tracking-bottom-actions {
+    max-width: 1250px;
+    margin: 5px auto 20px;
+    display: flex;
+    justify-content: center;
+    padding: 8px 0 25px;
+}
+
+
+/* =========================================================
+   LOADING
+   ========================================================= */
+
+.customer-tracking-loading {
+    min-height: calc(100vh - 72px);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 40px 20px;
+    background: #f6f8fc;
+}
+
+.tracking-loading-card {
+    width: min(430px, 100%);
+    padding: 40px 30px;
+    text-align: center;
+    background: white;
+    border: 1px solid #e5e7eb;
+    border-radius: 18px;
+    box-shadow: 0 12px 35px rgba(15, 23, 42, 0.08);
+}
+
+.tracking-loading-spinner {
+    width: 42px;
+    height: 42px;
+    margin: 0 auto 20px;
+    border: 4px solid #e8eaf0;
+    border-top-color: #4f46e5;
+    border-radius: 50%;
+    animation: trackingSpin 0.8s linear infinite;
+}
+
+.tracking-loading-card h3 {
+    margin: 0;
+    color: #1f2937;
+    font-size: 18px;
+}
+
+.tracking-loading-card p {
+    margin: 8px 0 0;
+    color: #7b8494;
+    font-size: 13px;
+    line-height: 1.6;
+}
+
+@keyframes trackingSpin {
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+
+/* =========================================================
+   EMPTY STATE
+   ========================================================= */
+
+.tracking-empty-card {
+    width: min(600px, 100%);
+    margin: 90px auto;
+    padding: 50px 35px;
+    text-align: center;
+    background: white;
+    border: 1px solid #e5e7eb;
+    border-radius: 20px;
+    box-shadow: 0 12px 35px rgba(15, 23, 42, 0.07);
+}
+
+.tracking-empty-icon {
+    width: 68px;
+    height: 68px;
+    margin: 0 auto 20px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 18px;
+    background: #eef2ff;
+    color: #4f46e5;
+    font-size: 26px;
+}
+
+.tracking-empty-card h2 {
+    margin: 0;
+    color: #111827;
+    font-size: 24px;
+}
+
+.tracking-empty-card p {
+    margin: 12px auto 25px;
+    max-width: 470px;
+    color: #667085;
+    font-size: 14px;
+    line-height: 1.7;
+}
+
+
+/* =========================================================
+   RESPONSIVE — TABLET
+   ========================================================= */
+
+@media (max-width: 1050px) {
+
+    .customer-tracking-page {
+        padding: 35px 4%;
+    }
+
+    .tracking-summary-card {
+        grid-template-columns: repeat(3, 1fr);
+    }
+
+    .tracking-summary-item:nth-child(3) {
+        border-right: none;
+    }
+
+    .tracking-summary-item:nth-child(-n + 3) {
+        border-bottom: 1px solid #edf0f4;
+    }
+
+    .delivery-information {
+        grid-template-columns: repeat(2, 1fr);
+    }
+}
+
+
+/* =========================================================
+   RESPONSIVE — MOBILE
+   ========================================================= */
+
+@media (max-width: 700px) {
+
+    .customer-tracking-page {
+        padding: 25px 16px;
+    }
+
+    .customer-tracking-header {
+        align-items: flex-start;
+        flex-direction: column;
+        margin-bottom: 20px;
+    }
+
+    .customer-tracking-header h1 {
+        font-size: 29px;
+    }
+
+    .tracking-header-actions {
+        width: 100%;
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+    }
+
+    .tracking-refresh-button,
+    .tracking-back-button {
+        width: 100%;
+        padding: 11px 10px;
+    }
+
+    .tracking-status-banner {
+        padding: 18px;
+    }
+
+    .tracking-status-banner strong {
+        font-size: 17px;
+    }
+
+    .tracking-summary-card {
+        grid-template-columns: 1fr 1fr;
+    }
+
+    .tracking-summary-item {
+        border-right: none;
+        border-bottom: 1px solid #edf0f4;
+    }
+
+    .tracking-summary-item:nth-last-child(-n + 2) {
+        border-bottom: none;
+    }
+
+    .tracking-card {
+        padding: 20px 17px;
+        border-radius: 14px;
+    }
+
+    .tracking-card-header {
+        align-items: flex-start;
+        flex-direction: column;
+    }
+
+    .delivery-information {
+        grid-template-columns: 1fr;
+    }
+
+    .tracking-timeline {
+        padding-left: 0;
+    }
+
+    .tracking-timeline::before {
+        left: 19px;
+    }
+
+    .tracking-step {
+        gap: 15px;
+    }
+
+    .tracking-step-marker {
+        width: 38px;
+        height: 38px;
+    }
+
+    .tracking-step-content h3 {
+        font-size: 14px;
+    }
+
+    .tracking-step-content p {
+        font-size: 12px;
+    }
+
+    .tracking-bottom-actions {
+        padding-bottom: 10px;
+    }
+
+    .tracking-orders-button {
+        width: 100%;
+    }
+
+}
+
+
+/* =========================================================
+   SMALL MOBILE
+   ========================================================= */
+
+@media (max-width: 430px) {
+
+    .tracking-summary-card {
+        grid-template-columns: 1fr;
+    }
+
+    .tracking-summary-item {
+        border-bottom: 1px solid #edf0f4 !important;
+    }
+
+    .tracking-summary-item:last-child {
+        border-bottom: none !important;
+    }
+
+    .tracking-header-actions {
+        grid-template-columns: 1fr;
+    }
+
+    .tracking-status-banner {
+        align-items: flex-start;
+    }
+
+    .tracking-status-icon {
+        width: 42px;
+        height: 42px;
+        font-size: 17px;
+    }
+
+    .customer-tracking-header h1 {
+        font-size: 26px;
+    }
+
+    .tracking-empty-card {
+        margin: 50px auto;
+        padding: 35px 20px;
+    }
+}

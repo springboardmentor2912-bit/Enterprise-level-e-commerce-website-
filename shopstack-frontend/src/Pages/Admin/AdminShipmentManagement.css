@@ -1,0 +1,715 @@
+
+/* =========================================================
+   ADMIN SHIPMENT MANAGEMENT
+   ========================================================= */
+
+.admin-shipment-page {
+    min-height: 100vh;
+    padding: 32px;
+    background: #f5f7fb;
+    box-sizing: border-box;
+}
+
+
+/* =========================================================
+   HEADER
+   ========================================================= */
+
+.admin-shipment-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 30px;
+}
+
+.admin-shipment-header h1 {
+    margin: 0;
+    color: #172033;
+    font-size: 30px;
+    font-weight: 700;
+}
+
+.admin-shipment-header p {
+    margin: 8px 0 0;
+    color: #687386;
+    font-size: 14px;
+}
+
+.admin-shipment-count {
+    padding: 11px 18px;
+    background: #0f4c81;
+    color: white;
+    border-radius: 8px;
+    font-size: 14px;
+    font-weight: 600;
+}
+
+
+/* =========================================================
+   COMMON SECTION
+   ========================================================= */
+
+.shipment-section {
+    margin-bottom: 32px;
+}
+
+.shipment-section-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 16px;
+}
+
+.shipment-section-header h2 {
+    margin: 0;
+    color: #172033;
+    font-size: 21px;
+    font-weight: 700;
+}
+
+.shipment-section-header p {
+    margin: 5px 0 0;
+    color: #7a8495;
+    font-size: 13px;
+}
+
+.shipment-ready-count {
+    padding: 7px 13px;
+    background: #e8f1fb;
+    color: #0f4c81;
+    border-radius: 20px;
+    font-size: 12px;
+    font-weight: 700;
+}
+
+
+/* =========================================================
+   PACKED ORDERS CARD
+   ========================================================= */
+
+.packed-orders-card {
+    background: white;
+    border: 1px solid #e1e7ef;
+    border-radius: 12px;
+    overflow: hidden;
+    box-shadow: 0 4px 14px rgba(15, 76, 129, 0.06);
+}
+
+
+/* =========================================================
+   PACKED ORDER ROW
+   ========================================================= */
+
+.packed-order-row {
+    display: grid;
+
+    grid-template-columns:
+        0.8fr
+        1fr
+        1fr
+        1.2fr
+        0.9fr
+        2fr;
+
+    align-items: center;
+
+    gap: 18px;
+
+    padding: 20px 22px;
+
+    border-bottom: 1px solid #edf0f4;
+}
+
+.packed-order-row:last-child {
+    border-bottom: none;
+}
+
+.packed-order-row:hover {
+    background: #f8fbff;
+}
+
+
+/* =========================================================
+   LABELS
+   ========================================================= */
+
+.shipment-label {
+    display: block;
+    margin-bottom: 5px;
+
+    color: #8a94a6;
+
+    font-size: 10px;
+
+    font-weight: 700;
+
+    letter-spacing: 0.6px;
+}
+
+.packed-order-row strong {
+    display: block;
+
+    color: #172033;
+
+    font-size: 14px;
+}
+
+
+/* =========================================================
+   PACKED STATUS
+   ========================================================= */
+
+.packed-status {
+    display: inline-block;
+
+    padding: 6px 11px;
+
+    background: #dff6e9;
+
+    color: #08763f;
+
+    border-radius: 20px;
+
+    font-size: 11px;
+
+    font-weight: 700;
+}
+
+
+/* =========================================================
+   COURIER CREATE AREA
+   ========================================================= */
+
+.courier-create-area {
+    display: flex;
+
+    align-items: center;
+
+    gap: 8px;
+
+    width: 100%;
+}
+
+.courier-create-area input {
+    width: 150px;
+
+    min-width: 0;
+
+    padding: 9px 10px;
+
+    border: 1px solid #d5dce6;
+
+    border-radius: 6px;
+
+    outline: none;
+
+    color: #172033;
+
+    background: white;
+
+    font-size: 12px;
+
+    box-sizing: border-box;
+}
+
+.courier-create-area input:focus {
+    border-color: #0f4c81;
+
+    box-shadow: 0 0 0 2px rgba(15, 76, 129, 0.08);
+}
+
+.courier-create-area input::placeholder {
+    color: #9aa3b1;
+}
+
+
+/* =========================================================
+   CREATE SHIPMENT BUTTON
+   ========================================================= */
+
+.create-shipment-button {
+    border: none;
+
+    background: #0f4c81;
+
+    color: white;
+
+    padding: 9px 12px;
+
+    border-radius: 6px;
+
+    font-size: 12px;
+
+    font-weight: 600;
+
+    cursor: pointer;
+
+    white-space: nowrap;
+
+    transition: background 0.2s ease;
+}
+
+.create-shipment-button:hover {
+    background: #09355d;
+}
+
+.create-shipment-button:disabled {
+    opacity: 0.6;
+
+    cursor: wait;
+}
+
+
+/* =========================================================
+   CREATED LABEL
+   ========================================================= */
+
+.shipment-created-label {
+    display: inline-block;
+
+    padding: 8px 12px;
+
+    border-radius: 6px;
+
+    background: #eef2f7;
+
+    color: #596579;
+
+    font-size: 12px;
+
+    font-weight: 600;
+}
+
+
+/* =========================================================
+   SHIPMENT TABLE CARD
+   ========================================================= */
+
+.admin-shipment-card {
+    background: white;
+
+    border: 1px solid #e1e7ef;
+
+    border-radius: 12px;
+
+    overflow: hidden;
+
+    box-shadow: 0 4px 14px rgba(15, 76, 129, 0.06);
+}
+
+
+/* =========================================================
+   TABLE HEADER
+   ========================================================= */
+
+.admin-shipment-table-header {
+    display: grid;
+
+    grid-template-columns:
+        1fr
+        0.9fr
+        1.2fr
+        1.5fr
+        1.2fr
+        2fr;
+
+    align-items: center;
+
+    gap: 15px;
+
+    padding: 16px 22px;
+
+    background: #f8fafc;
+
+    border-bottom: 1px solid #e3e8ef;
+
+    color: #687386;
+
+    font-size: 11px;
+
+    font-weight: 700;
+
+    text-transform: uppercase;
+
+    letter-spacing: 0.5px;
+}
+
+
+/* =========================================================
+   SHIPMENT ROW
+   ========================================================= */
+
+.admin-shipment-row {
+    display: grid;
+
+    grid-template-columns:
+        1fr
+        0.9fr
+        1.2fr
+        1.5fr
+        1.2fr
+        2fr;
+
+    align-items: center;
+
+    gap: 15px;
+
+    padding: 18px 22px;
+
+    min-height: 72px;
+
+    border-bottom: 1px solid #edf0f4;
+
+    box-sizing: border-box;
+}
+
+.admin-shipment-row:last-child {
+    border-bottom: none;
+}
+
+.admin-shipment-row:hover {
+    background: #f8fbff;
+}
+
+
+/* =========================================================
+   SHIPMENT MAIN
+   ========================================================= */
+
+.shipment-main {
+    display: flex;
+
+    flex-direction: column;
+
+    gap: 4px;
+}
+
+.shipment-main strong {
+    color: #172033;
+
+    font-size: 14px;
+}
+
+.shipment-main small {
+    color: #8a94a6;
+
+    font-size: 10px;
+}
+
+
+/* =========================================================
+   ORDER / COURIER
+   ========================================================= */
+
+.admin-shipment-row > div:not(.shipment-main):not(.shipment-actions),
+.admin-shipment-row > span {
+    color: #394456;
+
+    font-size: 13px;
+}
+
+.admin-shipment-row strong {
+    color: #172033;
+}
+
+
+/* =========================================================
+   TRACKING NUMBER
+   ========================================================= */
+
+.tracking-number {
+    color: #0f4c81 !important;
+
+    font-family: monospace;
+
+    font-size: 12px !important;
+
+    font-weight: 600;
+
+    word-break: break-word;
+}
+
+
+/* =========================================================
+   SHIPMENT STATUS
+   ========================================================= */
+
+.shipment-status {
+    display: inline-flex;
+
+    width: fit-content;
+
+    padding: 6px 10px;
+
+    border-radius: 20px;
+
+    background: #eef2f7;
+
+    color: #596579 !important;
+
+    font-size: 10px !important;
+
+    font-weight: 700;
+
+    letter-spacing: 0.3px;
+}
+
+.shipment-status.created {
+    background: #e8f1fb;
+
+    color: #0f4c81 !important;
+}
+
+.shipment-status.picked_up {
+    background: #fff4d8;
+
+    color: #9a6800 !important;
+}
+
+.shipment-status.in_transit {
+    background: #e9edff;
+
+    color: #4756a8 !important;
+}
+
+.shipment-status.out_for_delivery {
+    background: #e7f7ef;
+
+    color: #16834d !important;
+}
+
+.shipment-status.delivered {
+    background: #dff6e9;
+
+    color: #08763f !important;
+}
+
+
+/* =========================================================
+   ACTIONS
+   ========================================================= */
+
+.shipment-actions {
+    display: flex;
+
+    align-items: center;
+
+    gap: 7px;
+
+    flex-wrap: wrap;
+}
+
+
+/* =========================================================
+   VIEW BUTTON
+   ========================================================= */
+
+.shipment-view-button {
+    border: 1px solid #d5dce6;
+
+    background: white;
+
+    color: #0f4c81;
+
+    padding: 8px 12px;
+
+    border-radius: 6px;
+
+    font-size: 11px;
+
+    font-weight: 600;
+
+    cursor: pointer;
+
+    transition: all 0.2s ease;
+}
+
+.shipment-view-button:hover {
+    background: #eef5fb;
+
+    border-color: #0f4c81;
+}
+
+
+/* =========================================================
+   STATUS ACTION BUTTON
+   ========================================================= */
+
+.shipment-action-button {
+    border: none;
+
+    background: #0f4c81;
+
+    color: white;
+
+    padding: 8px 12px;
+
+    border-radius: 6px;
+
+    font-size: 11px;
+
+    font-weight: 600;
+
+    cursor: pointer;
+
+    white-space: nowrap;
+
+    transition: all 0.2s ease;
+}
+
+.shipment-action-button:hover {
+    background: #09355d;
+
+    transform: translateY(-1px);
+}
+
+.shipment-action-button.delivered {
+    background: #16834d;
+}
+
+.shipment-action-button.delivered:hover {
+    background: #0f693d;
+}
+
+
+/* =========================================================
+   EMPTY / LOADING
+   ========================================================= */
+
+.admin-shipment-empty {
+    min-height: 170px;
+
+    display: flex;
+
+    align-items: center;
+
+    justify-content: center;
+
+    padding: 20px;
+
+    box-sizing: border-box;
+
+    color: #7a8495;
+
+    font-size: 14px;
+
+    text-align: center;
+}
+
+
+/* =========================================================
+   RESPONSIVE - TABLET
+   ========================================================= */
+
+@media (max-width: 1200px) {
+
+    .admin-shipment-page {
+        padding: 25px;
+    }
+
+    .packed-order-row {
+        grid-template-columns:
+            1fr
+            1fr
+            1fr;
+
+        gap: 18px;
+    }
+
+    .courier-create-area {
+        width: auto;
+    }
+
+    .admin-shipment-table-header,
+    .admin-shipment-row {
+        grid-template-columns:
+            0.8fr
+            0.7fr
+            1fr
+            1.2fr
+            1fr
+            1.8fr;
+    }
+}
+
+
+/* =========================================================
+   RESPONSIVE - MOBILE
+   ========================================================= */
+
+@media (max-width: 800px) {
+
+    .admin-shipment-page {
+        padding: 18px;
+    }
+
+    .admin-shipment-header {
+        flex-direction: column;
+
+        align-items: flex-start;
+
+        gap: 15px;
+    }
+
+    .admin-shipment-header h1 {
+        font-size: 25px;
+    }
+
+    .shipment-section-header {
+        align-items: flex-start;
+
+        gap: 12px;
+    }
+
+    .packed-order-row {
+        display: flex;
+
+        flex-direction: column;
+
+        align-items: flex-start;
+
+        gap: 14px;
+    }
+
+    .courier-create-area {
+        width: 100%;
+
+        flex-direction: column;
+
+        align-items: stretch;
+    }
+
+    .courier-create-area input {
+        width: 100%;
+    }
+
+    .create-shipment-button {
+        width: 100%;
+    }
+
+    .admin-shipment-table-header {
+        display: none;
+    }
+
+    .admin-shipment-row {
+        display: flex;
+
+        flex-direction: column;
+
+        align-items: flex-start;
+
+        gap: 12px;
+
+        padding: 20px;
+    }
+
+    .shipment-actions {
+        width: 100%;
+    }
+
+    .shipment-view-button,
+    .shipment-action-button {
+        flex: 1;
+    }
+}
+
