@@ -1,0 +1,65 @@
+services:
+
+  postgres:
+    image: postgres:16
+    container_name: shopstack-postgres
+
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB}
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+
+    ports:
+      - "5432:5432"
+
+    volumes:
+      - shopstack_postgres_data:/var/lib/postgresql/data
+
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER} -d ${POSTGRES_DB}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+
+  backend:
+    image: shopstack-backend:latest
+    container_name: shopstack-backend
+
+    ports:
+      - "8080:8080"
+
+    environment:
+      DB_URL: jdbc:postgresql://postgres:5432/${POSTGRES_DB}
+      DB_USERNAME: ${POSTGRES_USER}
+      DB_PASSWORD: ${POSTGRES_PASSWORD}
+
+      JWT_SECRET: ${JWT_SECRET}
+
+      RAZORPAY_KEY_ID: ${RAZORPAY_KEY_ID}
+      RAZORPAY_KEY_SECRET: ${RAZORPAY_KEY_SECRET}
+
+      COMMISSION_RATE: ${COMMISSION_RATE:-10}
+
+    depends_on:
+      postgres:
+        condition: service_healthy
+
+
+  frontend:
+    build:
+      context: ./frontend
+      args:
+        VITE_API_BASE_URL: ${VITE_API_BASE_URL}
+
+    container_name: shopstack-frontend
+
+    ports:
+      - "5173:80"
+
+    depends_on:
+      - backend
+
+
+volumes:
+  shopstack_postgres_data:
