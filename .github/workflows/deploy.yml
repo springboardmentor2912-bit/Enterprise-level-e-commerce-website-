@@ -1,9 +1,10 @@
 name: Deploy ShopStack to AWS EC2
 
 on:
-  push:
-    branches: [ "main" ]
-  workflow_dispatch:
+  # Disabled automatic trigger on push until AWS EC2 secrets are configured
+  # push:
+  #   branches: [ "main" ]
+  workflow_dispatch: # Allows manual trigger from GitHub Actions tab when needed
 
 concurrency:
   group: aws-ec2-deployment
