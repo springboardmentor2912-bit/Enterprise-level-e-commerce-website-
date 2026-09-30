@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Order Delivered - ShopStack</title>
+    <style>
+        body { margin: 0; padding: 0; background-color: #f4f5f9; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; color: #1e293b; }
+        .container { max-width: 600px; margin: 24px auto; background-color: #ffffff; border-radius: 12px; overflow: hidden; box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05); }
+        .header { background: linear-gradient(135deg, #059669 0%, #0d9488 100%); padding: 32px 24px; text-align: center; color: #ffffff; }
+        .header .icon { font-size: 40px; line-height: 1; margin-bottom: 8px; }
+        .header h1 { margin: 0; font-size: 22px; font-weight: 700; letter-spacing: -0.5px; }
+        .header p { margin: 8px 0 0 0; font-size: 14px; opacity: 0.95; }
+        .content { padding: 32px 24px; }
+        .greeting { font-size: 18px; font-weight: 600; margin-bottom: 12px; color: #0f172a; }
+        .badge { display: inline-block; padding: 4px 12px; border-radius: 9999px; font-size: 12px; font-weight: 600; background-color: #ecfdf5; color: #059669; }
+        .card { background-color: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px; padding: 18px; margin: 20px 0; }
+        .details-grid { width: 100%; border-collapse: collapse; }
+        .details-grid td { padding: 8px 0; font-size: 14px; vertical-align: top; }
+        .details-grid td.label { color: #64748b; width: 45%; }
+        .details-grid td.value { color: #0f172a; font-weight: 600; text-align: right; }
+        .review-cta { text-align: center; margin: 24px 0 8px 0; padding: 20px; background-color: #f0fdf4; border-radius: 8px; border: 1px dashed #86efac; }
+        .review-cta p { margin: 0 0 12px 0; font-size: 14px; color: #166534; font-weight: 500; }
+        .footer { background-color: #f8fafc; padding: 24px; text-align: center; font-size: 12px; color: #94a3b8; border-top: 1px solid #e2e8f0; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Header -->
+        <div class="header">
+            <div class="icon">🎉</div>
+            <h1>Your Package Has Arrived!</h1>
+            <p>Order delivered successfully</p>
+        </div>
+
+        <!-- Content -->
+        <div class="content">
+            <div class="greeting">
+                Hello, <span th:text="${recipientName != null ? recipientName : 'Customer'}">Customer</span> ✨
+            </div>
+            <p style="font-size: 14px; line-height: 1.6; color: #475569; margin: 0 0 16px 0;">
+                Your package for order <strong th:text="${orderId}">ORD-123456</strong> has been delivered. We hope you love your purchase!
+            </p>
+
+            <!-- Delivery Details -->
+            <div class="card">
+                <table class="details-grid">
+                    <tr>
+                        <td class="label">Order ID</td>
+                        <td class="value" th:text="${orderId}">ORD-123456</td>
+                    </tr>
+                    <tr>
+                        <td class="label">Delivery Status</td>
+                        <td class="value">
+                            <span class="badge">DELIVERED</span>
+                        </td>
+                    </tr>
+                    <tr th:if="${deliveredAt != null and !deliveredAt.isEmpty()}">
+                        <td class="label">Delivered On</td>
+                        <td class="value" th:text="${deliveredAt}">Jan 03, 2026</td>
+                    </tr>
+                </table>
+            </div>
+
+            <!-- Review / Feedback Callout -->
+            <div class="review-cta">
+                <p>How was your shopping experience?</p>
+                <span style="font-size: 13px; color: #15803d;">Log in to your ShopStack account to rate your ordered products and help other shoppers!</span>
+            </div>
+
+            <p style="font-size: 13px; color: #64748b; line-height: 1.5; margin: 16px 0 0 0;">
+                If you have any issues with your items, you can easily initiate a return or replacement from your Order History page within the return window.
+            </p>
+        </div>
+
+        <!-- Footer -->
+        <div class="footer">
+            <p style="margin: 0 0 6px 0;">Thank you for shopping with ShopStack!</p>
+            <p style="margin: 0;">&copy; 2026 ShopStack Multi-Vendor Marketplace. All rights reserved.</p>
+        </div>
+    </div>
+</body>
+</html>

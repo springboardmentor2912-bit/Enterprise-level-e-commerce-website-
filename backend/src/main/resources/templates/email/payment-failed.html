@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Payment Incomplete / Failed - ShopStack</title>
+    <style>
+        body { margin: 0; padding: 0; background-color: #f4f5f9; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; color: #1e293b; }
+        .container { max-width: 600px; margin: 24px auto; background-color: #ffffff; border-radius: 12px; overflow: hidden; box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05); }
+        .header { background: linear-gradient(135deg, #dc2626 0%, #ef4444 100%); padding: 32px 24px; text-align: center; color: #ffffff; }
+        .header .icon { font-size: 40px; line-height: 1; margin-bottom: 8px; }
+        .header h1 { margin: 0; font-size: 22px; font-weight: 700; letter-spacing: -0.5px; }
+        .header p { margin: 8px 0 0 0; font-size: 14px; opacity: 0.95; }
+        .content { padding: 32px 24px; }
+        .greeting { font-size: 18px; font-weight: 600; margin-bottom: 12px; color: #0f172a; }
+        .badge-failed { display: inline-block; padding: 4px 12px; border-radius: 9999px; font-size: 12px; font-weight: 600; background-color: #fef2f2; color: #dc2626; }
+        .card { background-color: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px; padding: 18px; margin: 20px 0; }
+        .details-grid { width: 100%; border-collapse: collapse; }
+        .details-grid td { padding: 8px 0; font-size: 14px; vertical-align: top; }
+        .details-grid td.label { color: #64748b; width: 45%; }
+        .details-grid td.value { color: #0f172a; font-weight: 600; text-align: right; }
+        .alert-box { background-color: #fef2f2; border: 1px solid #fecaca; border-radius: 8px; padding: 14px; margin: 16px 0; font-size: 13px; color: #991b1b; line-height: 1.5; }
+        .footer { background-color: #f8fafc; padding: 24px; text-align: center; font-size: 12px; color: #94a3b8; border-top: 1px solid #e2e8f0; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Header -->
+        <div class="header">
+            <div class="icon">⚠️</div>
+            <h1>Payment Unsuccessful</h1>
+            <p>We could not complete your transaction</p>
+        </div>
+
+        <!-- Content -->
+        <div class="content">
+            <div class="greeting">
+                Hello, <span th:text="${recipientName != null ? recipientName : 'Customer'}">Customer</span>
+            </div>
+            <p style="font-size: 14px; line-height: 1.6; color: #475569; margin: 0 0 16px 0;">
+                We encountered an issue while trying to process payment for your checkout attempt. Don't worry—if any amount was debited from your account, your bank will typically auto-reverse it within 3-5 business days.
+            </p>
+
+            <!-- Alert Notice -->
+            <div class="alert-box">
+                <strong>Reason:</strong> <span th:text="${failureReason != null ? failureReason : 'Payment authorization declined or dismissed by user.'}">Payment failed.</span>
+            </div>
+
+            <!-- Transaction Details -->
+            <div class="card">
+                <table class="details-grid">
+                    <tr th:if="${orderId != null and !orderId.isEmpty()}">
+                        <td class="label">Reference Order ID</td>
+                        <td class="value" th:text="${orderId}">ORD-123456</td>
+                    </tr>
+                    <tr th:if="${razorpayOrderId != null and !razorpayOrderId.isEmpty()}">
+                        <td class="label">Gateway Order ID</td>
+                        <td class="value" th:text="${razorpayOrderId}">order_abc123</td>
+                    </tr>
+                    <tr th:if="${amount != null and amount > 0}">
+                        <td class="label">Amount Attempted</td>
+                        <td class="value">₹<span th:text="${#numbers.formatDecimal(amount, 1, 2)}">0.00</span></td>
+                    </tr>
+                    <tr>
+                        <td class="label">Payment Status</td>
+                        <td class="value">
+                            <span class="badge-failed">FAILED</span>
+                        </td>
+                    </tr>
+                    <tr th:if="${date != null}">
+                        <td class="label">Attempt Time</td>
+                        <td class="value" th:text="${date}">Jan 01, 2026</td>
+                    </tr>
+                </table>
+            </div>
+
+            <p style="font-size: 13px; color: #64748b; line-height: 1.5; margin: 16px 0 0 0;">
+                You can retry your purchase by visiting ShopStack and selecting your preferred payment method (UPI, Cards, Net Banking, or Cash on Delivery).
+            </p>
+        </div>
+
+        <!-- Footer -->
+        <div class="footer">
+            <p style="margin: 0 0 6px 0;">Need assistance? Our support team is here to help 24/7.</p>
+            <p style="margin: 0;">&copy; 2026 ShopStack Multi-Vendor Marketplace. All rights reserved.</p>
+        </div>
+    </div>
+</body>
+</html>

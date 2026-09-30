@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Refund Processed - ShopStack</title>
+    <style>
+        body { margin: 0; padding: 0; background-color: #f4f5f9; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; color: #1e293b; }
+        .container { max-width: 600px; margin: 24px auto; background-color: #ffffff; border-radius: 12px; overflow: hidden; box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05); }
+        .header { background: linear-gradient(135deg, #0284c7 0%, #0369a1 100%); padding: 32px 24px; text-align: center; color: #ffffff; }
+        .header .icon { font-size: 40px; line-height: 1; margin-bottom: 8px; }
+        .header h1 { margin: 0; font-size: 22px; font-weight: 700; letter-spacing: -0.5px; }
+        .header p { margin: 8px 0 0 0; font-size: 14px; opacity: 0.95; }
+        .content { padding: 32px 24px; }
+        .greeting { font-size: 18px; font-weight: 600; margin-bottom: 12px; color: #0f172a; }
+        .badge { display: inline-block; padding: 4px 12px; border-radius: 9999px; font-size: 12px; font-weight: 600; background-color: #e0f2fe; color: #0369a1; }
+        .card { background-color: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px; padding: 18px; margin: 20px 0; }
+        .details-grid { width: 100%; border-collapse: collapse; }
+        .details-grid td { padding: 8px 0; font-size: 14px; vertical-align: top; }
+        .details-grid td.label { color: #64748b; width: 45%; }
+        .details-grid td.value { color: #0f172a; font-weight: 600; text-align: right; }
+        .amount-highlight { text-align: center; margin: 24px 0; padding: 16px; background-color: #f0f9ff; border-radius: 8px; border: 1px solid #bae6fd; }
+        .amount-highlight .amount { font-size: 28px; font-weight: 700; color: #0284c7; }
+        .amount-highlight .caption { font-size: 13px; color: #0369a1; margin-top: 4px; }
+        .footer { background-color: #f8fafc; padding: 24px; text-align: center; font-size: 12px; color: #94a3b8; border-top: 1px solid #e2e8f0; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Header -->
+        <div class="header">
+            <div class="icon">💸</div>
+            <h1>Refund Completed</h1>
+            <p>Your refund has been disbursed</p>
+        </div>
+
+        <!-- Content -->
+        <div class="content">
+            <div class="greeting">
+                Hello, <span th:text="${recipientName != null ? recipientName : 'Customer'}">Customer</span>
+            </div>
+            <p style="font-size: 14px; line-height: 1.6; color: #475569; margin: 0 0 16px 0;">
+                We have processed your refund for order <strong th:text="${orderId}">ORD-123456</strong>. The funds have been initiated back to your original payment method.
+            </p>
+
+            <!-- Amount Highlight -->
+            <div class="amount-highlight">
+                <div class="amount">₹<span th:text="${#numbers.formatDecimal(refundAmount, 1, 2)}">0.00</span></div>
+                <div class="caption">Refund Successfully Credited</div>
+            </div>
+
+            <!-- Refund Details -->
+            <div class="card">
+                <table class="details-grid">
+                    <tr>
+                        <td class="label">Order ID</td>
+                        <td class="value" th:text="${orderId}">ORD-123456</td>
+                    </tr>
+                    <tr th:if="${refundId != null and !refundId.isEmpty()}">
+                        <td class="label">Refund Reference ID</td>
+                        <td class="value" th:text="${refundId}">rfnd_abc123</td>
+                    </tr>
+                    <tr>
+                        <td class="label">Refund Status</td>
+                        <td class="value">
+                            <span class="badge" th:text="${status != null ? status : 'PROCESSED'}">PROCESSED</span>
+                        </td>
+                    </tr>
+                    <tr th:if="${reason != null and !reason.isEmpty()}">
+                        <td class="label">Reason / Item Condition</td>
+                        <td class="value" th:text="${reason}">Quality inspection passed</td>
+                    </tr>
+                    <tr th:if="${processedAt != null and !processedAt.isEmpty()}">
+                        <td class="label">Processed Date</td>
+                        <td class="value" th:text="${processedAt}">Jan 04, 2026</td>
+                    </tr>
+                </table>
+            </div>
+
+            <p style="font-size: 13px; color: #64748b; line-height: 1.5; margin: 16px 0 0 0;">
+                Depending on your card issuer or bank, please allow 5 to 7 business days for the funds to reflect on your statement.
+            </p>
+        </div>
+
+        <!-- Footer -->
+        <div class="footer">
+            <p style="margin: 0 0 6px 0;">If you have any questions regarding this refund, please contact support@shopstack.com.</p>
+            <p style="margin: 0;">&copy; 2026 ShopStack Multi-Vendor Marketplace. All rights reserved.</p>
+        </div>
+    </div>
+</body>
+</html>
