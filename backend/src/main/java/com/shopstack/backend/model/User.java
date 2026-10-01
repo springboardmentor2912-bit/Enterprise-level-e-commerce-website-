@@ -40,6 +40,9 @@ public class User {
     @Column(name = "warehouse_name")
     private String warehouseName;
 
+    @jakarta.persistence.Transient
+    private String token;
+
     public User() {}
 
     public User(String fullName, String email, String password, String role, String phone, String address) {
@@ -87,4 +90,7 @@ public class User {
 
     public String getWarehouseName() { return warehouseName; }
     public void setWarehouseName(String warehouseName) { this.warehouseName = warehouseName; }
+
+    public String getToken() { return token; }
+    public void setToken(String token) { this.token = token; }
 }

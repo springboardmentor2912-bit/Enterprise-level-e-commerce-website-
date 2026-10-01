@@ -201,13 +201,22 @@ ShopStack/
 📡 API Endpoints (Day 2)
 Authentication & Customer Profile
 
-Method | Endpoint                    | Description
---------------------------------------------------------------------------------
-POST   | /api/auth/register          | Register new user account
-POST   | /api/auth/login             | User login
-GET    | /api/customer/{id}          | Get customer profile details
-PUT    | /api/customer/{id},         | Update profile (phone & shipping address)
-PUT    | /api/auth/customer/{id}/role| Toggle account role (CUSTOMER ↔ VENDOR)
+Method | Endpoint                     | Auth Required | Description
+-------|------------------------------|---------------|------------------------------------------------------
+POST   | /api/auth/register           | Public        | Register new account (BCrypt hashed, returns JWT)
+POST   | /api/auth/login              | Public        | Authenticate credentials & return JWT Bearer token
+POST   | /api/auth/forgot-password    | Public        | Verify account email for password reset
+POST   | /api/auth/reset-password     | Public        | Reset password with BCrypt hash
+GET    | /api/customer/{id}           | Bearer JWT    | Get customer profile details
+PUT    | /api/customer/{id}           | Bearer JWT    | Update profile (phone & shipping address)
+PUT    | /api/auth/customer/{id}/role | Bearer JWT    | Toggle account role (CUSTOMER ↔ VENDOR with 6-digit ID)
+
+🔒 Security Architecture & Protections
+* **BCrypt Password Hashing:** All passwords stored securely using Spring Security `BCryptPasswordEncoder` (10 rounds).
+* **JWT Stateless Authentication:** Generates cryptographically signed HMAC-SHA256 JWT tokens with role claims and expiration.
+* **Role-Based Access Control (RBAC):** Granular endpoint security enforcing role constraints (`ADMINISTRATOR`, `VENDOR`, `WAREHOUSE_STAFF`, `CUSTOMER`).
+* **Tightened CORS Policy:** Controlled origin whitelisting (`http://localhost:5173`, `http://localhost:3000`, and production host).
+* **Axios Interceptor:** Automated frontend Bearer token attachment and 401 session expiry handling.
 
 Products
 
@@ -216,22 +225,18 @@ Method | Endpoint                         | Description
 GET    | /api/products                    | Fetch all products (auto-seeds 
        |                                  | inventory if empty)
        |                                  |
-GET    |/api/products/search?query={term} | Search products by name or category
+GET    | /api/products/search?query={term}| Search products by name or category
 
 🧪 Postman Testing Checklist
-Register Customer: POST http://localhost:8080/api/auth/register
-
-Login: POST http://localhost:8080/api/auth/login
-
-Get Profile: GET http://localhost:8080/api/customer/{id}
-
-Update Profile: PUT http://localhost:8080/api/customer/{id}
-
-Switch Role: PUT http://localhost:8080/api/auth/customer/{id}/role with body {"role": "VENDOR"}
-
-Browse Inventory: GET http://localhost:8080/api/products
-
-Search Inventory: GET http://localhost:8080/api/products/search?query=Headphones
+* **Register Customer:** `POST http://localhost:8080/api/auth/register` (Returns user object + JWT token)
+* **Login User:** `POST http://localhost:8080/api/auth/login` (Returns user object + `Authorization` Bearer token)
+* **Forgot Password:** `POST http://localhost:8080/api/auth/forgot-password` with body `{"email": "user@example.com"}`
+* **Reset Password:** `POST http://localhost:8080/api/auth/reset-password` with body `{"email": "user@example.com", "newPassword": "NewPassword123!"}`
+* **Get Profile:** `GET http://localhost:8080/api/customer/{id}` with Header `Authorization: Bearer <token>`
+* **Update Profile:** `PUT http://localhost:8080/api/customer/{id}` with Header `Authorization: Bearer <token>`
+* **Switch Role:** `PUT http://localhost:8080/api/auth/customer/{id}/role` with body `{"role": "VENDOR", "vendorCode": "123456"}`
+* **Browse Inventory:** `GET http://localhost:8080/api/products`
+* **Search Inventory:** `GET http://localhost:8080/api/products/search?query=Headphones`
 
 
 

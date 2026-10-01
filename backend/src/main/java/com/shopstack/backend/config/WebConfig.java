@@ -17,13 +17,16 @@ public class WebConfig implements WebMvcConfigurer {
     @Value("${app.upload.dir:uploads/products}")
     private String uploadDir;
 
+    @Value("${app.cors.allowed-origins:http://localhost:5173,http://localhost:3000,http://127.0.0.1:5173,http://127.0.0.1:3000,https://*.vercel.app,https://*.sslip.io,http://13.48.47.35:*,https://13.48.47.35:*}")
+    private String allowedOrigins;
+
     @Override
     public void addCorsMappings(CorsRegistry registry) {
         registry.addMapping("/**")
-                .allowedOriginPatterns("*")
+                .allowedOriginPatterns(allowedOrigins.split(","))
                 .allowedMethods("GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH")
                 .allowedHeaders("*")
-                .exposedHeaders("Content-Disposition")
+                .exposedHeaders("Authorization", "Content-Disposition")
                 .allowCredentials(true);
     }
 

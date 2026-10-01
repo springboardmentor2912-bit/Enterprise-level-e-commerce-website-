@@ -5,6 +5,7 @@ import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -17,10 +18,11 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.shopstack.backend.model.User;
 import com.shopstack.backend.repository.UserRepository;
+import com.shopstack.backend.security.JwtUtils;
 
 @RestController
 @RequestMapping("/api/auth")
-@CrossOrigin(originPatterns = "*", allowCredentials = "true") // Allow React Frontend & Mobile devices
+@CrossOrigin(originPatterns = "*", allowCredentials = "true")
 public class AuthController {
 
     @Autowired
@@ -32,6 +34,12 @@ public class AuthController {
     @Autowired
     private com.shopstack.backend.service.CloudSyncService cloudSyncService;
 
+    @Autowired
+    private PasswordEncoder passwordEncoder;
+
+    @Autowired
+    private JwtUtils jwtUtils;
+
     @GetMapping("/users")
     public ResponseEntity<?> getAllUsers() {
         return ResponseEntity.ok(userRepository.findAll());
@@ -40,8 +48,8 @@ public class AuthController {
     @PostMapping("/register")
     @Transactional
     public ResponseEntity<?> registerUser(@RequestBody User user) {
-        if (user.getEmail() == null || user.getRole() == null) {
-            return ResponseEntity.badRequest().body("Error: Email and Role are required!");
+        if (user.getEmail() == null || user.getRole() == null || user.getPassword() == null) {
+            return ResponseEntity.badRequest().body("Error: Email, Role, and Password are required!");
         }
 
         String email = user.getEmail().trim().toLowerCase();
@@ -62,6 +70,7 @@ public class AuthController {
         }
 
         user.setEmail(email);
+        user.setPassword(passwordEncoder.encode(user.getPassword()));
 
         if (user.getFullName() == null || user.getFullName().trim().isEmpty()) {
             String prefix = email.split("@")[0].replaceAll("[._-]", " ");
@@ -93,12 +102,16 @@ public class AuthController {
         }
 
         User savedUser = userRepository.saveAndFlush(user);
+        String token = jwtUtils.generateToken(savedUser);
+        savedUser.setToken(token);
+
         System.out.println(">>> User registered and saved in PostgreSQL database: " + savedUser.getEmail() + " [ID: " + savedUser.getId() + ", Role: " + savedUser.getRole() + "]");
         cloudSyncService.pushUserToCloud(savedUser);
 
         java.util.Map<String, Object> response = new java.util.HashMap<>();
         response.put("message", "User registered successfully!");
         response.put("user", savedUser);
+        response.put("token", token);
         if (generatedCode != null) {
             response.put("vendorCode", generatedCode);
         }
@@ -128,7 +141,7 @@ public class AuthController {
 
             User newUser = new User();
             newUser.setEmail(email);
-            newUser.setPassword(password);
+            newUser.setPassword(passwordEncoder.encode(password));
 
             String prefix = email.split("@")[0].replaceAll("[._-]", " ");
             String defaultName = Character.toUpperCase(prefix.charAt(0)) + (prefix.length() > 1 ? prefix.substring(1) : "");
@@ -147,6 +160,9 @@ public class AuthController {
             }
 
             User persistedUser = userRepository.saveAndFlush(newUser);
+            String token = jwtUtils.generateToken(persistedUser);
+            persistedUser.setToken(token);
+
             System.out.println(">>> User auto-provisioned and saved on login in PostgreSQL database: " + persistedUser.getEmail() + " [ID: " + persistedUser.getId() + ", Role: " + persistedUser.getRole() + "]");
             cloudSyncService.pushUserToCloud(persistedUser);
             return ResponseEntity.ok(persistedUser);
@@ -154,7 +170,15 @@ public class AuthController {
 
         // If user already exists in PostgreSQL database
         User user = userOpt.get();
-        if (!user.getPassword().equals(password)) {
+        boolean passwordValid = passwordEncoder.matches(password, user.getPassword());
+        
+        // Backward-compatibility: auto-upgrade legacy plain-text passwords
+        if (!passwordValid && password.equals(user.getPassword())) {
+            user.setPassword(passwordEncoder.encode(password));
+            passwordValid = true;
+        }
+
+        if (!passwordValid) {
             return ResponseEntity.status(401).body("Invalid email or password!");
         }
 
@@ -196,6 +220,9 @@ public class AuthController {
         }
 
         User updatedUser = userRepository.saveAndFlush(user);
+        String token = jwtUtils.generateToken(updatedUser);
+        updatedUser.setToken(token);
+
         System.out.println(">>> User login verified and synced to PostgreSQL database: " + updatedUser.getEmail() + " [ID: " + updatedUser.getId() + ", Role: " + updatedUser.getRole() + "]");
         cloudSyncService.pushUserToCloud(updatedUser);
         return ResponseEntity.ok(updatedUser);
@@ -216,7 +243,6 @@ public class AuthController {
             return ResponseEntity.badRequest().body("Error: Role is required");
         }
         newRole = newRole.toUpperCase();
-        String email = user.getEmail().toLowerCase();
 
         // Role switching rules:
         if (currentRole.equals("CUSTOMER")) {
@@ -255,8 +281,10 @@ public class AuthController {
             return ResponseEntity.badRequest().body("Error: Unknown user role.");
         }
 
-        userRepository.save(user);
-        return ResponseEntity.ok(user);
+        User saved = userRepository.save(user);
+        String token = jwtUtils.generateToken(saved);
+        saved.setToken(token);
+        return ResponseEntity.ok(saved);
     }
 
     @PostMapping("/forgot-password")
@@ -286,7 +314,7 @@ public class AuthController {
             return ResponseEntity.status(404).body("Error: No account found with this email address.");
         }
         User user = userOpt.get();
-        user.setPassword(newPassword);
+        user.setPassword(passwordEncoder.encode(newPassword));
         userRepository.save(user);
         return ResponseEntity.ok(Map.of("message", "Password reset successfully! You can now log in with your new password."));
     }
