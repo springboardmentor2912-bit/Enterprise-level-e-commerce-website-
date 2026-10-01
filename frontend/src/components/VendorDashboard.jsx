@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import axios from 'axios';
-import { 
-  TrendingUp, Package, AlertTriangle, IndianRupee, Plus, Edit2, 
+import {
+  TrendingUp, Package, AlertTriangle, IndianRupee, Plus, Edit2,
   Trash2, X, Check, Save, Truck, Calendar, ShoppingBag, Eye, EyeOff, Power, Layers,
   DollarSign, RefreshCw, CheckCircle, Clock, ShieldCheck, FileText, Search, Ticket, RotateCcw,
   Sun, Moon, ArrowLeft, ChevronDown, User, LogOut
@@ -10,12 +10,13 @@ import ProductIcon from './ProductIcon';
 import NotificationCenter from './NotificationCenter';
 import { extractErrorMessage } from '../utils/errorHandler';
 import { formatImageUrl } from '../utils/imageHelper';
-import { 
-  generateVendorNotifications, 
-  markNotifAsRead, 
-  markAllNotifsAsRead, 
-  clearAllNotifs, 
-  dismissNotif 
+import {
+  generateVendorNotifications,
+  markNotifAsRead,
+  markAllNotifsAsRead,
+  clearAllNotifs,
+  dismissNotif,
+  syncNotificationsWithServer
 } from '../utils/notificationService';
 
 const getWordCount = (text) => {
@@ -96,6 +97,14 @@ export default function VendorDashboard({ user, orders = [], onGoToHome, onGoToP
   };
 
   useEffect(() => {
+    if (user?.id) {
+      syncNotificationsWithServer(user.id).then(() => {
+        refreshNotifications();
+      });
+    }
+  }, [user?.id]);
+
+  useEffect(() => {
     refreshNotifications();
   }, [user, products, vendorOrders, orders, coupons]);
 
@@ -118,7 +127,7 @@ export default function VendorDashboard({ user, orders = [], onGoToHome, onGoToP
     dismissNotif(id, user?.id || user?.email);
     refreshNotifications();
   };
-  
+
   // Settlements / Payouts state
   const [settlements, setSettlements] = useState([]);
   const [settlementsSummary, setSettlementsSummary] = useState({
@@ -130,12 +139,12 @@ export default function VendorDashboard({ user, orders = [], onGoToHome, onGoToP
   });
   const [isLoadingSettlements, setIsLoadingSettlements] = useState(false);
   const [settlementFilter, setSettlementFilter] = useState('ALL');
-  
+
   // Dedicated Stock Management state (Zero Admin Approval Required)
   const [stockModalProduct, setStockModalProduct] = useState(null);
   const [quickStockValue, setQuickStockValue] = useState(0);
   const [isUpdatingStock, setIsUpdatingStock] = useState(false);
-  
+
   const [productForm, setProductForm] = useState({
     id: null,
     name: '',
@@ -196,7 +205,7 @@ export default function VendorDashboard({ user, orders = [], onGoToHome, onGoToP
     try {
       const res = await axios.get('http://localhost:8080/api/admin/refunds');
       // Filter returns belonging to orders containing vendor's items
-      const matchingReturns = res.data.filter(r => 
+      const matchingReturns = res.data.filter(r =>
         vendorOrders.some(vo => vo.orderId === r.orderId)
       );
       setVendorReturns(matchingReturns);
@@ -573,9 +582,9 @@ export default function VendorDashboard({ user, orders = [], onGoToHome, onGoToP
         </div>
 
         <div className="nav-right">
-          <button 
+          <button
             type="button"
-            onClick={onGoToHome} 
+            onClick={onGoToHome}
             className="btn-store-nav"
             title="Browse ShopStack Storefront"
           >
@@ -597,11 +606,11 @@ export default function VendorDashboard({ user, orders = [], onGoToHome, onGoToP
             align="right"
           />
 
-          <div 
+          <div
             className="nav-user-menu"
             ref={userMenuRef}
           >
-            <div 
+            <div
               className="nav-user-trigger"
               onClick={(e) => {
                 e.stopPropagation();
@@ -613,13 +622,13 @@ export default function VendorDashboard({ user, orders = [], onGoToHome, onGoToP
                 <User size={14} style={{ color: 'var(--accent-emerald)', flexShrink: 0 }} />
               </div>
               <strong className="nav-user-name">{user?.fullName || 'Vendor'}</strong>
-              <ChevronDown 
-                size={13} 
+              <ChevronDown
+                size={13}
                 className="nav-user-chevron"
-                style={{ 
+                style={{
                   transform: showDropdown ? 'rotate(180deg)' : 'none',
                   transition: 'transform 0.2s ease'
-                }} 
+                }}
               />
             </div>
 
@@ -638,11 +647,11 @@ export default function VendorDashboard({ user, orders = [], onGoToHome, onGoToP
                 </div>
 
                 {onGoToProfile && (
-                  <div 
-                    onClick={() => { 
-                      setShowDropdown(false); 
-                      onGoToProfile('orders'); 
-                    }} 
+                  <div
+                    onClick={() => {
+                      setShowDropdown(false);
+                      onGoToProfile('orders');
+                    }}
                     className="dropdown-item"
                   >
                     <User size={16} style={{ flexShrink: 0 }} /> <span>My Purchases & Profile</span>
@@ -657,12 +666,12 @@ export default function VendorDashboard({ user, orders = [], onGoToHome, onGoToP
 
                 {/* Light / Dark Mode Toggle Button */}
                 {onToggleTheme && (
-                  <div 
-                    onClick={(e) => { 
-                      e.stopPropagation(); 
-                      onToggleTheme(); 
-                    }} 
-                    className="dropdown-item" 
+                  <div
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      onToggleTheme();
+                    }}
+                    className="dropdown-item"
                     style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', cursor: 'pointer' }}
                   >
                     <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
@@ -673,15 +682,15 @@ export default function VendorDashboard({ user, orders = [], onGoToHome, onGoToP
                       )}
                       <span>{theme === 'dark' ? 'Light Mode' : 'Dark Mode'}</span>
                     </div>
-                    <span 
-                      style={{ 
-                        fontSize: '10px', 
-                        fontWeight: '700', 
-                        padding: '2px 6px', 
-                        borderRadius: '4px', 
-                        background: 'var(--bg-input)', 
+                    <span
+                      style={{
+                        fontSize: '10px',
+                        fontWeight: '700',
+                        padding: '2px 6px',
+                        borderRadius: '4px',
+                        background: 'var(--bg-input)',
                         color: 'var(--text-secondary)',
-                        border: '1px solid var(--border-light)' 
+                        border: '1px solid var(--border-light)'
                       }}
                     >
                       {theme === 'dark' ? 'DARK' : 'LIGHT'}
@@ -693,12 +702,12 @@ export default function VendorDashboard({ user, orders = [], onGoToHome, onGoToP
 
                 {/* Logout Button */}
                 {onLogout && (
-                  <div 
-                    onClick={() => { 
-                      setShowDropdown(false); 
-                      onLogout(); 
-                    }} 
-                    className="dropdown-item dropdown-item-danger" 
+                  <div
+                    onClick={() => {
+                      setShowDropdown(false);
+                      onLogout();
+                    }}
+                    className="dropdown-item dropdown-item-danger"
                     style={{ color: 'var(--accent-rose)', fontWeight: '600' }}
                   >
                     <LogOut size={16} style={{ flexShrink: 0 }} /> <span>Logout</span>
@@ -713,38 +722,38 @@ export default function VendorDashboard({ user, orders = [], onGoToHome, onGoToP
       <div className="dashboard-layout">
         {/* Sidebar Navigation */}
         <div className="sidebar">
-          <div 
-            onClick={() => setActiveTab('analytics')} 
+          <div
+            onClick={() => setActiveTab('analytics')}
             className={`sidebar-item ${activeTab === 'analytics' ? 'sidebar-item-active' : ''}`}
           >
             <TrendingUp size={18} /> Sales & Analytics
           </div>
-          <div 
-            onClick={() => setActiveTab('inventory')} 
+          <div
+            onClick={() => setActiveTab('inventory')}
             className={`sidebar-item ${activeTab === 'inventory' ? 'sidebar-item-active' : ''}`}
           >
             <Package size={18} /> Catalog Products ({products.length})
           </div>
-          <div 
-            onClick={() => setActiveTab('orders')} 
+          <div
+            onClick={() => setActiveTab('orders')}
             className={`sidebar-item ${activeTab === 'orders' ? 'sidebar-item-active' : ''}`}
           >
             <ShoppingBag size={18} /> Customer Orders ({vendorOrders.length})
           </div>
-          <div 
-            onClick={() => { setActiveTab('settlements'); fetchSettlements(); }} 
+          <div
+            onClick={() => { setActiveTab('settlements'); fetchSettlements(); }}
             className={`sidebar-item ${activeTab === 'settlements' ? 'sidebar-item-active' : ''}`}
           >
             <IndianRupee size={18} /> Settlements & Payouts ({settlements.length})
           </div>
-          <div 
-            onClick={() => { setActiveTab('coupons'); fetchVendorCoupons(); }} 
+          <div
+            onClick={() => { setActiveTab('coupons'); fetchVendorCoupons(); }}
             className={`sidebar-item ${activeTab === 'coupons' ? 'sidebar-item-active' : ''}`}
           >
             <Ticket size={18} /> Promotions & Coupons
           </div>
-          <div 
-            onClick={() => { setActiveTab('returns'); fetchReturns(); }} 
+          <div
+            onClick={() => { setActiveTab('returns'); fetchReturns(); }}
             className={`sidebar-item ${activeTab === 'returns' ? 'sidebar-item-active' : ''}`}
           >
             <RotateCcw size={18} /> Return QC & Disputes ({vendorReturns.length})
@@ -756,7 +765,7 @@ export default function VendorDashboard({ user, orders = [], onGoToHome, onGoToP
           {activeTab === 'analytics' && (
             <div>
               <h2 style={{ fontSize: '20px', fontWeight: '700', marginBottom: '20px' }}>Dashboard Overview</h2>
-              
+
               {/* Analytics Metric Cards */}
               <div className="analytics-grid">
                 <div className="analytics-card">
@@ -863,203 +872,202 @@ export default function VendorDashboard({ user, orders = [], onGoToHome, onGoToP
                         const finalP = prod.finalPrice != null ? prod.finalPrice : (disc > 0 ? Math.round(prod.price * (1 - disc / 100) * 100) / 100 : prod.price);
                         const savings = Math.max(0, Math.round((prod.price - finalP) * 100) / 100);
                         return (
-                        <tr key={prod.id}>
-                          <td style={{ fontSize: '20px', textAlign: 'center' }}>
-                            <div style={{ width: '36px', height: '36px', display: 'flex', alignItems: 'center', justifyContent: 'center', borderRadius: '8px', overflow: 'hidden', margin: '0 auto', background: 'var(--bg-input)' }}>
-                              {prod.imageUrl && formatImageUrl(prod.imageUrl).length > 4 ? (
-                                <img src={formatImageUrl(prod.imageUrl)} alt={prod.name} loading="lazy" decoding="async" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                          <tr key={prod.id}>
+                            <td style={{ fontSize: '20px', textAlign: 'center' }}>
+                              <div style={{ width: '36px', height: '36px', display: 'flex', alignItems: 'center', justifyContent: 'center', borderRadius: '8px', overflow: 'hidden', margin: '0 auto', background: 'var(--bg-input)' }}>
+                                {prod.imageUrl && formatImageUrl(prod.imageUrl).length > 4 ? (
+                                  <img src={formatImageUrl(prod.imageUrl)} alt={prod.name} loading="lazy" decoding="async" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                                ) : (
+                                  <ProductIcon name={prod.name} category={prod.category} size={18} />
+                                )}
+                              </div>
+                            </td>
+                            <td style={{ fontWeight: '600', fontSize: '13.5px' }}>{prod.name}</td>
+                            <td>
+                              <span className="badge badge-customer">{prod.category}</span>
+                            </td>
+                            <td>
+                              {disc > 0 ? (
+                                <span style={{ fontSize: '13px', fontWeight: '600', textDecoration: 'line-through', color: '#94a3b8', textDecorationColor: '#ef4444', textDecorationThickness: '1.5px' }}>
+                                  ₹{Number(prod.price).toLocaleString('en-IN')}
+                                </span>
                               ) : (
-                                <ProductIcon name={prod.name} category={prod.category} size={18} />
-                              )}
-                            </div>
-                          </td>
-                          <td style={{ fontWeight: '600', fontSize: '13.5px' }}>{prod.name}</td>
-                          <td>
-                            <span className="badge badge-customer">{prod.category}</span>
-                          </td>
-                          <td>
-                            {disc > 0 ? (
-                              <span style={{ fontSize: '13px', fontWeight: '600', textDecoration: 'line-through', color: '#94a3b8', textDecorationColor: '#ef4444', textDecorationThickness: '1.5px' }}>
-                                ₹{Number(prod.price).toLocaleString('en-IN')}
-                              </span>
-                            ) : (
-                              <span style={{ fontSize: '14px', fontWeight: '700' }}>
-                                ₹{Number(prod.price).toLocaleString('en-IN')}
-                              </span>
-                            )}
-                          </td>
-                          <td>
-                            {disc > 0 ? (
-                              <span style={{ 
-                                background: 'linear-gradient(135deg, #ef4444 0%, #dc2626 100%)', 
-                                color: '#ffffff', 
-                                fontWeight: '800', 
-                                fontSize: '11px', 
-                                padding: '3px 8px', 
-                                borderRadius: '4px',
-                                boxShadow: '0 2px 6px rgba(239, 68, 68, 0.4)',
-                                display: 'inline-block'
-                              }}>
-                                {disc}% OFF
-                              </span>
-                            ) : (
-                              <span style={{ color: 'var(--text-muted)', fontSize: '13px' }}>0% (No discount)</span>
-                            )}
-                          </td>
-                          <td>
-                            <div style={{ display: 'flex', flexDirection: 'column' }}>
-                              <span style={{ fontWeight: '900', fontSize: '15px', color: 'var(--text-primary)' }}>
-                                ₹{Number(finalP).toLocaleString('en-IN')}
-                              </span>
-                              {disc > 0 && (
-                                <span style={{ fontSize: '11px', color: '#10b981', fontWeight: '700' }}>
-                                  Save ₹{Number(savings).toLocaleString('en-IN')}
+                                <span style={{ fontSize: '14px', fontWeight: '700' }}>
+                                  ₹{Number(prod.price).toLocaleString('en-IN')}
                                 </span>
                               )}
-                            </div>
-                          </td>
-                          <td style={{ textAlign: 'center', minWidth: '160px' }}>
-                            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px' }}>
-                              <button 
-                                type="button"
-                                onClick={() => handleUpdateProductStock(prod.id, prod.stock - 1)}
-                                className="btn-icon-only"
-                                style={{ padding: '2px', width: '24px', height: '24px', borderRadius: '50%', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}
-                                disabled={prod.stock <= 0}
-                                title="Quick decrease stock by 1 (Instant update)"
-                              >
-                                -
-                              </button>
-                              <span style={{ 
-                                minWidth: '42px',
-                                textAlign: 'center',
-                                fontWeight: prod.stock < 5 ? 'bold' : '700',
-                                fontSize: '14px',
-                                color: prod.stock < 5 ? 'var(--accent-rose)' : 'inherit'
-                              }}>
-                                {prod.stock}
-                              </span>
-                              <button 
-                                type="button"
-                                onClick={() => handleUpdateProductStock(prod.id, prod.stock + 1)}
-                                className="btn-icon-only"
-                                style={{ padding: '2px', width: '24px', height: '24px', borderRadius: '50%', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}
-                                title="Quick increase stock by 1 (Instant update)"
-                              >
-                                +
-                              </button>
-                            </div>
-                            <div style={{ marginTop: '6px', display: 'flex', justifyContent: 'center' }}>
-                              {prod.stock <= 0 ? (
-                                <span className="badge badge-rejected" style={{ fontSize: '10px', padding: '2px 8px' }}>Out of Stock</span>
-                              ) : prod.stock < 5 ? (
-                                <span className="badge badge-pending" style={{ fontSize: '10px', padding: '2px 8px' }}>Only {prod.stock} left</span>
+                            </td>
+                            <td>
+                              {disc > 0 ? (
+                                <span style={{
+                                  background: 'linear-gradient(135deg, #ef4444 0%, #dc2626 100%)',
+                                  color: '#ffffff',
+                                  fontWeight: '800',
+                                  fontSize: '11px',
+                                  padding: '3px 8px',
+                                  borderRadius: '4px',
+                                  boxShadow: '0 2px 6px rgba(239, 68, 68, 0.4)',
+                                  display: 'inline-block'
+                                }}>
+                                  {disc}% OFF
+                                </span>
                               ) : (
-                                <span className="badge badge-approved" style={{ fontSize: '10px', padding: '2px 8px' }}>In Stock</span>
+                                <span style={{ color: 'var(--text-muted)', fontSize: '13px' }}>0% (No discount)</span>
                               )}
-                            </div>
-                          </td>
-                          <td style={{ textAlign: 'center', minWidth: '170px' }}>
-                            <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '4px' }}>
-                              <span className={`badge ${
-                                prod.status === 'APPROVED' ? 'badge-approved' : 
-                                prod.status === 'REJECTED' ? 'badge-rejected' : 
-                                prod.status === 'DISABLED' ? 'badge-pending' : 'badge-pending'
-                              }`} style={{ 
-                                fontWeight: '700', 
-                                padding: '3px 10px',
-                                ...(prod.status === 'DISABLED' ? { background: 'rgba(148, 163, 184, 0.15)', color: '#64748b', border: '1px solid rgba(148, 163, 184, 0.3)' } : {}) 
-                              }}>
-                                {prod.status === 'APPROVED' ? 'APPROVED' : 
-                                 prod.status === 'REJECTED' ? 'REJECTED' : 
-                                 prod.status === 'DISABLED' ? 'DISABLED' : 'PENDING APPROVAL'}
-                              </span>
-                              {prod.status === 'PENDING' && (
-                                <div style={{ fontSize: '10px', color: 'var(--accent-amber)', fontWeight: '600' }}>
-                                  Awaiting Admin Approval
-                                </div>
-                              )}
-                              {prod.status === 'DISABLED' && (
-                                <div style={{ fontSize: '10px', color: '#64748b', fontWeight: '600' }}>
-                                  Hidden from Store
-                                </div>
-                              )}
-                              {prod.status === 'REJECTED' && prod.rejectionReason && (
-                                <div style={{ fontSize: '11px', color: 'var(--accent-rose)', maxWidth: '160px', lineBreak: 'anywhere' }}>
-                                  <strong>Reason:</strong> {prod.rejectionReason}
-                                </div>
-                              )}
-                            </div>
-                          </td>
-                          <td style={{ textAlign: 'center', minWidth: '260px', width: '260px' }}>
-                            <div style={{ display: 'flex', gap: '8px', justifyContent: 'center', alignItems: 'center', flexWrap: 'nowrap' }}>
-                              <button 
-                                type="button"
-                                onClick={() => handleOpenStockModal(prod)} 
-                                className="btn btn-secondary" 
-                                title="Manage Stock (Instant - No Admin Approval Required)"
-                                style={{ 
-                                  padding: '6px 12px', 
-                                  fontSize: '12px', 
-                                  fontWeight: '600',
-                                  display: 'inline-flex', 
-                                  alignItems: 'center', 
-                                  gap: '5px', 
-                                  color: 'var(--accent-teal)', 
-                                  borderColor: 'rgba(20, 184, 166, 0.3)',
-                                  background: 'rgba(20, 184, 166, 0.08)',
-                                  height: '32px',
-                                  flexShrink: 0
-                                }}
-                              >
-                                <Layers size={14} /> Stock
-                              </button>
-                              <button 
-                                type="button"
-                                onClick={() => handleOpenEditModal(prod)} 
-                                className="btn btn-secondary" 
-                                title="Edit Product Details"
-                                style={{ 
-                                  padding: '6px 12px', 
-                                  fontSize: '12px', 
-                                  fontWeight: '600',
-                                  display: 'inline-flex', 
-                                  alignItems: 'center', 
-                                  gap: '5px', 
-                                  color: 'var(--accent-blue)', 
-                                  borderColor: 'rgba(59, 130, 246, 0.3)',
-                                  background: 'rgba(59, 130, 246, 0.08)',
-                                  height: '32px',
-                                  flexShrink: 0
-                                }}
-                              >
-                                <Edit2 size={14} /> Edit
-                              </button>
-                              <button 
-                                type="button"
-                                onClick={() => handleToggleProductStatus(prod.id, prod.status)} 
-                                className="btn btn-secondary" 
-                                title={prod.status === 'DISABLED' ? "Enable Product (Make live on store)" : "Disable Product (Hide from customers)"}
-                                style={{ 
-                                  padding: '6px 12px', 
-                                  fontSize: '12px', 
-                                  fontWeight: '600',
-                                  display: 'inline-flex', 
-                                  alignItems: 'center', 
-                                  gap: '5px',
-                                  color: prod.status === 'DISABLED' ? '#10b981' : '#f59e0b',
-                                  borderColor: prod.status === 'DISABLED' ? 'rgba(16, 185, 129, 0.3)' : 'rgba(245, 158, 11, 0.3)',
-                                  background: prod.status === 'DISABLED' ? 'rgba(16, 185, 129, 0.08)' : 'rgba(245, 158, 11, 0.08)',
-                                  height: '32px',
-                                  flexShrink: 0
-                                }}
-                              >
-                                {prod.status === 'DISABLED' ? <Eye size={14} /> : <EyeOff size={14} />}
-                                {prod.status === 'DISABLED' ? 'Enable' : 'Disable'}
-                              </button>
-                            </div>
-                          </td>
-                        </tr>
+                            </td>
+                            <td>
+                              <div style={{ display: 'flex', flexDirection: 'column' }}>
+                                <span style={{ fontWeight: '900', fontSize: '15px', color: 'var(--text-primary)' }}>
+                                  ₹{Number(finalP).toLocaleString('en-IN')}
+                                </span>
+                                {disc > 0 && (
+                                  <span style={{ fontSize: '11px', color: '#10b981', fontWeight: '700' }}>
+                                    Save ₹{Number(savings).toLocaleString('en-IN')}
+                                  </span>
+                                )}
+                              </div>
+                            </td>
+                            <td style={{ textAlign: 'center', minWidth: '160px' }}>
+                              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px' }}>
+                                <button
+                                  type="button"
+                                  onClick={() => handleUpdateProductStock(prod.id, prod.stock - 1)}
+                                  className="btn-icon-only"
+                                  style={{ padding: '2px', width: '24px', height: '24px', borderRadius: '50%', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}
+                                  disabled={prod.stock <= 0}
+                                  title="Quick decrease stock by 1 (Instant update)"
+                                >
+                                  -
+                                </button>
+                                <span style={{
+                                  minWidth: '42px',
+                                  textAlign: 'center',
+                                  fontWeight: prod.stock < 5 ? 'bold' : '700',
+                                  fontSize: '14px',
+                                  color: prod.stock < 5 ? 'var(--accent-rose)' : 'inherit'
+                                }}>
+                                  {prod.stock}
+                                </span>
+                                <button
+                                  type="button"
+                                  onClick={() => handleUpdateProductStock(prod.id, prod.stock + 1)}
+                                  className="btn-icon-only"
+                                  style={{ padding: '2px', width: '24px', height: '24px', borderRadius: '50%', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}
+                                  title="Quick increase stock by 1 (Instant update)"
+                                >
+                                  +
+                                </button>
+                              </div>
+                              <div style={{ marginTop: '6px', display: 'flex', justifyContent: 'center' }}>
+                                {prod.stock <= 0 ? (
+                                  <span className="badge badge-rejected" style={{ fontSize: '10px', padding: '2px 8px' }}>Out of Stock</span>
+                                ) : prod.stock < 5 ? (
+                                  <span className="badge badge-pending" style={{ fontSize: '10px', padding: '2px 8px' }}>Only {prod.stock} left</span>
+                                ) : (
+                                  <span className="badge badge-approved" style={{ fontSize: '10px', padding: '2px 8px' }}>In Stock</span>
+                                )}
+                              </div>
+                            </td>
+                            <td style={{ textAlign: 'center', minWidth: '170px' }}>
+                              <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '4px' }}>
+                                <span className={`badge ${prod.status === 'APPROVED' ? 'badge-approved' :
+                                    prod.status === 'REJECTED' ? 'badge-rejected' :
+                                      prod.status === 'DISABLED' ? 'badge-pending' : 'badge-pending'
+                                  }`} style={{
+                                    fontWeight: '700',
+                                    padding: '3px 10px',
+                                    ...(prod.status === 'DISABLED' ? { background: 'rgba(148, 163, 184, 0.15)', color: '#64748b', border: '1px solid rgba(148, 163, 184, 0.3)' } : {})
+                                  }}>
+                                  {prod.status === 'APPROVED' ? 'APPROVED' :
+                                    prod.status === 'REJECTED' ? 'REJECTED' :
+                                      prod.status === 'DISABLED' ? 'DISABLED' : 'PENDING APPROVAL'}
+                                </span>
+                                {prod.status === 'PENDING' && (
+                                  <div style={{ fontSize: '10px', color: 'var(--accent-amber)', fontWeight: '600' }}>
+                                    Awaiting Admin Approval
+                                  </div>
+                                )}
+                                {prod.status === 'DISABLED' && (
+                                  <div style={{ fontSize: '10px', color: '#64748b', fontWeight: '600' }}>
+                                    Hidden from Store
+                                  </div>
+                                )}
+                                {prod.status === 'REJECTED' && prod.rejectionReason && (
+                                  <div style={{ fontSize: '11px', color: 'var(--accent-rose)', maxWidth: '160px', lineBreak: 'anywhere' }}>
+                                    <strong>Reason:</strong> {prod.rejectionReason}
+                                  </div>
+                                )}
+                              </div>
+                            </td>
+                            <td style={{ textAlign: 'center', minWidth: '260px', width: '260px' }}>
+                              <div style={{ display: 'flex', gap: '8px', justifyContent: 'center', alignItems: 'center', flexWrap: 'nowrap' }}>
+                                <button
+                                  type="button"
+                                  onClick={() => handleOpenStockModal(prod)}
+                                  className="btn btn-secondary"
+                                  title="Manage Stock (Instant - No Admin Approval Required)"
+                                  style={{
+                                    padding: '6px 12px',
+                                    fontSize: '12px',
+                                    fontWeight: '600',
+                                    display: 'inline-flex',
+                                    alignItems: 'center',
+                                    gap: '5px',
+                                    color: 'var(--accent-teal)',
+                                    borderColor: 'rgba(20, 184, 166, 0.3)',
+                                    background: 'rgba(20, 184, 166, 0.08)',
+                                    height: '32px',
+                                    flexShrink: 0
+                                  }}
+                                >
+                                  <Layers size={14} /> Stock
+                                </button>
+                                <button
+                                  type="button"
+                                  onClick={() => handleOpenEditModal(prod)}
+                                  className="btn btn-secondary"
+                                  title="Edit Product Details"
+                                  style={{
+                                    padding: '6px 12px',
+                                    fontSize: '12px',
+                                    fontWeight: '600',
+                                    display: 'inline-flex',
+                                    alignItems: 'center',
+                                    gap: '5px',
+                                    color: 'var(--accent-blue)',
+                                    borderColor: 'rgba(59, 130, 246, 0.3)',
+                                    background: 'rgba(59, 130, 246, 0.08)',
+                                    height: '32px',
+                                    flexShrink: 0
+                                  }}
+                                >
+                                  <Edit2 size={14} /> Edit
+                                </button>
+                                <button
+                                  type="button"
+                                  onClick={() => handleToggleProductStatus(prod.id, prod.status)}
+                                  className="btn btn-secondary"
+                                  title={prod.status === 'DISABLED' ? "Enable Product (Make live on store)" : "Disable Product (Hide from customers)"}
+                                  style={{
+                                    padding: '6px 12px',
+                                    fontSize: '12px',
+                                    fontWeight: '600',
+                                    display: 'inline-flex',
+                                    alignItems: 'center',
+                                    gap: '5px',
+                                    color: prod.status === 'DISABLED' ? '#10b981' : '#f59e0b',
+                                    borderColor: prod.status === 'DISABLED' ? 'rgba(16, 185, 129, 0.3)' : 'rgba(245, 158, 11, 0.3)',
+                                    background: prod.status === 'DISABLED' ? 'rgba(16, 185, 129, 0.08)' : 'rgba(245, 158, 11, 0.08)',
+                                    height: '32px',
+                                    flexShrink: 0
+                                  }}
+                                >
+                                  {prod.status === 'DISABLED' ? <Eye size={14} /> : <EyeOff size={14} />}
+                                  {prod.status === 'DISABLED' ? 'Enable' : 'Disable'}
+                                </button>
+                              </div>
+                            </td>
+                          </tr>
                         );
                       })}
                     </tbody>
@@ -1073,16 +1081,16 @@ export default function VendorDashboard({ user, orders = [], onGoToHome, onGoToP
             <div>
               <div className="flex-between" style={{ marginBottom: '20px' }}>
                 <h2 style={{ fontSize: '20px', fontWeight: '700', margin: 0 }}>Merchant Customer Orders</h2>
-                <button 
-                  type="button" 
-                  onClick={fetchVendorOrders} 
+                <button
+                  type="button"
+                  onClick={fetchVendorOrders}
                   className="btn btn-secondary"
                   style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '12px', padding: '6px 14px' }}
                 >
                   <RefreshCw size={13} className={isLoadingOrders ? "spin-animation" : ""} /> Refresh Orders
                 </button>
               </div>
-              
+
               {vendorOrders.length === 0 ? (
                 <div className="cart-empty-state">
                   <ShoppingBag className="cart-empty-icon" style={{ opacity: 0.2 }} />
@@ -1116,10 +1124,9 @@ export default function VendorDashboard({ user, orders = [], onGoToHome, onGoToP
                           <td>{ord.quantity}x</td>
                           <td style={{ fontWeight: '700' }}>₹{ord.totalAmount}</td>
                           <td>
-                            <span className={`badge ${
-                              ord.status === 'DELIVERED' ? 'badge-approved' : 
-                              ord.status === 'SHIPPED' ? 'badge-pending' : 'badge-customer'
-                            }`}>
+                            <span className={`badge ${ord.status === 'DELIVERED' ? 'badge-approved' :
+                                ord.status === 'SHIPPED' ? 'badge-pending' : 'badge-customer'
+                              }`}>
                               {ord.status}
                             </span>
                           </td>
@@ -1176,9 +1183,9 @@ export default function VendorDashboard({ user, orders = [], onGoToHome, onGoToP
                     Transparent earnings breakdown per sold item with automatic platform commission deduction (10%).
                   </p>
                 </div>
-                <button 
-                  type="button" 
-                  onClick={fetchSettlements} 
+                <button
+                  type="button"
+                  onClick={fetchSettlements}
                   className="btn btn-secondary"
                   style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '12px', padding: '6px 14px' }}
                 >
@@ -1254,10 +1261,10 @@ export default function VendorDashboard({ user, orders = [], onGoToHome, onGoToP
                     className={`btn ${settlementFilter === filter ? 'btn-primary' : 'btn-secondary'}`}
                     style={{ fontSize: '12px', padding: '6px 14px' }}
                   >
-                    {filter === 'ALL' ? `All Records (${settlements.length})` : 
-                     filter === 'PENDING' ? `Pending (${settlements.filter(s => s.status === 'PENDING').length})` : 
-                     filter === 'SETTLED' ? `Settled (${settlements.filter(s => s.status === 'SETTLED').length})` : 
-                     `Refunded (${settlements.filter(s => s.status === 'REFUNDED').length})`}
+                    {filter === 'ALL' ? `All Records (${settlements.length})` :
+                      filter === 'PENDING' ? `Pending (${settlements.filter(s => s.status === 'PENDING').length})` :
+                        filter === 'SETTLED' ? `Settled (${settlements.filter(s => s.status === 'SETTLED').length})` :
+                          `Refunded (${settlements.filter(s => s.status === 'REFUNDED').length})`}
                   </button>
                 ))}
               </div>
@@ -1347,9 +1354,9 @@ export default function VendorDashboard({ user, orders = [], onGoToHome, onGoToP
                     Confirm or reject admin-launched coupon promotions for your store. Customers can only redeem coupons on your items after you approve them.
                   </p>
                 </div>
-                <button 
-                  type="button" 
-                  onClick={fetchVendorCoupons} 
+                <button
+                  type="button"
+                  onClick={fetchVendorCoupons}
                   className="btn btn-secondary"
                   style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '12px', padding: '6px 14px' }}
                 >
@@ -1426,8 +1433,8 @@ export default function VendorDashboard({ user, orders = [], onGoToHome, onGoToP
                             </td>
                             <td>
                               <div style={{ display: 'flex', gap: '8px' }}>
-                                <button 
-                                  type="button" 
+                                <button
+                                  type="button"
                                   onClick={() => handleApproveCoupon(coupon.code)}
                                   className="btn btn-primary"
                                   style={{ padding: '4px 10px', fontSize: '12px', background: isApproved ? 'var(--bg-card-hover)' : 'var(--accent-teal)', border: isApproved ? '1px solid var(--border-light)' : 'none', color: isApproved ? 'var(--text-muted)' : '#fff' }}
@@ -1435,8 +1442,8 @@ export default function VendorDashboard({ user, orders = [], onGoToHome, onGoToP
                                 >
                                   {isApproved ? 'Accepted' : 'Accept'}
                                 </button>
-                                <button 
-                                  type="button" 
+                                <button
+                                  type="button"
                                   onClick={() => handleRejectCoupon(coupon.code)}
                                   className="btn btn-secondary"
                                   style={{ padding: '4px 10px', fontSize: '12px', color: isRejected ? 'var(--text-muted)' : 'var(--accent-rose)' }}
@@ -1461,12 +1468,12 @@ export default function VendorDashboard({ user, orders = [], onGoToHome, onGoToP
             <div>
               <div className="flex-between" style={{ marginBottom: '20px' }}>
                 <h2 style={{ fontSize: '20px', fontWeight: '700', margin: 0 }}>Customer Return Requests</h2>
-                <button 
-                  type="button" 
+                <button
+                  type="button"
                   onClick={async () => {
                     await fetchVendorOrders();
                     await fetchReturns();
-                  }} 
+                  }}
                   className="btn btn-secondary"
                   style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '12px', padding: '6px 14px' }}
                 >
@@ -1508,11 +1515,10 @@ export default function VendorDashboard({ user, orders = [], onGoToHome, onGoToP
                               <span className="badge" style={{ background: 'var(--bg-input)' }}>{r.resolutionType}</span>
                             </td>
                             <td>
-                              <span className={`badge ${
-                                r.returnStage === 'REFUNDED' ? 'badge-approved' : 
-                                r.returnStage === 'QC_PASSED' ? 'badge-approved' : 
-                                r.returnStage === 'VENDOR_DISPUTED' ? 'badge-rejected' : 'badge-pending'
-                              }`}>
+                              <span className={`badge ${r.returnStage === 'REFUNDED' ? 'badge-approved' :
+                                  r.returnStage === 'QC_PASSED' ? 'badge-approved' :
+                                    r.returnStage === 'VENDOR_DISPUTED' ? 'badge-rejected' : 'badge-pending'
+                                }`}>
                                 {r.returnStage}
                               </span>
                             </td>
@@ -1580,7 +1586,7 @@ export default function VendorDashboard({ user, orders = [], onGoToHome, onGoToP
                 <X size={18} />
               </button>
             </div>
-            
+
             <form onSubmit={handleSaveProduct} style={{ display: 'flex', flexDirection: 'column', gap: '16px', overflowY: 'auto', flex: 1, paddingRight: '6px' }}>
               {modalMode === 'edit' && productForm.status === 'REJECTED' && (
                 <div className="rejection-warning-banner">
@@ -1600,33 +1606,33 @@ export default function VendorDashboard({ user, orders = [], onGoToHome, onGoToP
                     {getWordCount(productForm.name)} / 50 words
                   </span>
                 </div>
-                <input 
-                  type="text" 
-                  value={productForm.name} 
-                  onChange={(e) => setProductForm({...productForm, name: e.target.value})} 
+                <input
+                  type="text"
+                  value={productForm.name}
+                  onChange={(e) => setProductForm({ ...productForm, name: e.target.value })}
                   placeholder="e.g. Wireless Sports Earbuds"
-                  className="form-input" 
+                  className="form-input"
                   required
                 />
               </div>
 
               <div className="form-group">
                 <label className="form-label">Brand</label>
-                <input 
-                  type="text" 
-                  value={productForm.brand} 
-                  onChange={(e) => setProductForm({...productForm, brand: e.target.value})} 
+                <input
+                  type="text"
+                  value={productForm.brand}
+                  onChange={(e) => setProductForm({ ...productForm, brand: e.target.value })}
                   placeholder="e.g. Sony, Nike, L'Oreal"
-                  className="form-input" 
+                  className="form-input"
                   required
                 />
               </div>
 
               <div className="form-group">
                 <label className="form-label">Category</label>
-                <select 
-                  value={productForm.category} 
-                  onChange={(e) => setProductForm({...productForm, category: e.target.value})}
+                <select
+                  value={productForm.category}
+                  onChange={(e) => setProductForm({ ...productForm, category: e.target.value })}
                   className="form-select"
                 >
                   <option value="Electronics">Electronics</option>
@@ -1644,11 +1650,11 @@ export default function VendorDashboard({ user, orders = [], onGoToHome, onGoToP
                     {getWordCount(productForm.description)} / 500 words
                   </span>
                 </div>
-                <textarea 
-                  value={productForm.description} 
-                  onChange={(e) => setProductForm({...productForm, description: e.target.value})} 
+                <textarea
+                  value={productForm.description}
+                  onChange={(e) => setProductForm({ ...productForm, description: e.target.value })}
                   placeholder="Enter a detailed description of the product..."
-                  className="form-input" 
+                  className="form-input"
                   style={{ minHeight: '80px', resize: 'vertical' }}
                   required
                 />
@@ -1657,12 +1663,12 @@ export default function VendorDashboard({ user, orders = [], onGoToHome, onGoToP
               <div style={{ display: 'grid', gridTemplateColumns: modalMode === 'add' ? '1fr 1fr 1fr' : '1fr 1fr', gap: '12px' }}>
                 <div className="form-group">
                   <label className="form-label">Price (MRP ₹)</label>
-                  <input 
-                    type="number" 
-                    value={productForm.price} 
-                    onChange={(e) => setProductForm({...productForm, price: e.target.value})} 
+                  <input
+                    type="number"
+                    value={productForm.price}
+                    onChange={(e) => setProductForm({ ...productForm, price: e.target.value })}
                     placeholder="999"
-                    className="form-input" 
+                    className="form-input"
                     min="1"
                     step="0.01"
                     required
@@ -1670,12 +1676,12 @@ export default function VendorDashboard({ user, orders = [], onGoToHome, onGoToP
                 </div>
                 <div className="form-group">
                   <label className="form-label">Discount (%)</label>
-                  <input 
-                    type="number" 
-                    value={productForm.discountPercentage} 
-                    onChange={(e) => setProductForm({...productForm, discountPercentage: e.target.value})} 
+                  <input
+                    type="number"
+                    value={productForm.discountPercentage}
+                    onChange={(e) => setProductForm({ ...productForm, discountPercentage: e.target.value })}
                     placeholder="0"
-                    className="form-input" 
+                    className="form-input"
                     min="0"
                     max="99"
                     step="1"
@@ -1684,12 +1690,12 @@ export default function VendorDashboard({ user, orders = [], onGoToHome, onGoToP
                 {modalMode === 'add' && (
                   <div className="form-group">
                     <label className="form-label">Initial Stock</label>
-                    <input 
-                      type="number" 
-                      value={productForm.stock} 
-                      onChange={(e) => setProductForm({...productForm, stock: e.target.value})} 
+                    <input
+                      type="number"
+                      value={productForm.stock}
+                      onChange={(e) => setProductForm({ ...productForm, stock: e.target.value })}
                       placeholder="10"
-                      className="form-input" 
+                      className="form-input"
                       min="0"
                       required
                     />
@@ -1698,11 +1704,11 @@ export default function VendorDashboard({ user, orders = [], onGoToHome, onGoToP
               </div>
 
               <div className="form-group" style={{ display: 'flex', alignItems: 'center', gap: '8px', marginTop: '10px', marginBottom: '10px' }}>
-                <input 
-                  type="checkbox" 
+                <input
+                  type="checkbox"
                   id="couponsEnabled"
                   checked={productForm.couponsEnabled}
-                  onChange={(e) => setProductForm({...productForm, couponsEnabled: e.target.checked})} 
+                  onChange={(e) => setProductForm({ ...productForm, couponsEnabled: e.target.checked })}
                   style={{ width: '16px', height: '16px', cursor: 'pointer' }}
                 />
                 <label htmlFor="couponsEnabled" style={{ fontSize: '13px', cursor: 'pointer', fontWeight: '500' }}>
@@ -1712,9 +1718,9 @@ export default function VendorDashboard({ user, orders = [], onGoToHome, onGoToP
 
               <div className="form-group">
                 <label className="form-label" style={{ fontWeight: '600' }}>Return Policy Eligibility</label>
-                <select 
-                  value={productForm.returnPolicy || '7_DAYS'} 
-                  onChange={(e) => setProductForm({...productForm, returnPolicy: e.target.value})}
+                <select
+                  value={productForm.returnPolicy || '7_DAYS'}
+                  onChange={(e) => setProductForm({ ...productForm, returnPolicy: e.target.value })}
                   className="form-select"
                   style={{ padding: '8px', fontSize: '13px' }}
                 >
@@ -1773,12 +1779,12 @@ export default function VendorDashboard({ user, orders = [], onGoToHome, onGoToP
                             <span style={{ fontSize: '14px', fontWeight: '600', textDecoration: 'line-through', color: '#94a3b8', textDecorationColor: '#ef4444', textDecorationThickness: '1.5px' }}>
                               ₹{p.toLocaleString('en-IN')}
                             </span>
-                            <span style={{ 
-                              background: 'linear-gradient(135deg, #ef4444 0%, #dc2626 100%)', 
-                              color: '#ffffff', 
-                              fontWeight: '800', 
-                              fontSize: '11px', 
-                              padding: '2px 8px', 
+                            <span style={{
+                              background: 'linear-gradient(135deg, #ef4444 0%, #dc2626 100%)',
+                              color: '#ffffff',
+                              fontWeight: '800',
+                              fontSize: '11px',
+                              padding: '2px 8px',
                               borderRadius: '4px',
                               boxShadow: '0 2px 6px rgba(239, 68, 68, 0.4)'
                             }}>
@@ -1789,14 +1795,14 @@ export default function VendorDashboard({ user, orders = [], onGoToHome, onGoToP
                       </div>
                     </div>
                     {d > 0 && p > 0 && (
-                      <div style={{ 
-                        background: 'rgba(16, 185, 129, 0.16)', 
-                        border: '1px solid rgba(16, 185, 129, 0.4)', 
-                        padding: '6px 12px', 
-                        borderRadius: '6px', 
-                        fontSize: '13px', 
+                      <div style={{
+                        background: 'rgba(16, 185, 129, 0.16)',
+                        border: '1px solid rgba(16, 185, 129, 0.4)',
+                        padding: '6px 12px',
+                        borderRadius: '6px',
+                        fontSize: '13px',
                         fontWeight: '700',
-                        color: '#10b981' 
+                        color: '#10b981'
                       }}>
                         Customer Saves: <strong>₹{savings.toLocaleString('en-IN')}</strong>
                       </div>
@@ -1807,13 +1813,13 @@ export default function VendorDashboard({ user, orders = [], onGoToHome, onGoToP
 
               <div className="form-group" style={{ borderTop: '1px solid var(--border-light)', paddingTop: '16px' }}>
                 <label className="form-label" style={{ fontWeight: '700' }}>Product Images & Gallery</label>
-                
+
                 {/* Image Upload / Input controls */}
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '10px', marginBottom: '16px' }}>
                   {/* File Upload Row */}
                   <div style={{ display: 'flex', gap: '10px', alignItems: 'center' }}>
-                    <label 
-                      className={`btn ${isUploadingImage ? 'btn-secondary disabled' : 'btn-secondary'}`} 
+                    <label
+                      className={`btn ${isUploadingImage ? 'btn-secondary disabled' : 'btn-secondary'}`}
                       style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px', cursor: isUploadingImage ? 'not-allowed' : 'pointer', margin: 0, padding: '8px 12px', fontSize: '13px', opacity: isUploadingImage ? 0.7 : 1 }}
                     >
                       {isUploadingImage ? (
@@ -1826,18 +1832,18 @@ export default function VendorDashboard({ user, orders = [], onGoToHome, onGoToP
                           <Plus size={16} /> Upload Image File (Stores on Disk)
                         </>
                       )}
-                      <input 
-                        type="file" 
-                        accept="image/*" 
-                        multiple 
+                      <input
+                        type="file"
+                        accept="image/*"
+                        multiple
                         disabled={isUploadingImage}
-                        onChange={handleImageUpload} 
-                        style={{ display: 'none' }} 
+                        onChange={handleImageUpload}
+                        style={{ display: 'none' }}
                       />
                     </label>
-                    
+
                     {/* Emoji Select option to quickly add visual icons */}
-                    <select 
+                    <select
                       onChange={(e) => {
                         if (e.target.value) {
                           handleAddImageUrl(e.target.value);
@@ -1866,10 +1872,10 @@ export default function VendorDashboard({ user, orders = [], onGoToHome, onGoToP
 
                   {/* Manual URL Row */}
                   <div style={{ display: 'flex', gap: '8px' }}>
-                    <input 
-                      type="text" 
+                    <input
+                      type="text"
                       id="manual-image-url"
-                      placeholder="Paste Image URL here..." 
+                      placeholder="Paste Image URL here..."
                       className="form-input"
                       style={{ flex: 1, padding: '6px 10px', fontSize: '13px' }}
                       onKeyDown={(e) => {
@@ -1880,9 +1886,9 @@ export default function VendorDashboard({ user, orders = [], onGoToHome, onGoToP
                         }
                       }}
                     />
-                    <button 
-                      type="button" 
-                      className="btn btn-secondary" 
+                    <button
+                      type="button"
+                      className="btn btn-secondary"
                       style={{ padding: '6px 12px', fontSize: '12px' }}
                       onClick={() => {
                         const input = document.getElementById('manual-image-url');
@@ -1904,8 +1910,8 @@ export default function VendorDashboard({ user, orders = [], onGoToHome, onGoToP
                       const isPrimary = productForm.imageUrl === img;
                       const isEmoji = img.length <= 4; // Emojis are short strings
                       return (
-                        <div 
-                          key={idx} 
+                        <div
+                          key={idx}
                           style={{ position: 'relative', aspectRatio: '1', borderRadius: '6px', overflow: 'hidden', border: isPrimary ? '2px solid var(--accent-indigo)' : '1px solid var(--border-light)', background: 'var(--bg-card)', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer' }}
                           title={isPrimary ? "Primary Cover Image" : "Click to set as primary"}
                           onClick={() => handleSetPrimaryImage(img)}
@@ -2008,7 +2014,7 @@ export default function VendorDashboard({ user, orders = [], onGoToHome, onGoToP
                       <thead>
                         <tr>
                           <th style={{ width: '32px', padding: '6px' }}>
-                            <input 
+                            <input
                               type="checkbox"
                               checked={selectedPromoProductIds.length === products.length && products.length > 0}
                               onChange={(e) => {
@@ -2039,15 +2045,15 @@ export default function VendorDashboard({ user, orders = [], onGoToHome, onGoToP
                           products.map((prod) => {
                             const isChecked = selectedPromoProductIds.includes(prod.id);
                             return (
-                              <tr 
-                                key={prod.id} 
-                                style={{ 
+                              <tr
+                                key={prod.id}
+                                style={{
                                   background: isChecked ? 'rgba(20, 184, 166, 0.08)' : 'transparent',
                                   transition: 'background-color 0.2s'
                                 }}
                               >
                                 <td style={{ padding: '6px', textAlign: 'center' }}>
-                                  <input 
+                                  <input
                                     type="checkbox"
                                     checked={isChecked}
                                     onChange={(e) => {
@@ -2098,9 +2104,9 @@ export default function VendorDashboard({ user, orders = [], onGoToHome, onGoToP
               <button type="button" onClick={() => setShowAcceptPromoModal(false)} className="btn btn-secondary">
                 Cancel
               </button>
-              <button 
-                type="button" 
-                onClick={() => submitApproveCoupon(selectedPromoCode, acceptPromoMode === 'all', selectedPromoProductIds)} 
+              <button
+                type="button"
+                onClick={() => submitApproveCoupon(selectedPromoCode, acceptPromoMode === 'all', selectedPromoProductIds)}
                 className="btn btn-primary"
                 style={{ background: 'var(--accent-teal)' }}
               >
@@ -2151,7 +2157,7 @@ export default function VendorDashboard({ user, orders = [], onGoToHome, onGoToP
 
               <div className="form-group">
                 <label className="form-label" style={{ fontWeight: '700' }}>Available Stock Units</label>
-                <input 
+                <input
                   type="number"
                   value={quickStockValue}
                   onChange={(e) => setQuickStockValue(Math.max(0, parseInt(e.target.value) || 0))}
@@ -2165,33 +2171,33 @@ export default function VendorDashboard({ user, orders = [], onGoToHome, onGoToP
 
               {/* Quick Preset Buttons */}
               <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
-                <button 
-                  type="button" 
-                  className="btn btn-secondary" 
+                <button
+                  type="button"
+                  className="btn btn-secondary"
                   style={{ flex: 1, padding: '6px 8px', fontSize: '12px' }}
                   onClick={() => setQuickStockValue(0)}
                 >
                   Set 0 (Out of Stock)
                 </button>
-                <button 
-                  type="button" 
-                  className="btn btn-secondary" 
+                <button
+                  type="button"
+                  className="btn btn-secondary"
                   style={{ flex: 1, padding: '6px 8px', fontSize: '12px' }}
                   onClick={() => setQuickStockValue(prev => (parseInt(prev) || 0) + 10)}
                 >
                   +10
                 </button>
-                <button 
-                  type="button" 
-                  className="btn btn-secondary" 
+                <button
+                  type="button"
+                  className="btn btn-secondary"
                   style={{ flex: 1, padding: '6px 8px', fontSize: '12px' }}
                   onClick={() => setQuickStockValue(prev => (parseInt(prev) || 0) + 50)}
                 >
                   +50
                 </button>
-                <button 
-                  type="button" 
-                  className="btn btn-secondary" 
+                <button
+                  type="button"
+                  className="btn btn-secondary"
                   style={{ flex: 1, padding: '6px 8px', fontSize: '12px' }}
                   onClick={() => setQuickStockValue(prev => (parseInt(prev) || 0) + 100)}
                 >
@@ -2200,17 +2206,17 @@ export default function VendorDashboard({ user, orders = [], onGoToHome, onGoToP
               </div>
 
               <div style={{ display: 'flex', gap: '10px', marginTop: '10px' }}>
-                <button 
-                  type="button" 
-                  onClick={() => setStockModalProduct(null)} 
+                <button
+                  type="button"
+                  onClick={() => setStockModalProduct(null)}
                   className="btn btn-secondary"
                   style={{ flex: 1 }}
                 >
                   Cancel
                 </button>
-                <button 
-                  type="submit" 
-                  disabled={isUpdatingStock} 
+                <button
+                  type="submit"
+                  disabled={isUpdatingStock}
                   className="btn btn-primary"
                   style={{ flex: 2 }}
                 >

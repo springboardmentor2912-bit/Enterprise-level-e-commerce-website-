@@ -1,26 +1,26 @@
 import React, { useState, useRef, useEffect, useMemo } from 'react';
-import { 
-  Bell, 
-  Check, 
-  CheckCheck, 
-  Trash2, 
-  Tag, 
-  Package, 
-  Truck, 
-  CreditCard, 
-  Percent, 
-  Gift, 
-  Sparkles, 
-  AlertTriangle, 
-  ShieldAlert, 
-  CheckCircle2, 
-  Clock, 
-  ArrowRight, 
-  Copy, 
-  X, 
-  Store, 
-  TrendingUp, 
-  Box, 
+import {
+  Bell,
+  Check,
+  CheckCheck,
+  Trash2,
+  Tag,
+  Package,
+  Truck,
+  CreditCard,
+  Percent,
+  Gift,
+  Sparkles,
+  AlertTriangle,
+  ShieldAlert,
+  CheckCircle2,
+  Clock,
+  ArrowRight,
+  Copy,
+  X,
+  Store,
+  TrendingUp,
+  Box,
   Layers,
   ShoppingBag,
   Info
@@ -197,7 +197,7 @@ export default function NotificationCenter({
     if (unreadCount > 0) {
       baseTabs.push({ key: 'unread', label: 'Unread', count: unreadCount });
     }
-    
+
     // Categorize with deduplication and normalized keys
     const seenCats = new Set();
     notifications.forEach(n => {
@@ -216,12 +216,12 @@ export default function NotificationCenter({
   return (
     <div className="notification-bell-container" ref={dropdownRef} style={{ position: 'relative' }}>
       {/* Bell Trigger Button */}
-      <button 
+      <button
         type="button"
-        onClick={() => setIsOpen(prev => !prev)} 
-        className={buttonClassName} 
-        style={{ 
-          position: 'relative', 
+        onClick={() => setIsOpen(prev => !prev)}
+        className={buttonClassName}
+        style={{
+          position: 'relative',
           cursor: 'pointer',
           display: 'flex',
           alignItems: 'center',
@@ -242,10 +242,10 @@ export default function NotificationCenter({
 
       {/* Dropdown Panel */}
       {isOpen && (
-        <div 
-          className="notifications-dropdown modern-notif-panel" 
-          style={{ 
-            right: align === 'right' ? 0 : 'auto', 
+        <div
+          className="notifications-dropdown modern-notif-panel"
+          style={{
+            right: align === 'right' ? 0 : 'auto',
             left: align === 'left' ? 0 : 'auto',
             width: 'min(420px, calc(100vw - 20px))',
             maxHeight: '540px',
@@ -325,15 +325,15 @@ export default function NotificationCenter({
                   No notifications
                 </strong>
                 <p style={{ fontSize: '11.5px', color: 'var(--text-muted)', margin: '4px 0 0 0', textAlign: 'center', maxWidth: '240px' }}>
-                  {activeTab === 'unread' 
-                    ? "You've read all your notifications!" 
+                  {activeTab === 'unread'
+                    ? "You've read all your notifications!"
                     : "You're all caught up! No active notifications."}
                 </p>
               </div>
             ) : (
               filteredNotifications.map((item, idx) => (
-                <div 
-                  key={item.id ? `${item.id}_${idx}` : `notif_${idx}`}
+                <div
+                  key={item.id || `notif_${idx}`}
                   className={`notif-card ${!item.read ? 'unread' : ''}`}
                   onClick={() => {
                     if (!item.read && onMarkAsRead) {
@@ -379,12 +379,11 @@ export default function NotificationCenter({
                       )}
 
                       {item.badge && !item.codeToCopy && (
-                        <span className={`badge ${
-                          item.badgeType === 'success' ? 'badge-verified' : 
-                          item.badgeType === 'warning' ? 'badge-pending' : 
-                          item.badgeType === 'danger' ? 'badge-rejected' : 
-                          item.badgeType === 'purple' ? 'badge-vendor' : 'badge-customer'
-                        }`} style={{ fontSize: '9.5px', padding: '1px 6px' }}>
+                        <span className={`badge ${item.badgeType === 'success' ? 'badge-verified' :
+                            item.badgeType === 'warning' ? 'badge-pending' :
+                              item.badgeType === 'danger' ? 'badge-rejected' :
+                                item.badgeType === 'purple' ? 'badge-vendor' : 'badge-customer'
+                          }`} style={{ fontSize: '9.5px', padding: '1px 6px' }}>
                           {item.badge}
                         </span>
                       )}

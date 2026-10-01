@@ -1,8 +1,4 @@
-/**
- * ShopStack Notification Service
- * Manages real dynamic notifications and read/unread states for each dashboard
- * strictly based on live user role and data without mock coupons or promotional noise.
- */
+import axios from 'axios';
 
 const NOTIF_STORAGE_KEY_PREFIX = 'shopstack_read_notifs_';
 const NOTIF_DISMISSED_KEY_PREFIX = 'shopstack_dismissed_notifs_';
@@ -13,6 +9,52 @@ export function resolveUserId(userOrId) {
     return userOrId.id || userOrId.email || 'guest';
   }
   return String(userOrId);
+}
+
+export function resolveNumericUserId(userOrId) {
+  if (!userOrId) return null;
+  if (typeof userOrId === 'object') {
+    return userOrId.id ? Number(userOrId.id) : null;
+  }
+  const num = Number(userOrId);
+  return !isNaN(num) ? num : null;
+}
+
+/**
+ * Synchronize read and dismissed notification state across all devices via backend
+ */
+export async function syncNotificationsWithServer(userOrId) {
+  const numericId = resolveNumericUserId(userOrId);
+  const uid = resolveUserId(userOrId);
+  if (!numericId || uid === 'guest') return;
+
+  try {
+    const res = await axios.get(`http://localhost:8080/api/customer/${numericId}/notifications`);
+    if (res.data) {
+      const serverDismissed = Array.isArray(res.data.dismissed) ? res.data.dismissed : [];
+      const serverRead = Array.isArray(res.data.read) ? res.data.read : [];
+
+      const localDismissed = getDismissedNotifIds(uid);
+      const localRead = getReadNotifIds(uid);
+
+      // Merge local and server state
+      const mergedDismissed = [...new Set([...localDismissed, ...serverDismissed])].filter(id => id !== '__all__');
+      const mergedRead = [...new Set([...localRead, ...serverRead])];
+
+      localStorage.setItem(`${NOTIF_DISMISSED_KEY_PREFIX}${uid}`, JSON.stringify(mergedDismissed));
+      localStorage.setItem(`${NOTIF_STORAGE_KEY_PREFIX}${uid}`, JSON.stringify(mergedRead));
+
+      // If local had unsynced dismissed items, push them to server
+      const unsyncedDismissed = localDismissed.filter(id => !serverDismissed.includes(id));
+      if (unsyncedDismissed.length > 0) {
+        axios.post(`http://localhost:8080/api/customer/${numericId}/notifications/dismiss`, {
+          notifIds: unsyncedDismissed
+        }).catch(() => { });
+      }
+    }
+  } catch (e) {
+    // Graceful offline fallback to localStorage
+  }
 }
 
 export function getReadNotifIds(userId = 'guest') {
@@ -40,7 +82,14 @@ export function markNotifAsRead(notifId, userId = 'guest') {
       ids.push(notifId);
       localStorage.setItem(`${NOTIF_STORAGE_KEY_PREFIX}${uid}`, JSON.stringify(ids));
     }
-  } catch (e) {}
+
+    const numericId = resolveNumericUserId(userId);
+    if (numericId) {
+      axios.post(`http://localhost:8080/api/customer/${numericId}/notifications/read`, {
+        notifId
+      }).catch(() => { });
+    }
+  } catch (e) { }
 }
 
 export function markAllNotifsAsRead(notifIds = [], userId = 'guest') {
@@ -49,7 +98,14 @@ export function markAllNotifsAsRead(notifIds = [], userId = 'guest') {
     const ids = getReadNotifIds(uid);
     const combined = [...new Set([...ids, ...notifIds])];
     localStorage.setItem(`${NOTIF_STORAGE_KEY_PREFIX}${uid}`, JSON.stringify(combined));
-  } catch (e) {}
+
+    const numericId = resolveNumericUserId(userId);
+    if (numericId && notifIds.length > 0) {
+      axios.post(`http://localhost:8080/api/customer/${numericId}/notifications/read`, {
+        notifIds
+      }).catch(() => { });
+    }
+  } catch (e) { }
 }
 
 export function getDismissedNotifIds(userId = 'guest') {
@@ -77,21 +133,35 @@ export function dismissNotif(notifId, userId = 'guest') {
       ids.push(notifId);
       localStorage.setItem(`${NOTIF_DISMISSED_KEY_PREFIX}${uid}`, JSON.stringify(ids));
     }
-  } catch (e) {}
+
+    const numericId = resolveNumericUserId(userId);
+    if (numericId) {
+      axios.post(`http://localhost:8080/api/customer/${numericId}/notifications/dismiss`, {
+        notifId
+      }).catch(() => { });
+    }
+  } catch (e) { }
 }
 
 export function clearAllNotifs(userId = 'guest', notifIds = []) {
   try {
     const uid = resolveUserId(userId);
-    const ids = getDismissedNotifIds(uid);
+    const ids = getDismissedNotifIds(uid).filter(id => id !== '__all__');
     let combined;
     if (Array.isArray(notifIds) && notifIds.length > 0) {
       combined = [...new Set([...ids, ...notifIds])];
     } else {
-      combined = [...new Set([...ids, '__all__'])];
+      combined = [...ids];
     }
     localStorage.setItem(`${NOTIF_DISMISSED_KEY_PREFIX}${uid}`, JSON.stringify(combined));
-  } catch (e) {}
+
+    const numericId = resolveNumericUserId(userId);
+    if (numericId && Array.isArray(notifIds) && notifIds.length > 0) {
+      axios.post(`http://localhost:8080/api/customer/${numericId}/notifications/clear`, {
+        notifIds
+      }).catch(() => { });
+    }
+  } catch (e) { }
 }
 
 /**
@@ -107,26 +177,25 @@ export function generateCustomerNotifications({
   const userId = resolveUserId(user);
   const readIds = getReadNotifIds(userId);
   const dismissedIds = getDismissedNotifIds(userId);
-  if (dismissedIds.includes('__all__')) return [];
 
   const list = [];
 
   // 1. Promotional Coupon Notifications from active campaigns
   if (Array.isArray(coupons) && coupons.length > 0) {
-    coupons.forEach((coupon, idx) => {
+    coupons.forEach((coupon) => {
       if (coupon.active === false) return;
       const code = coupon.code ? coupon.code.toUpperCase().trim() : '';
       if (!code) return;
-      const discountLabel = coupon.discountType === 'PERCENTAGE' 
-        ? `${coupon.discountValue}% OFF` 
+      const discountLabel = coupon.discountType === 'PERCENTAGE'
+        ? `${coupon.discountValue}% OFF`
         : `₹${coupon.discountValue} OFF`;
-      const minOrderText = coupon.minOrderAmount 
-        ? ` on orders above ₹${Number(coupon.minOrderAmount).toLocaleString('en-IN')}` 
+      const minOrderText = coupon.minOrderAmount
+        ? ` on orders above ₹${Number(coupon.minOrderAmount).toLocaleString('en-IN')}`
         : '';
-      const expiryText = coupon.expiryDate 
-        ? ` Valid until ${coupon.expiryDate.replace('T', ' ').substring(0, 16)}.` 
+      const expiryText = coupon.expiryDate
+        ? ` Valid until ${coupon.expiryDate.replace('T', ' ').substring(0, 16)}.`
         : '';
-      const uniqueSuffix = coupon.id || code || idx;
+      const uniqueSuffix = coupon.id ? `id_${coupon.id}` : `code_${code}`;
 
       list.push({
         id: `cust_coupon_${uniqueSuffix}`,
@@ -144,14 +213,14 @@ export function generateCustomerNotifications({
     });
   }
 
-  // 2. Order Lifecycle Notifications from real customer orders
+  // 2. Order Lifecycle Notifications from real customer orders (using deterministic order IDs)
   if (Array.isArray(orders)) {
     orders.forEach((order, idx) => {
-      const orderId = order.id || order.orderId || `ORD-${idx + 1}`;
+      const orderId = order.id || order.orderId || (order.trackingNumber ? `TRK-${order.trackingNumber}` : `ORD-${idx + 1}`);
       const status = (order.orderStatus || order.status || 'PLACED').toUpperCase();
       const amount = Number(order.totalAmount || 0).toLocaleString('en-IN');
       const itemCount = order.items?.length || 1;
-      const uniqueSuffix = `${orderId}_${idx}`;
+      const uniqueSuffix = `${orderId}`;
 
       if (status === 'PLACED' || status === 'PROCESSING' || status === 'CONFIRMED') {
         const notifId = `cust_order_conf_${uniqueSuffix}`;
@@ -257,13 +326,13 @@ export function generateVendorNotifications({
 
   // 1. Promotional Coupon Campaigns from Admin (Pending Review or Accepted)
   if (Array.isArray(coupons) && coupons.length > 0) {
-    coupons.forEach((coupon, idx) => {
+    coupons.forEach((coupon) => {
       const code = coupon.code ? coupon.code.toUpperCase().trim() : '';
       if (!code) return;
-      const discountLabel = coupon.discountType === 'PERCENTAGE' 
-        ? `${coupon.discountValue}% Off` 
+      const discountLabel = coupon.discountType === 'PERCENTAGE'
+        ? `${coupon.discountValue}% Off`
         : `₹${coupon.discountValue} Off`;
-      const uniqueSuffix = coupon.id || code || idx;
+      const uniqueSuffix = coupon.id ? `id_${coupon.id}` : `code_${code}`;
       const status = (coupon.approvalStatus || 'PENDING').toUpperCase();
 
       if (status === 'PENDING') {
@@ -301,10 +370,10 @@ export function generateVendorNotifications({
   // 2. Personal Purchase Orders (Vendor ordering as a customer)
   if (Array.isArray(purchaseOrders) && purchaseOrders.length > 0) {
     purchaseOrders.forEach((pOrder, idx) => {
-      const orderId = pOrder.orderId || pOrder.id || `ORD-${idx + 1}`;
+      const orderId = pOrder.orderId || pOrder.id || (pOrder.trackingNumber ? `TRK-${pOrder.trackingNumber}` : `ORD-${idx + 1}`);
       const status = (pOrder.orderStatus || pOrder.status || 'PLACED').toUpperCase();
       const amount = Number(pOrder.totalAmount || 0).toLocaleString('en-IN');
-      const uniqueSuffix = `${orderId}_${idx}`;
+      const uniqueSuffix = `${orderId}`;
 
       if (status === 'PLACED' || status === 'PROCESSING' || status === 'CONFIRMED') {
         list.push({
@@ -367,7 +436,7 @@ export function generateVendorNotifications({
     orders.forEach((order, idx) => {
       const orderId = order.orderId || order.id || (order.orderItemId ? `ITEM-${order.orderItemId}` : `104${idx + 1}`);
       const amount = Number(order.totalAmount || order.price || 0).toLocaleString('en-IN');
-      const uniqueSuffix = order.orderItemId ? `item_${order.orderItemId}` : `${orderId}_${idx}`;
+      const uniqueSuffix = order.orderItemId ? `item_${order.orderItemId}` : (order.id ? `order_${order.id}` : `order_${orderId}`);
       list.push({
         id: `vend_order_new_${uniqueSuffix}`,
         category: 'sales',
@@ -392,7 +461,7 @@ export function generateVendorNotifications({
     if (approvedProducts.length > 0) {
       const p = approvedProducts[0];
       list.push({
-        id: `vend_prod_appr_${p.id || 1}`,
+        id: `vend_prod_appr_${p.id || p.name || 'main'}`,
         category: 'products',
         iconType: 'product_approved',
         title: `Product Approved: ${p.name || 'Listing'}`,
@@ -407,7 +476,7 @@ export function generateVendorNotifications({
 
     if (pendingProducts.length > 0) {
       list.push({
-        id: `vend_prod_pend_${pendingProducts.length}`,
+        id: `vend_prod_pend_${pendingProducts.map(p => p.id).filter(Boolean).join('_') || 'all'}`,
         category: 'products',
         iconType: 'product_pending',
         title: `${pendingProducts.length} Listing(s) in Review`,
@@ -424,7 +493,7 @@ export function generateVendorNotifications({
     if (lowStockProducts.length > 0) {
       const p = lowStockProducts[0];
       list.push({
-        id: `vend_stock_low_${p.id || 3}`,
+        id: `vend_stock_low_${p.id || p.name || 'main'}`,
         category: 'products',
         iconType: 'low_stock',
         title: `Low Stock: ${p.name || 'Product'}`,
@@ -459,14 +528,13 @@ export function generateAdminNotifications({
   const userId = resolveUserId(user || 'admin');
   const readIds = getReadNotifIds(userId);
   const dismissedIds = getDismissedNotifIds(userId);
-  if (dismissedIds.includes('__all__')) return [];
 
   const list = [];
 
   // 1. Pending Product Submissions
   if (pendingProductsCount > 0) {
     list.push({
-      id: `admin_pend_prods_${pendingProductsCount}`,
+      id: 'admin_pend_prods',
       category: 'approvals',
       iconType: 'admin_alert',
       title: `${pendingProductsCount} Product(s) Pending Review`,
@@ -530,14 +598,13 @@ export function generateWarehouseNotifications({
   const userId = resolveUserId(user || 'staff');
   const readIds = getReadNotifIds(userId);
   const dismissedIds = getDismissedNotifIds(userId);
-  if (dismissedIds.includes('__all__')) return [];
 
   const list = [];
 
   // Order Allocations for picking
   if (pendingAllocationsCount > 0) {
     list.push({
-      id: `wh_alloc_tasks_${pendingAllocationsCount}`,
+      id: 'wh_alloc_tasks',
       category: 'picking',
       iconType: 'warehouse_alloc',
       title: `${pendingAllocationsCount} Pick Tasks Assigned`,

@@ -1,10 +1,10 @@
 import React, { useState, useEffect, useRef } from 'react';
 import axios from 'axios';
-import { 
+import {
   Check, X, ShieldAlert, AlertCircle, Bell, Store, Mail, Phone, MapPin, User,
   Activity, Receipt, IndianRupee, RefreshCw, Search, RotateCcw, CheckCircle, CheckCircle2,
   Clock, AlertTriangle, Eye, DollarSign, Package, ShieldCheck, ArrowRight,
-  Truck, CornerUpLeft, ThumbsUp, ThumbsDown, Users, BarChart3, Settings, 
+  Truck, CornerUpLeft, ThumbsUp, ThumbsDown, Users, BarChart3, Settings,
   FileSpreadsheet, HardDrive, Database, TrendingUp, Ticket, ArrowRightLeft, Plus, FileText,
   Trash2, Layers, Tag, ExternalLink, Power, Ban, Sun, Moon, ArrowLeft, ChevronDown, LogOut,
   Star, MessageSquare
@@ -13,12 +13,13 @@ import ProductIcon from './ProductIcon';
 import NotificationCenter from './NotificationCenter';
 import { extractErrorMessage } from '../utils/errorHandler';
 import { formatImageUrl } from '../utils/imageHelper';
-import { 
-  generateAdminNotifications, 
-  markNotifAsRead, 
-  markAllNotifsAsRead, 
-  clearAllNotifs, 
-  dismissNotif 
+import {
+  generateAdminNotifications,
+  markNotifAsRead,
+  markAllNotifsAsRead,
+  clearAllNotifs,
+  dismissNotif,
+  syncNotificationsWithServer
 } from '../utils/notificationService';
 
 export default function AdminDashboard({ user, onGoToHome, onGoToProfile, theme, onToggleTheme, onLogout, initialTab = 'overview' }) {
@@ -75,10 +76,10 @@ export default function AdminDashboard({ user, onGoToHome, onGoToProfile, theme,
     active: true
   });
   const [isEditingCoupon, setIsEditingCoupon] = useState(false);
-  
+
   // Notification states
   const [showNotifications, setShowNotifications] = useState(false);
-  
+
   // Product Modal states
   const [showReviewModal, setShowReviewModal] = useState(false);
   const [selectedProduct, setSelectedProduct] = useState(null);
@@ -140,6 +141,14 @@ export default function AdminDashboard({ user, onGoToHome, onGoToProfile, theme,
     });
     setNotificationList(list);
   };
+
+  useEffect(() => {
+    if (user?.id) {
+      syncNotificationsWithServer(user.id).then(() => {
+        refreshNotifications();
+      });
+    }
+  }, [user?.id]);
 
   useEffect(() => {
     refreshNotifications();
@@ -392,7 +401,7 @@ export default function AdminDashboard({ user, onGoToHome, onGoToProfile, theme,
                 transferReason: adminTransferForm.transferReason || 'VENDOR_STOCK_DISTRIBUTION',
                 notes: adminTransferForm.notes || 'Vendor listed stock distributed across regional fulfillment hubs.'
               });
-            } catch (ignore) {}
+            } catch (ignore) { }
           }
         }
         showFlash('success', `Vendor stock (${totalUnits} units) distributed across regional warehouses successfully!`);
@@ -551,7 +560,7 @@ export default function AdminDashboard({ user, onGoToHome, onGoToProfile, theme,
       const res = await axios.get(`http://localhost:8080/api/admin/reports/export?type=${type}`, {
         responseType: 'blob'
       });
-      
+
       let filename = `report_${type.toLowerCase()}_${Date.now()}.csv`;
       const disposition = res.headers && (res.headers['content-disposition'] || res.headers['Content-Disposition']);
       if (disposition && disposition.indexOf('filename=') !== -1) {
@@ -601,7 +610,7 @@ export default function AdminDashboard({ user, onGoToHome, onGoToProfile, theme,
       alert("Coupon code is required");
       return;
     }
-    
+
     const payload = {
       ...couponFormData,
       code: couponFormData.code.toUpperCase().trim(),
@@ -654,7 +663,7 @@ export default function AdminDashboard({ user, onGoToHome, onGoToProfile, theme,
     const tzOffset = new Date().getTimezoneOffset() * 60000;
     const nowLocalDate = new Date(Date.now() - tzOffset).toISOString();
     const futureLocalDate = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000 - tzOffset).toISOString();
-    
+
     setCouponFormData({
       id: null,
       code: '',
@@ -721,7 +730,7 @@ export default function AdminDashboard({ user, onGoToHome, onGoToProfile, theme,
               productStats[pName] = { name: pName, returns: 0, sales: 0 };
             }
             productStats[pName].returns += item.quantity;
-            
+
             const vKey = item.vendorId || 'SYSTEM';
             if (!vendorStats[vKey]) {
               vendorStats[vKey] = { vendorId: vKey, returns: 0, sales: 0 };
@@ -1160,9 +1169,9 @@ export default function AdminDashboard({ user, onGoToHome, onGoToProfile, theme,
         </div>
 
         <div className="nav-right">
-          <button 
+          <button
             type="button"
-            onClick={onGoToHome} 
+            onClick={onGoToHome}
             className="btn-store-nav"
             title="Browse Catalog & Inspect Products"
           >
@@ -1184,11 +1193,11 @@ export default function AdminDashboard({ user, onGoToHome, onGoToProfile, theme,
             align="right"
           />
 
-          <div 
+          <div
             className="nav-user-menu"
             ref={userMenuRef}
           >
-            <div 
+            <div
               className="nav-user-trigger"
               onClick={(e) => {
                 e.stopPropagation();
@@ -1200,13 +1209,13 @@ export default function AdminDashboard({ user, onGoToHome, onGoToProfile, theme,
                 <User size={14} style={{ color: 'var(--accent-rose)', flexShrink: 0 }} />
               </div>
               <strong className="nav-user-name">{user?.fullName || 'Admin'}</strong>
-              <ChevronDown 
-                size={13} 
+              <ChevronDown
+                size={13}
                 className="nav-user-chevron"
-                style={{ 
+                style={{
                   transform: showUserDropdown ? 'rotate(180deg)' : 'none',
                   transition: 'transform 0.2s ease'
-                }} 
+                }}
               />
             </div>
 
@@ -1224,11 +1233,11 @@ export default function AdminDashboard({ user, onGoToHome, onGoToProfile, theme,
                   </div>
                 </div>
 
-                <div 
-                  onClick={() => { 
-                    setShowUserDropdown(false); 
-                    if (onGoToProfile) onGoToProfile('profile'); 
-                  }} 
+                <div
+                  onClick={() => {
+                    setShowUserDropdown(false);
+                    if (onGoToProfile) onGoToProfile('profile');
+                  }}
                   className="dropdown-item"
                 >
                   <User size={16} style={{ flexShrink: 0 }} /> <span>My Profile</span>
@@ -1238,12 +1247,12 @@ export default function AdminDashboard({ user, onGoToHome, onGoToProfile, theme,
 
                 {/* Light / Dark Mode Toggle Button */}
                 {onToggleTheme && (
-                  <div 
-                    onClick={(e) => { 
-                      e.stopPropagation(); 
-                      onToggleTheme(); 
-                    }} 
-                    className="dropdown-item" 
+                  <div
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      onToggleTheme();
+                    }}
+                    className="dropdown-item"
                     style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', cursor: 'pointer' }}
                   >
                     <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
@@ -1254,15 +1263,15 @@ export default function AdminDashboard({ user, onGoToHome, onGoToProfile, theme,
                       )}
                       <span>{theme === 'dark' ? 'Light Mode' : 'Dark Mode'}</span>
                     </div>
-                    <span 
-                      style={{ 
-                        fontSize: '10px', 
-                        fontWeight: '700', 
-                        padding: '2px 6px', 
-                        borderRadius: '4px', 
-                        background: 'var(--bg-input)', 
-                        color: 'var(--text-secondary)', 
-                        border: '1px solid var(--border-light)' 
+                    <span
+                      style={{
+                        fontSize: '10px',
+                        fontWeight: '700',
+                        padding: '2px 6px',
+                        borderRadius: '4px',
+                        background: 'var(--bg-input)',
+                        color: 'var(--text-secondary)',
+                        border: '1px solid var(--border-light)'
                       }}
                     >
                       {theme === 'dark' ? 'DARK' : 'LIGHT'}
@@ -1274,12 +1283,12 @@ export default function AdminDashboard({ user, onGoToHome, onGoToProfile, theme,
 
                 {/* Logout Button */}
                 {onLogout && (
-                  <div 
-                    onClick={() => { 
-                      setShowUserDropdown(false); 
-                      onLogout(); 
-                    }} 
-                    className="dropdown-item dropdown-item-danger" 
+                  <div
+                    onClick={() => {
+                      setShowUserDropdown(false);
+                      onLogout();
+                    }}
+                    className="dropdown-item dropdown-item-danger"
                     style={{ color: 'var(--accent-rose)', fontWeight: '600' }}
                   >
                     <LogOut size={16} style={{ flexShrink: 0 }} /> <span>Logout</span>
@@ -1461,9 +1470,9 @@ export default function AdminDashboard({ user, onGoToHome, onGoToProfile, theme,
                     Real-time performance ledger, revenue growth metrics, and catalog statistics.
                   </p>
                 </div>
-                <button 
-                  type="button" 
-                  onClick={fetchDashboardSummary} 
+                <button
+                  type="button"
+                  onClick={fetchDashboardSummary}
                   className="btn btn-secondary"
                   style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '12px', padding: '8px 16px' }}
                 >
@@ -1482,8 +1491,8 @@ export default function AdminDashboard({ user, onGoToHome, onGoToProfile, theme,
                     ₹{dashboardSummary.totalSalesVolume?.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                   </div>
                   <div className="analytics-card-desc">
-                    {dashboardSummary.totalRefunded > 0 
-                      ? `Verified volume (₹${dashboardSummary.totalRefunded?.toLocaleString('en-IN')} refunded)` 
+                    {dashboardSummary.totalRefunded > 0
+                      ? `Verified volume (₹${dashboardSummary.totalRefunded?.toLocaleString('en-IN')} refunded)`
                       : 'Verified transaction volume'}
                   </div>
                 </div>
@@ -1497,8 +1506,8 @@ export default function AdminDashboard({ user, onGoToHome, onGoToProfile, theme,
                     ₹{dashboardSummary.totalCommission?.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                   </div>
                   <div className="analytics-card-desc">
-                    {dashboardSummary.totalRefunded > 0 
-                      ? `Net fees (₹${(dashboardSummary.totalRefunded * 0.1).toFixed(2)} reversed)` 
+                    {dashboardSummary.totalRefunded > 0
+                      ? `Net fees (₹${(dashboardSummary.totalRefunded * 0.1).toFixed(2)} reversed)`
                       : 'Commission fee collected'}
                   </div>
                 </div>
@@ -1512,8 +1521,8 @@ export default function AdminDashboard({ user, onGoToHome, onGoToProfile, theme,
                     ₹{dashboardSummary.totalPayouts?.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                   </div>
                   <div className="analytics-card-desc">
-                    {dashboardSummary.totalRefunded > 0 
-                      ? `Net transfers (deducted ₹${dashboardSummary.totalRefunded?.toLocaleString('en-IN')})` 
+                    {dashboardSummary.totalRefunded > 0
+                      ? `Net transfers (deducted ₹${dashboardSummary.totalRefunded?.toLocaleString('en-IN')})`
                       : 'Disbursed & pending transfers'}
                   </div>
                 </div>
@@ -1646,27 +1655,26 @@ export default function AdminDashboard({ user, onGoToHome, onGoToProfile, theme,
                             <td style={{ fontFamily: 'monospace', fontWeight: '700', color: 'var(--accent-blue)' }}>{ord.orderId}</td>
                             <td>{ord.recipientName || 'Customer'}</td>
                             <td>
-                              <span style={{ 
-                                fontSize: '11px', 
-                                fontWeight: '700', 
-                                padding: '3px 8px', 
+                              <span style={{
+                                fontSize: '11px',
+                                fontWeight: '700',
+                                padding: '3px 8px',
                                 borderRadius: '4px',
-                                background: 'var(--bg-input)', 
+                                background: 'var(--bg-input)',
                                 color: 'var(--text-secondary)',
-                                border: '1px solid var(--border-light)' 
+                                border: '1px solid var(--border-light)'
                               }}>
                                 {ord.paymentMethod || 'RAZORPAY'}
                               </span>
                             </td>
                             <td>
-                              <span className={`badge ${
-                                ord.status === 'REFUNDED' ? 'badge-rejected' : 
-                                ord.status === 'DELIVERED' ? 'badge-approved' : 
-                                ord.status === 'SHIPPED' ? 'badge-customer' : 'badge-pending'
-                              }`} style={{ 
-                                fontWeight: '700',
-                                ...(ord.status === 'REFUNDED' ? { background: 'rgba(239, 68, 68, 0.12)', color: '#ef4444', border: '1px solid rgba(239, 68, 68, 0.3)' } : {})
-                              }}>
+                              <span className={`badge ${ord.status === 'REFUNDED' ? 'badge-rejected' :
+                                  ord.status === 'DELIVERED' ? 'badge-approved' :
+                                    ord.status === 'SHIPPED' ? 'badge-customer' : 'badge-pending'
+                                }`} style={{
+                                  fontWeight: '700',
+                                  ...(ord.status === 'REFUNDED' ? { background: 'rgba(239, 68, 68, 0.12)', color: '#ef4444', border: '1px solid rgba(239, 68, 68, 0.3)' } : {})
+                                }}>
                                 {ord.status}
                               </span>
                             </td>
@@ -1693,9 +1701,9 @@ export default function AdminDashboard({ user, onGoToHome, onGoToProfile, theme,
                     Monitor merchant operations, listed items, cumulative platform sales, and commission contributions.
                   </p>
                 </div>
-                <button 
-                  type="button" 
-                  onClick={fetchVendorsList} 
+                <button
+                  type="button"
+                  onClick={fetchVendorsList}
                   className="btn btn-secondary"
                   style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '12px', padding: '6px 14px' }}
                 >
@@ -1706,9 +1714,9 @@ export default function AdminDashboard({ user, onGoToHome, onGoToProfile, theme,
               {/* Vendor Search */}
               <div style={{ position: 'relative', marginBottom: '20px' }}>
                 <Search size={16} style={{ position: 'absolute', left: '12px', top: '50%', transform: 'translateY(-50%)', color: 'var(--text-muted)' }} />
-                <input 
-                  type="text" 
-                  placeholder="Search vendors by name, email, address, or vendor code..." 
+                <input
+                  type="text"
+                  placeholder="Search vendors by name, email, address, or vendor code..."
                   value={vendorSearch}
                   onChange={(e) => setVendorSearch(e.target.value)}
                   className="form-input"
@@ -1742,10 +1750,10 @@ export default function AdminDashboard({ user, onGoToHome, onGoToProfile, theme,
                         .filter(v => {
                           if (!vendorSearch.trim()) return true;
                           const q = vendorSearch.toLowerCase();
-                          return (v.fullName?.toLowerCase().includes(q) || 
-                                  v.email?.toLowerCase().includes(q) || 
-                                  v.address?.toLowerCase().includes(q) || 
-                                  v.vendorCode?.toLowerCase().includes(q));
+                          return (v.fullName?.toLowerCase().includes(q) ||
+                            v.email?.toLowerCase().includes(q) ||
+                            v.address?.toLowerCase().includes(q) ||
+                            v.vendorCode?.toLowerCase().includes(q));
                         })
                         .map(v => (
                           <tr key={v.id}>
@@ -1763,9 +1771,9 @@ export default function AdminDashboard({ user, onGoToHome, onGoToProfile, theme,
                             </td>
                             <td style={{ color: 'var(--accent-emerald)', fontWeight: '700' }}>₹{v.netPayout?.toLocaleString('en-IN')}</td>
                             <td>
-                              <button 
+                              <button
                                 onClick={() => handleInspectVendor(v)}
-                                className="btn btn-secondary" 
+                                className="btn btn-secondary"
                                 style={{ padding: '4px 10px', fontSize: '11px', display: 'inline-flex', alignItems: 'center', gap: '4px' }}
                               >
                                 <Eye size={12} /> Inspect Details
@@ -1793,9 +1801,9 @@ export default function AdminDashboard({ user, onGoToHome, onGoToProfile, theme,
                     Live tracking of API server JVM status, relational database rows, uploads storage capacity, and payment gateway ping metrics.
                   </p>
                 </div>
-                <button 
-                  type="button" 
-                  onClick={fetchSystemStatus} 
+                <button
+                  type="button"
+                  onClick={fetchSystemStatus}
                   className="btn btn-secondary"
                   style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '12px', padding: '6px 14px' }}
                 >
@@ -1857,7 +1865,7 @@ export default function AdminDashboard({ user, onGoToHome, onGoToProfile, theme,
                   <h3 style={{ fontSize: '16px', fontWeight: '700', marginBottom: '16px', display: 'flex', alignItems: 'center', gap: '8px' }}>
                     <HardDrive size={18} style={{ color: 'var(--accent-indigo)' }} /> JVM Memory Allocation Diagnostics
                   </h3>
-                  
+
                   {(() => {
                     const total = systemStatus.jvmMaxMemory || 100;
                     const used = systemStatus.jvmUsedMemory || 0;
@@ -1949,17 +1957,17 @@ export default function AdminDashboard({ user, onGoToHome, onGoToProfile, theme,
                   </p>
                 </div>
                 <div style={{ display: 'flex', gap: '10px' }}>
-                  <button 
-                    type="button" 
-                    onClick={() => fetchReportData(reportType)} 
+                  <button
+                    type="button"
+                    onClick={() => fetchReportData(reportType)}
                     className="btn btn-secondary"
                     style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '12px', padding: '6px 14px' }}
                   >
                     <RefreshCw size={13} className={isLoadingReport ? "spin-animation" : ""} /> Refresh Data
                   </button>
-                  <button 
-                    type="button" 
-                    onClick={() => handleExportCSV(reportType)} 
+                  <button
+                    type="button"
+                    onClick={() => handleExportCSV(reportType)}
                     className="btn btn-primary"
                     style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '12px', padding: '6px 14px', background: 'linear-gradient(135deg, #10b981 0%, #059669 100%)', color: '#fff', borderColor: '#10b981' }}
                   >
@@ -1972,7 +1980,7 @@ export default function AdminDashboard({ user, onGoToHome, onGoToProfile, theme,
               <div style={{ display: 'flex', gap: '12px', marginBottom: '20px', flexWrap: 'wrap' }}>
                 <div className="form-group" style={{ flex: '1', minWidth: '220px', marginBottom: 0 }}>
                   <label className="form-label">Select Report Category</label>
-                  <select 
+                  <select
                     value={reportType}
                     onChange={(e) => { setReportType(e.target.value); fetchReportData(e.target.value); }}
                     className="form-input"
@@ -1988,9 +1996,9 @@ export default function AdminDashboard({ user, onGoToHome, onGoToProfile, theme,
                   <label className="form-label">Quick Search / Filter Results</label>
                   <div style={{ position: 'relative' }}>
                     <Search size={16} style={{ position: 'absolute', left: '12px', top: '50%', transform: 'translateY(-50%)', color: 'var(--text-muted)' }} />
-                    <input 
-                      type="text" 
-                      placeholder="Filter records showing in report..." 
+                    <input
+                      type="text"
+                      placeholder="Filter records showing in report..."
                       value={reportSearch}
                       onChange={(e) => setReportSearch(e.target.value)}
                       className="form-input"
@@ -2210,7 +2218,7 @@ export default function AdminDashboard({ user, onGoToHome, onGoToProfile, theme,
                                 )}
                               </div>
                             </td>
-                            <td 
+                            <td
                               className="clickable-product-name"
                               style={{ fontWeight: '600' }}
                               onClick={() => {
@@ -2230,13 +2238,13 @@ export default function AdminDashboard({ user, onGoToHome, onGoToProfile, theme,
                             </td>
                             <td>
                               {disc > 0 ? (
-                                <span style={{ 
-                                  background: 'linear-gradient(135deg, #ef4444 0%, #dc2626 100%)', 
-                                  color: '#ffffff', 
-                                  fontWeight: '800', 
-                                  fontSize: '11px', 
-                                  padding: '3px 8px', 
-                                  borderRadius: '4px', 
+                                <span style={{
+                                  background: 'linear-gradient(135deg, #ef4444 0%, #dc2626 100%)',
+                                  color: '#ffffff',
+                                  fontWeight: '800',
+                                  fontSize: '11px',
+                                  padding: '3px 8px',
+                                  borderRadius: '4px',
                                   display: 'inline-block'
                                 }}>
                                   {disc}% OFF
@@ -2267,21 +2275,21 @@ export default function AdminDashboard({ user, onGoToHome, onGoToProfile, theme,
                             </td>
                             <td style={{ textAlign: 'center' }}>
                               <div style={{ display: 'flex', gap: '10px', justifyContent: 'center' }}>
-                                <button 
-                                  onClick={() => handleApprove(prod.id, prod.name)} 
-                                  className="btn btn-success" 
+                                <button
+                                  onClick={() => handleApprove(prod.id, prod.name)}
+                                  className="btn btn-success"
                                   style={{ padding: '6px 14px', fontSize: '12px' }}
                                 >
                                   <Check size={14} /> Approve
                                 </button>
-                                <button 
+                                <button
                                   onClick={() => {
                                     setSelectedProduct(prod);
                                     setRejectionReason('');
                                     setShowRejectionInput(true);
                                     setShowReviewModal(true);
-                                  }} 
-                                  className="btn btn-danger" 
+                                  }}
+                                  className="btn btn-danger"
                                   style={{ padding: '6px 14px', fontSize: '12px' }}
                                 >
                                   <X size={14} /> Reject
@@ -2310,9 +2318,9 @@ export default function AdminDashboard({ user, onGoToHome, onGoToProfile, theme,
                     Customer Lifecycle: BUY → RETURN → QUALITY INSPECTION → REFUND DISBURSAL. Admin verifies returned item condition before executing Razorpay payment reversal.
                   </p>
                 </div>
-                <button 
-                  type="button" 
-                  onClick={fetchReturnRequests} 
+                <button
+                  type="button"
+                  onClick={fetchReturnRequests}
                   className="btn btn-secondary"
                   style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '12px', padding: '6px 14px' }}
                 >
@@ -2372,7 +2380,7 @@ export default function AdminDashboard({ user, onGoToHome, onGoToProfile, theme,
                 const { avgCsat, ratingCount, productList, vendorList } = getReturnAnalytics();
                 return (
                   <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '20px', marginBottom: '24px' }}>
-                    
+
                     {/* CSAT Card */}
                     <div className="analytics-card" style={{ padding: '16px', borderLeft: '4px solid var(--accent-teal)', display: 'flex', flexDirection: 'column', justifyContent: 'space-between' }}>
                       <div className="analytics-card-header">
@@ -2432,9 +2440,9 @@ export default function AdminDashboard({ user, onGoToHome, onGoToProfile, theme,
               <div className="dashboard-filter-bar">
                 <div className="dashboard-filter-search">
                   <Search size={16} style={{ position: 'absolute', left: '12px', top: '50%', transform: 'translateY(-50%)', color: 'var(--text-muted)' }} />
-                  <input 
-                    type="text" 
-                    placeholder="Search by Order ID, Reason, or Customer Name..." 
+                  <input
+                    type="text"
+                    placeholder="Search by Order ID, Reason, or Customer Name..."
                     value={returnSearch}
                     onChange={(e) => setReturnSearch(e.target.value)}
                     className="form-input"
@@ -2450,10 +2458,10 @@ export default function AdminDashboard({ user, onGoToHome, onGoToProfile, theme,
                       onClick={() => setReturnFilter(st)}
                       className={`btn ${returnFilter === st ? 'btn-primary' : 'btn-secondary'}`}
                     >
-                      {st === 'PENDING' ? `Pending QC (${pendingReturnsCount})` : 
-                       st === 'ALL' ? `All Requests (${returnRequests.length})` :
-                       st === 'PROCESSED' ? `Approved & Refunded (${returnRequests.filter(r => r.status === 'PROCESSED').length})` :
-                       `Rejected (${returnRequests.filter(r => r.status === 'REJECTED').length})`}
+                      {st === 'PENDING' ? `Pending QC (${pendingReturnsCount})` :
+                        st === 'ALL' ? `All Requests (${returnRequests.length})` :
+                          st === 'PROCESSED' ? `Approved & Refunded (${returnRequests.filter(r => r.status === 'PROCESSED').length})` :
+                            `Rejected (${returnRequests.filter(r => r.status === 'REJECTED').length})`}
                     </button>
                   ))}
                 </div>
@@ -2511,11 +2519,10 @@ export default function AdminDashboard({ user, onGoToHome, onGoToProfile, theme,
                                 {r.recipientPhone && <div style={{ fontSize: '11px', color: 'var(--text-muted)' }}>{r.recipientPhone}</div>}
                               </td>
                               <td>
-                                <span className={`badge ${
-                                  r.returnReasonCategory === 'DEFECTIVE_DAMAGED' ? 'badge-rejected' :
-                                  r.returnReasonCategory === 'WRONG_ITEM' ? 'badge-vendor' :
-                                  r.returnReasonCategory === 'SIZE_FIT_ISSUE' ? 'badge-customer' : 'badge-pending'
-                                }`} style={{ fontSize: '10px' }}>
+                                <span className={`badge ${r.returnReasonCategory === 'DEFECTIVE_DAMAGED' ? 'badge-rejected' :
+                                    r.returnReasonCategory === 'WRONG_ITEM' ? 'badge-vendor' :
+                                      r.returnReasonCategory === 'SIZE_FIT_ISSUE' ? 'badge-customer' : 'badge-pending'
+                                  }`} style={{ fontSize: '10px' }}>
                                   {r.returnReasonCategory || 'DEFECTIVE'}
                                 </span>
                                 <div style={{ fontSize: '11px', color: 'var(--text-secondary)', marginTop: '2px', maxWidth: '180px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }} title={r.reason}>
@@ -2658,20 +2665,20 @@ export default function AdminDashboard({ user, onGoToHome, onGoToProfile, theme,
                   </p>
                 </div>
                 <div style={{ display: 'flex', gap: '10px' }}>
-                  <button 
-                    type="button" 
+                  <button
+                    type="button"
                     onClick={() => {
                       setAdminWhForm({ id: null, name: '', code: '', address: '', city: '', active: true });
                       setShowAddWhAdminModal(true);
-                    }} 
+                    }}
                     className="btn btn-primary"
                     style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '12px', padding: '6px 14px' }}
                   >
                     + Register New Facility
                   </button>
-                  <button 
-                    type="button" 
-                    onClick={fetchWarehousesAndAllocations} 
+                  <button
+                    type="button"
+                    onClick={fetchWarehousesAndAllocations}
                     className="btn btn-secondary"
                     style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '12px', padding: '6px 14px' }}
                   >
@@ -2684,10 +2691,10 @@ export default function AdminDashboard({ user, onGoToHome, onGoToProfile, theme,
               {(() => {
                 const isOrderFulfilledOrFinal = (order) => {
                   const s = (order.status || '').toUpperCase();
-                  return s === 'DELIVERED' || s === 'SHIPPED' || s === 'PACKED' || s === 'PICKED' || 
-                         s === 'OUT_FOR_DELIVERY' || s === 'COMPLETED' || 
-                         s === 'RETURN_REQUESTED' || s === 'RETURN_APPROVED' || s === 'REFUNDED' || 
-                         s === 'PARTIALLY_REFUNDED' || s === 'CANCELLED';
+                  return s === 'DELIVERED' || s === 'SHIPPED' || s === 'PACKED' || s === 'PICKED' ||
+                    s === 'OUT_FOR_DELIVERY' || s === 'COMPLETED' ||
+                    s === 'RETURN_REQUESTED' || s === 'RETURN_APPROVED' || s === 'REFUNDED' ||
+                    s === 'PARTIALLY_REFUNDED' || s === 'CANCELLED';
                 };
 
                 const isOrderAllocatedCheck = (order) => {
@@ -2756,10 +2763,10 @@ export default function AdminDashboard({ user, onGoToHome, onGoToProfile, theme,
               {adminWhModuleSubTab === 'allocation_desk' && (() => {
                 const isOrderFulfilledOrFinal = (order) => {
                   const s = (order.status || '').toUpperCase();
-                  return s === 'DELIVERED' || s === 'SHIPPED' || s === 'PACKED' || s === 'PICKED' || 
-                         s === 'OUT_FOR_DELIVERY' || s === 'COMPLETED' || 
-                         s === 'RETURN_REQUESTED' || s === 'RETURN_APPROVED' || s === 'REFUNDED' || 
-                         s === 'PARTIALLY_REFUNDED' || s === 'CANCELLED';
+                  return s === 'DELIVERED' || s === 'SHIPPED' || s === 'PACKED' || s === 'PICKED' ||
+                    s === 'OUT_FOR_DELIVERY' || s === 'COMPLETED' ||
+                    s === 'RETURN_REQUESTED' || s === 'RETURN_APPROVED' || s === 'REFUNDED' ||
+                    s === 'PARTIALLY_REFUNDED' || s === 'CANCELLED';
                 };
 
                 const isOrderAllocated = (order) => {
@@ -2902,7 +2909,7 @@ export default function AdminDashboard({ user, onGoToHome, onGoToProfile, theme,
                         <div style={{ padding: '36px', textAlign: 'center', background: 'var(--bg-input)', borderRadius: '8px', color: 'var(--text-muted)' }}>
                           <CheckCircle2 size={36} style={{ opacity: 0.3, marginBottom: '8px', color: 'var(--accent-emerald)' }} />
                           <p style={{ margin: 0, fontSize: '14px' }}>
-                            {allocFilterStatus === 'UNALLOCATED' 
+                            {allocFilterStatus === 'UNALLOCATED'
                               ? 'All customer orders have been routed to fulfillment facilities! No pending allocations.'
                               : 'No matching orders found.'}
                           </p>
@@ -3101,15 +3108,15 @@ export default function AdminDashboard({ user, onGoToHome, onGoToProfile, theme,
               {adminWhModuleSubTab === 'facilities' && (
                 <div>
                   {/* SEPARATED FACILITY SWITCHER TAB STRIP */}
-                  <div style={{ 
-                    display: 'flex', 
-                    gap: '8px', 
-                    marginBottom: '22px', 
-                    overflowX: 'auto', 
-                    padding: '6px', 
-                    background: 'var(--bg-card)', 
-                    borderRadius: '10px', 
-                    border: '1px solid var(--border-light)' 
+                  <div style={{
+                    display: 'flex',
+                    gap: '8px',
+                    marginBottom: '22px',
+                    overflowX: 'auto',
+                    padding: '6px',
+                    background: 'var(--bg-card)',
+                    borderRadius: '10px',
+                    border: '1px solid var(--border-light)'
                   }}>
                     <button
                       type="button"
@@ -3336,12 +3343,11 @@ export default function AdminDashboard({ user, onGoToHome, onGoToProfile, theme,
                                         </td>
                                         <td><strong>₹{ord.totalAmount?.toLocaleString('en-IN')}</strong></td>
                                         <td>
-                                          <span className={`badge ${
-                                            ord.status === 'DELIVERED' ? 'badge-approved' :
-                                            ord.status === 'SHIPPED' ? 'badge-vendor' :
-                                            ord.status === 'PACKED' ? 'badge-customer' :
-                                            ord.status === 'PICKED' ? 'badge-customer' : 'badge-pending'
-                                          }`} style={{ fontSize: '10px', padding: '2px 8px', fontWeight: '700' }}>
+                                          <span className={`badge ${ord.status === 'DELIVERED' ? 'badge-approved' :
+                                              ord.status === 'SHIPPED' ? 'badge-vendor' :
+                                                ord.status === 'PACKED' ? 'badge-customer' :
+                                                  ord.status === 'PICKED' ? 'badge-customer' : 'badge-pending'
+                                            }`} style={{ fontSize: '10px', padding: '2px 8px', fontWeight: '700' }}>
                                             {ord.status || 'ALLOCATED'}
                                           </span>
                                         </td>
@@ -3733,13 +3739,12 @@ export default function AdminDashboard({ user, onGoToHome, onGoToProfile, theme,
                                   <div style={{ fontSize: '10px', color: 'var(--text-muted)' }}>Facility Code: {t.destinationWarehouse?.code}</div>
                                 </td>
                                 <td>
-                                  <span className={`badge ${
-                                    t.status === 'RECEIVED_AND_SHELVED' ? 'badge-approved' :
-                                    t.status === 'DISPATCHED' ? 'badge-customer' : 'badge-pending'
-                                  }`} style={{ fontSize: '10px', padding: '2px 8px', fontWeight: '700' }}>
+                                  <span className={`badge ${t.status === 'RECEIVED_AND_SHELVED' ? 'badge-approved' :
+                                      t.status === 'DISPATCHED' ? 'badge-customer' : 'badge-pending'
+                                    }`} style={{ fontSize: '10px', padding: '2px 8px', fontWeight: '700' }}>
                                     {t.status === 'RECEIVED_AND_SHELVED' ? '✓ DISTRIBUTED & SHELVED' :
-                                     t.status === 'DISPATCHED' ? 'IN TRANSIT BETWEEN HUBS' :
-                                     t.status === 'APPROVED_BY_ADMIN' ? 'APPROVED BY ADMIN' : t.status}
+                                      t.status === 'DISPATCHED' ? 'IN TRANSIT BETWEEN HUBS' :
+                                        t.status === 'APPROVED_BY_ADMIN' ? 'APPROVED BY ADMIN' : t.status}
                                   </span>
                                 </td>
                                 <td>
@@ -3771,9 +3776,9 @@ export default function AdminDashboard({ user, onGoToHome, onGoToProfile, theme,
                     Real-time transaction health console with Razorpay verification tracking and failed attempt detection.
                   </p>
                 </div>
-                <button 
-                  type="button" 
-                  onClick={fetchMonitoring} 
+                <button
+                  type="button"
+                  onClick={fetchMonitoring}
                   className="btn btn-secondary"
                   style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '12px', padding: '6px 14px' }}
                 >
@@ -3843,9 +3848,9 @@ export default function AdminDashboard({ user, onGoToHome, onGoToProfile, theme,
               <div className="dashboard-filter-bar">
                 <div className="dashboard-filter-search">
                   <Search size={16} style={{ position: 'absolute', left: '12px', top: '50%', transform: 'translateY(-50%)', color: 'var(--text-muted)' }} />
-                  <input 
-                    type="text" 
-                    placeholder="Search by Order ID, Recipient Name, or Phone..." 
+                  <input
+                    type="text"
+                    placeholder="Search by Order ID, Recipient Name, or Phone..."
                     value={monitoringSearch}
                     onChange={(e) => setMonitoringSearch(e.target.value)}
                     className="form-input"
@@ -4022,9 +4027,9 @@ export default function AdminDashboard({ user, onGoToHome, onGoToProfile, theme,
                     Unified ledger of all checkouts, Razorpay signatures, payment IDs, and refund logs.
                   </p>
                 </div>
-                <button 
-                  type="button" 
-                  onClick={fetchTransactions} 
+                <button
+                  type="button"
+                  onClick={fetchTransactions}
                   className="btn btn-secondary"
                   style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '12px', padding: '6px 14px' }}
                 >
@@ -4036,9 +4041,9 @@ export default function AdminDashboard({ user, onGoToHome, onGoToProfile, theme,
               <div className="dashboard-filter-bar">
                 <div className="dashboard-filter-search">
                   <Search size={16} style={{ position: 'absolute', left: '12px', top: '50%', transform: 'translateY(-50%)', color: 'var(--text-muted)' }} />
-                  <input 
-                    type="text" 
-                    placeholder="Search by Order ID, Razorpay Payment ID, or User ID..." 
+                  <input
+                    type="text"
+                    placeholder="Search by Order ID, Razorpay Payment ID, or User ID..."
                     value={txSearch}
                     onChange={(e) => setTxSearch(e.target.value)}
                     className="form-input"
@@ -4197,9 +4202,9 @@ export default function AdminDashboard({ user, onGoToHome, onGoToProfile, theme,
                     Automatic 10% platform commission ledger with manual test-mode settlement reconciliation.
                   </p>
                 </div>
-                <button 
-                  type="button" 
-                  onClick={fetchSettlements} 
+                <button
+                  type="button"
+                  onClick={fetchSettlements}
                   className="btn btn-secondary"
                   style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '12px', padding: '6px 14px' }}
                 >
@@ -4258,9 +4263,9 @@ export default function AdminDashboard({ user, onGoToHome, onGoToProfile, theme,
               <div className="dashboard-filter-bar">
                 <div className="dashboard-filter-search">
                   <Search size={16} style={{ position: 'absolute', left: '12px', top: '50%', transform: 'translateY(-50%)', color: 'var(--text-muted)' }} />
-                  <input 
-                    type="text" 
-                    placeholder="Search by Vendor ID or Order ID..." 
+                  <input
+                    type="text"
+                    placeholder="Search by Vendor ID or Order ID..."
                     value={settlementSearch}
                     onChange={(e) => setSettlementSearch(e.target.value)}
                     className="form-input"
@@ -4276,10 +4281,10 @@ export default function AdminDashboard({ user, onGoToHome, onGoToProfile, theme,
                       onClick={() => setSettlementFilter(st)}
                       className={`btn ${settlementFilter === st ? 'btn-primary' : 'btn-secondary'}`}
                     >
-                      {st === 'ALL' ? `All (${settlements.length})` : 
-                       st === 'PENDING' ? `Pending (${settlements.filter(s => s.status === 'PENDING').length})` : 
-                       st === 'SETTLED' ? `Settled (${settlements.filter(s => s.status === 'SETTLED').length})` : 
-                       `Refunded (${settlements.filter(s => s.status === 'REFUNDED').length})`}
+                      {st === 'ALL' ? `All (${settlements.length})` :
+                        st === 'PENDING' ? `Pending (${settlements.filter(s => s.status === 'PENDING').length})` :
+                          st === 'SETTLED' ? `Settled (${settlements.filter(s => s.status === 'SETTLED').length})` :
+                            `Refunded (${settlements.filter(s => s.status === 'REFUNDED').length})`}
                     </button>
                   ))}
                 </div>
@@ -4407,17 +4412,17 @@ export default function AdminDashboard({ user, onGoToHome, onGoToProfile, theme,
                   </p>
                 </div>
                 <div style={{ display: 'flex', gap: '10px' }}>
-                  <button 
-                    type="button" 
-                    onClick={openAddCouponModal} 
+                  <button
+                    type="button"
+                    onClick={openAddCouponModal}
                     className="btn btn-primary"
                     style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '12px', padding: '6px 14px' }}
                   >
                     + Create Coupon
                   </button>
-                  <button 
-                    type="button" 
-                    onClick={() => { fetchCoupons(); fetchCouponAnalytics(); }} 
+                  <button
+                    type="button"
+                    onClick={() => { fetchCoupons(); fetchCouponAnalytics(); }}
                     className="btn btn-secondary"
                     style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '12px', padding: '6px 14px' }}
                   >
@@ -4500,7 +4505,7 @@ export default function AdminDashboard({ user, onGoToHome, onGoToProfile, theme,
                               ₹{analytics.totalDiscount?.toLocaleString('en-IN') || '0'}
                             </td>
                             <td>
-                              <button 
+                              <button
                                 type="button"
                                 onClick={() => handleToggleCoupon(coupon.id)}
                                 className={`badge ${coupon.active ? 'badge-approved' : 'badge-rejected'}`}
@@ -4512,17 +4517,17 @@ export default function AdminDashboard({ user, onGoToHome, onGoToProfile, theme,
                             </td>
                             <td>
                               <div style={{ display: 'flex', gap: '6px', justifyContent: 'center' }}>
-                                <button 
-                                  type="button" 
-                                  onClick={() => openEditCouponModal(coupon)} 
+                                <button
+                                  type="button"
+                                  onClick={() => openEditCouponModal(coupon)}
                                   className="btn btn-secondary"
                                   style={{ padding: '4px 10px', fontSize: '11px', borderRadius: '4px' }}
                                 >
                                   Edit
                                 </button>
-                                <button 
-                                  type="button" 
-                                  onClick={() => handleDeleteCoupon(coupon.id)} 
+                                <button
+                                  type="button"
+                                  onClick={() => handleDeleteCoupon(coupon.id)}
                                   className="btn btn-secondary"
                                   style={{ padding: '4px 10px', fontSize: '11px', color: 'var(--accent-rose)', borderRadius: '4px' }}
                                 >
@@ -4783,8 +4788,8 @@ export default function AdminDashboard({ user, onGoToHome, onGoToProfile, theme,
                       <Star size={36} style={{ color: 'var(--text-muted)', margin: '0 auto 12px auto' }} />
                       <h4 style={{ margin: '0 0 6px 0', fontSize: '16px', color: 'var(--text-primary)' }}>No Reviews Found</h4>
                       <p style={{ margin: 0, fontSize: '13px', color: 'var(--text-muted)' }}>
-                        {reviewSearchTerm || reviewFilterRating !== 'ALL' 
-                          ? 'No customer reviews match your active filter criteria.' 
+                        {reviewSearchTerm || reviewFilterRating !== 'ALL'
+                          ? 'No customer reviews match your active filter criteria.'
                           : 'No reviews have been submitted by customers yet.'}
                       </p>
                     </div>
@@ -4873,7 +4878,7 @@ export default function AdminDashboard({ user, onGoToHome, onGoToProfile, theme,
                           {/* Customer Unboxing / Review Photo */}
                           {r.reviewImage && (
                             <div style={{ marginTop: '10px' }}>
-                              <div 
+                              <div
                                 onClick={() => setAdminReviewLightboxImg({ url: formatImageUrl(r.reviewImage), reviewer: r.reviewerName, product: r.productName })}
                                 style={{
                                   display: 'inline-flex',
@@ -4888,10 +4893,10 @@ export default function AdminDashboard({ user, onGoToHome, onGoToProfile, theme,
                                 }}
                                 title="Click to view full customer unboxing photo"
                               >
-                                <img 
-                                  src={formatImageUrl(r.reviewImage)} 
-                                  alt="Customer Review Photo" 
-                                  style={{ width: '42px', height: '42px', objectFit: 'cover', borderRadius: '6px', border: '1px solid var(--border-color)' }} 
+                                <img
+                                  src={formatImageUrl(r.reviewImage)}
+                                  alt="Customer Review Photo"
+                                  style={{ width: '42px', height: '42px', objectFit: 'cover', borderRadius: '6px', border: '1px solid var(--border-color)' }}
                                 />
                                 <div style={{ display: 'flex', flexDirection: 'column' }}>
                                   <span style={{ fontSize: '11.5px', fontWeight: '600', color: 'var(--text-primary)', display: 'flex', alignItems: 'center', gap: '4px' }}>
@@ -4938,8 +4943,8 @@ export default function AdminDashboard({ user, onGoToHome, onGoToProfile, theme,
 
           {/* Admin Customer Review Photo Lightbox */}
           {adminReviewLightboxImg && (
-            <div 
-              className="image-lightbox-overlay" 
+            <div
+              className="image-lightbox-overlay"
               style={{ zIndex: 99999 }}
               onClick={() => setAdminReviewLightboxImg(null)}
             >
@@ -4949,9 +4954,9 @@ export default function AdminDashboard({ user, onGoToHome, onGoToProfile, theme,
                   <span>Review Photo: {adminReviewLightboxImg.product}</span>
                   <span className="badge badge-customer" style={{ marginLeft: '6px', fontSize: '11px' }}>Uploaded by {adminReviewLightboxImg.reviewer || 'Customer'}</span>
                 </div>
-                <button 
-                  type="button" 
-                  className="lightbox-close-btn" 
+                <button
+                  type="button"
+                  className="lightbox-close-btn"
                   onClick={() => setAdminReviewLightboxImg(null)}
                   title="Close Preview (Esc)"
                 >
@@ -4960,10 +4965,10 @@ export default function AdminDashboard({ user, onGoToHome, onGoToProfile, theme,
               </div>
               <div className="lightbox-main-stage" onClick={(e) => e.stopPropagation()}>
                 <div className="lightbox-img-wrapper" style={{ maxHeight: '80vh', maxWidth: '85vw' }}>
-                  <img 
-                    src={adminReviewLightboxImg.url} 
-                    alt="Customer Review Photo" 
-                    style={{ maxWidth: '100%', maxHeight: '80vh', objectFit: 'contain', borderRadius: '12px', boxShadow: '0 20px 50px rgba(0,0,0,0.5)' }} 
+                  <img
+                    src={adminReviewLightboxImg.url}
+                    alt="Customer Review Photo"
+                    style={{ maxWidth: '100%', maxHeight: '80vh', objectFit: 'contain', borderRadius: '12px', boxShadow: '0 20px 50px rgba(0,0,0,0.5)' }}
                   />
                 </div>
               </div>
@@ -4984,12 +4989,12 @@ export default function AdminDashboard({ user, onGoToHome, onGoToProfile, theme,
                 <form onSubmit={handleCreateOrCreateCoupon} style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
                   <div className="form-group">
                     <label className="form-label">Coupon Code (e.g. SAVE20) *</label>
-                    <input 
-                      type="text" 
+                    <input
+                      type="text"
                       value={couponFormData.code}
                       onChange={(e) => setCouponFormData({ ...couponFormData, code: e.target.value.toUpperCase() })}
-                      className="form-input" 
-                      placeholder="CODE" 
+                      className="form-input"
+                      placeholder="CODE"
                       required
                     />
                   </div>
@@ -4997,7 +5002,7 @@ export default function AdminDashboard({ user, onGoToHome, onGoToProfile, theme,
                   <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px' }}>
                     <div className="form-group">
                       <label className="form-label">Discount Type *</label>
-                      <select 
+                      <select
                         value={couponFormData.discountType}
                         onChange={(e) => setCouponFormData({ ...couponFormData, discountType: e.target.value })}
                         className="form-input"
@@ -5008,12 +5013,12 @@ export default function AdminDashboard({ user, onGoToHome, onGoToProfile, theme,
                     </div>
                     <div className="form-group">
                       <label className="form-label">Discount Value *</label>
-                      <input 
-                        type="number" 
+                      <input
+                        type="number"
                         step="0.01"
                         value={couponFormData.discountValue}
                         onChange={(e) => setCouponFormData({ ...couponFormData, discountValue: parseFloat(e.target.value) || 0 })}
-                        className="form-input" 
+                        className="form-input"
                         min="0.01"
                         required
                       />
@@ -5023,21 +5028,21 @@ export default function AdminDashboard({ user, onGoToHome, onGoToProfile, theme,
                   <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px' }}>
                     <div className="form-group">
                       <label className="form-label">Min Order Amount (₹)</label>
-                      <input 
-                        type="number" 
+                      <input
+                        type="number"
                         value={couponFormData.minOrderAmount}
                         onChange={(e) => setCouponFormData({ ...couponFormData, minOrderAmount: e.target.value })}
-                        className="form-input" 
+                        className="form-input"
                         placeholder="None"
                       />
                     </div>
                     <div className="form-group">
                       <label className="form-label">Max Discount Cap (₹)</label>
-                      <input 
-                        type="number" 
+                      <input
+                        type="number"
                         value={couponFormData.maxDiscount}
                         onChange={(e) => setCouponFormData({ ...couponFormData, maxDiscount: e.target.value })}
-                        className="form-input" 
+                        className="form-input"
                         placeholder="None"
                         disabled={couponFormData.discountType !== 'PERCENTAGE'}
                       />
@@ -5047,21 +5052,21 @@ export default function AdminDashboard({ user, onGoToHome, onGoToProfile, theme,
                   <div style={{ display: 'grid', gridTemplateColumns: '1.2fr 0.8fr', gap: '10px' }}>
                     <div className="form-group">
                       <label className="form-label">Start Date *</label>
-                      <input 
-                        type="date" 
+                      <input
+                        type="date"
                         value={couponFormData.startDate}
                         onChange={(e) => setCouponFormData({ ...couponFormData, startDate: e.target.value })}
-                        className="form-input" 
+                        className="form-input"
                         required
                       />
                     </div>
                     <div className="form-group">
                       <label className="form-label">Start Time *</label>
-                      <input 
-                        type="time" 
+                      <input
+                        type="time"
                         value={couponFormData.startTime}
                         onChange={(e) => setCouponFormData({ ...couponFormData, startTime: e.target.value })}
-                        className="form-input" 
+                        className="form-input"
                         required
                       />
                     </div>
@@ -5070,21 +5075,21 @@ export default function AdminDashboard({ user, onGoToHome, onGoToProfile, theme,
                   <div style={{ display: 'grid', gridTemplateColumns: '1.2fr 0.8fr', gap: '10px' }}>
                     <div className="form-group">
                       <label className="form-label">Expiry Date *</label>
-                      <input 
-                        type="date" 
+                      <input
+                        type="date"
                         value={couponFormData.expiryDate}
                         onChange={(e) => setCouponFormData({ ...couponFormData, expiryDate: e.target.value })}
-                        className="form-input" 
+                        className="form-input"
                         required
                       />
                     </div>
                     <div className="form-group">
                       <label className="form-label">Expiry Time *</label>
-                      <input 
-                        type="time" 
+                      <input
+                        type="time"
                         value={couponFormData.expiryTime}
                         onChange={(e) => setCouponFormData({ ...couponFormData, expiryTime: e.target.value })}
-                        className="form-input" 
+                        className="form-input"
                         required
                       />
                     </div>
@@ -5092,18 +5097,18 @@ export default function AdminDashboard({ user, onGoToHome, onGoToProfile, theme,
 
                   <div className="form-group">
                     <label className="form-label">Usage Limit (Global Total Uses)</label>
-                    <input 
-                      type="number" 
+                    <input
+                      type="number"
                       value={couponFormData.usageLimit}
                       onChange={(e) => setCouponFormData({ ...couponFormData, usageLimit: e.target.value })}
-                      className="form-input" 
+                      className="form-input"
                       placeholder="Unlimited"
                     />
                   </div>
 
                   <div className="form-group" style={{ display: 'flex', alignItems: 'center', gap: '8px', marginTop: '6px' }}>
-                    <input 
-                      type="checkbox" 
+                    <input
+                      type="checkbox"
                       id="couponActive"
                       checked={couponFormData.active}
                       onChange={(e) => setCouponFormData({ ...couponFormData, active: e.target.checked })}
@@ -5140,10 +5145,10 @@ export default function AdminDashboard({ user, onGoToHome, onGoToProfile, theme,
                 <X size={18} />
               </button>
             </div>
-            
+
             <div style={{ display: 'flex', flexDirection: 'column', gap: '16px', overflowY: 'auto', flex: 1, paddingRight: '6px' }}>
               <div style={{ display: 'flex', gap: '20px', alignItems: 'flex-start' }}>
-                <div 
+                <div
                   style={{ width: '120px', height: '120px', borderRadius: '8px', overflow: 'hidden', border: '1px solid var(--border-light)', display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'var(--bg-input)', flexShrink: 0 }}
                 >
                   {selectedProduct.imageUrl && formatImageUrl(selectedProduct.imageUrl).length > 4 ? (
@@ -5152,7 +5157,7 @@ export default function AdminDashboard({ user, onGoToHome, onGoToProfile, theme,
                     <ProductIcon name={selectedProduct.name} category={selectedProduct.category} size={48} />
                   )}
                 </div>
-                
+
                 <div style={{ flex: 1 }}>
                   <h3 style={{ fontSize: '18px', fontWeight: '700', color: 'var(--text-primary)', marginBottom: '4px' }}>{selectedProduct.name}</h3>
                   <p style={{ fontSize: '13px', color: 'var(--text-muted)', marginBottom: '8px' }}>Brand: <strong style={{ color: 'var(--text-primary)' }}>{selectedProduct.brand || 'N/A'}</strong></p>
@@ -5218,7 +5223,7 @@ export default function AdminDashboard({ user, onGoToHome, onGoToProfile, theme,
               {showRejectionInput && (
                 <div style={{ borderTop: '1px solid var(--border-light)', paddingTop: '16px', display: 'flex', flexDirection: 'column', gap: '10px' }}>
                   <label style={{ fontSize: '12px', fontWeight: 'bold', color: 'var(--accent-rose)', textTransform: 'uppercase', letterSpacing: '0.5px' }}>Rejection Reason (Required)</label>
-                  <textarea 
+                  <textarea
                     value={rejectionReason}
                     onChange={(e) => setRejectionReason(e.target.value)}
                     placeholder="Provide a clear reason for the vendor to correct..."
@@ -5227,17 +5232,17 @@ export default function AdminDashboard({ user, onGoToHome, onGoToProfile, theme,
                     required
                   />
                   <div style={{ display: 'flex', gap: '10px', justifyContent: 'flex-end', marginTop: '4px' }}>
-                    <button 
-                      type="button" 
-                      onClick={() => setShowRejectionInput(false)} 
+                    <button
+                      type="button"
+                      onClick={() => setShowRejectionInput(false)}
                       className="btn btn-secondary"
                       style={{ padding: '6px 12px', fontSize: '12px' }}
                     >
                       Back
                     </button>
-                    <button 
-                      type="button" 
-                      onClick={submitRejection} 
+                    <button
+                      type="button"
+                      onClick={submitRejection}
                       className="btn btn-danger"
                       style={{ padding: '6px 16px', fontSize: '12px' }}
                       disabled={!rejectionReason.trim()}
@@ -5255,16 +5260,16 @@ export default function AdminDashboard({ user, onGoToHome, onGoToProfile, theme,
                   Close
                 </button>
                 <div style={{ display: 'flex', gap: '10px' }}>
-                  <button 
-                    type="button" 
-                    onClick={() => setShowRejectionInput(true)} 
+                  <button
+                    type="button"
+                    onClick={() => setShowRejectionInput(true)}
                     className="btn btn-danger"
                   >
                     <X size={16} /> Reject Listing
                   </button>
-                  <button 
-                    type="button" 
-                    onClick={approveSelectedProduct} 
+                  <button
+                    type="button"
+                    onClick={approveSelectedProduct}
                     className="btn btn-success"
                   >
                     <Check size={16} /> Approve Listing
@@ -5317,9 +5322,9 @@ export default function AdminDashboard({ user, onGoToHome, onGoToProfile, theme,
                 {selectedReturnCase.customerProofImage && (
                   <div style={{ borderTop: '1px solid var(--border-light)', paddingTop: '6px' }}>
                     <span style={{ color: 'var(--text-muted)', display: 'block', fontSize: '11px', marginBottom: '4px' }}>Customer Proof Attachment:</span>
-                    <img 
-                      src={formatImageUrl(selectedReturnCase.customerProofImage)} 
-                      alt="Customer Proof" 
+                    <img
+                      src={formatImageUrl(selectedReturnCase.customerProofImage)}
+                      alt="Customer Proof"
                       style={{ maxWidth: '100%', maxHeight: '180px', borderRadius: '6px', border: '1px solid var(--border-light)', objectFit: 'contain' }}
                       onError={(e) => { e.target.style.display = 'none'; }}
                     />
@@ -5334,9 +5339,9 @@ export default function AdminDashboard({ user, onGoToHome, onGoToProfile, theme,
                 {selectedReturnCase.warehouseInspectionImage && (
                   <div style={{ borderTop: '1px solid var(--border-light)', paddingTop: '6px' }}>
                     <span style={{ color: 'var(--text-muted)', display: 'block', fontSize: '11px', marginBottom: '4px' }}>Warehouse Inspection Image:</span>
-                    <img 
-                      src={formatImageUrl(selectedReturnCase.warehouseInspectionImage)} 
-                      alt="Warehouse Inspection" 
+                    <img
+                      src={formatImageUrl(selectedReturnCase.warehouseInspectionImage)}
+                      alt="Warehouse Inspection"
                       style={{ maxWidth: '100%', maxHeight: '180px', borderRadius: '6px', border: '1px solid var(--border-light)', objectFit: 'contain' }}
                       onError={(e) => { e.target.style.display = 'none'; }}
                     />
@@ -5357,7 +5362,7 @@ export default function AdminDashboard({ user, onGoToHome, onGoToProfile, theme,
               {selectedReturnCase.status === 'PENDING' && (
                 <div style={{ borderTop: '1px solid var(--border-light)', paddingTop: '12px', marginTop: '10px', display: 'flex', flexDirection: 'column', gap: '10px' }}>
                   <h4 style={{ margin: 0, fontWeight: '700', fontSize: '13px', color: 'var(--text-primary)' }}>Return Request Action Console</h4>
-                  
+
                   {selectedReturnCase.returnStage === 'REQUESTED' && (
                     <div style={{ display: 'flex', gap: '10px', justifyContent: 'flex-end' }}>
                       <button
@@ -5395,7 +5400,7 @@ export default function AdminDashboard({ user, onGoToHome, onGoToProfile, theme,
                       <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px' }}>
                         <div>
                           <label className="form-label" style={{ fontSize: '11px', fontWeight: 'bold' }}>Resolution Strategy</label>
-                          <select 
+                          <select
                             value={resolutionChoice}
                             onChange={(e) => setResolutionChoice(e.target.value)}
                             className="form-input"
@@ -5408,7 +5413,7 @@ export default function AdminDashboard({ user, onGoToHome, onGoToProfile, theme,
                         </div>
                         <div>
                           <label className="form-label" style={{ fontSize: '11px', fontWeight: 'bold' }}>Observations / Notes</label>
-                          <input 
+                          <input
                             type="text"
                             value={resolutionNotes}
                             onChange={(e) => setResolutionNotes(e.target.value)}
@@ -5419,8 +5424,8 @@ export default function AdminDashboard({ user, onGoToHome, onGoToProfile, theme,
                         </div>
                       </div>
                       <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '8px', marginTop: '6px' }}>
-                        <button 
-                          type="button" 
+                        <button
+                          type="button"
                           onClick={async () => {
                             setIsProcessingReturnAction(true);
                             try {
@@ -5471,8 +5476,8 @@ export default function AdminDashboard({ user, onGoToHome, onGoToProfile, theme,
 
                   {(selectedReturnCase.returnStage === 'ADMIN_APPROVED' || selectedReturnCase.returnStage === 'ITEM_RETURNED') && (
                     <div style={{ padding: '8px 12px', background: 'var(--bg-input)', borderRadius: '6px', fontSize: '12px', color: 'var(--text-secondary)', fontStyle: 'italic', textAlign: 'center' }}>
-                      {selectedReturnCase.returnStage === 'ADMIN_APPROVED' 
-                        ? "Awaiting package pickup from customer address..." 
+                      {selectedReturnCase.returnStage === 'ADMIN_APPROVED'
+                        ? "Awaiting package pickup from customer address..."
                         : "Return package received. Awaiting Quality Control (QC) inspection in warehouse..."}
                     </div>
                   )}
@@ -5506,7 +5511,7 @@ export default function AdminDashboard({ user, onGoToHome, onGoToProfile, theme,
 
               <div className="form-group">
                 <label className="form-label">Rejection Reason / Inspection Notes *</label>
-                <textarea 
+                <textarea
                   value={rejectReasonText}
                   onChange={(e) => setRejectReasonText(e.target.value)}
                   className="form-input"
@@ -5611,7 +5616,7 @@ export default function AdminDashboard({ user, onGoToHome, onGoToProfile, theme,
 
               <div className="form-group">
                 <label className="form-label">Refund Amount (₹) *</label>
-                <input 
+                <input
                   type="number"
                   step="0.01"
                   min="1"
@@ -5626,7 +5631,7 @@ export default function AdminDashboard({ user, onGoToHome, onGoToProfile, theme,
 
               <div className="form-group">
                 <label className="form-label">Administrative Reason *</label>
-                <textarea 
+                <textarea
                   value={refundReason}
                   onChange={(e) => setRefundReason(e.target.value)}
                   className="form-input"
@@ -5636,16 +5641,16 @@ export default function AdminDashboard({ user, onGoToHome, onGoToProfile, theme,
               </div>
 
               <div style={{ display: 'flex', gap: '10px', justifyContent: 'flex-end', marginTop: '10px' }}>
-                <button 
-                  type="button" 
-                  onClick={() => setShowRefundModal(false)} 
+                <button
+                  type="button"
+                  onClick={() => setShowRefundModal(false)}
                   className="btn btn-secondary"
                   disabled={isProcessingRefund}
                 >
                   Cancel
                 </button>
-                <button 
-                  type="submit" 
+                <button
+                  type="submit"
                   className="btn btn-primary"
                   style={{ background: 'linear-gradient(135deg, #8b5cf6 0%, #7c3aed 100%)', color: '#fff' }}
                   disabled={isProcessingRefund || !refundAmount}
@@ -5799,19 +5804,18 @@ export default function AdminDashboard({ user, onGoToHome, onGoToProfile, theme,
                                   </span>
                                 </td>
                                 <td>
-                                  <span className={`badge ${
-                                    prod.status === 'APPROVED' ? 'badge-approved' : 
-                                    prod.status === 'REJECTED' ? 'badge-rejected' : 
-                                    prod.status === 'DISABLED' ? 'badge-pending' : 'badge-pending'
-                                  }`} style={{ 
-                                    fontSize: '10px', 
-                                    padding: '2px 6px', 
-                                    fontWeight: '700',
-                                    ...(prod.status === 'DISABLED' ? { background: 'rgba(148, 163, 184, 0.15)', color: '#64748b', border: '1px solid rgba(148, 163, 184, 0.3)' } : {})
-                                  }}>
-                                    {prod.status === 'APPROVED' ? 'APPROVED' : 
-                                     prod.status === 'REJECTED' ? 'REJECTED' : 
-                                     prod.status === 'DISABLED' ? 'DISABLED' : 'PENDING'}
+                                  <span className={`badge ${prod.status === 'APPROVED' ? 'badge-approved' :
+                                      prod.status === 'REJECTED' ? 'badge-rejected' :
+                                        prod.status === 'DISABLED' ? 'badge-pending' : 'badge-pending'
+                                    }`} style={{
+                                      fontSize: '10px',
+                                      padding: '2px 6px',
+                                      fontWeight: '700',
+                                      ...(prod.status === 'DISABLED' ? { background: 'rgba(148, 163, 184, 0.15)', color: '#64748b', border: '1px solid rgba(148, 163, 184, 0.3)' } : {})
+                                    }}>
+                                    {prod.status === 'APPROVED' ? 'APPROVED' :
+                                      prod.status === 'REJECTED' ? 'REJECTED' :
+                                        prod.status === 'DISABLED' ? 'DISABLED' : 'PENDING'}
                                   </span>
                                 </td>
                                 <td style={{ textAlign: 'center' }}>
@@ -5954,14 +5958,13 @@ export default function AdminDashboard({ user, onGoToHome, onGoToProfile, theme,
                   </div>
                   <div style={{ display: 'flex', gap: '6px', flexWrap: 'wrap', alignItems: 'center' }}>
                     <span className="badge badge-customer">{inspectingProductDetail.category}</span>
-                    <span className={`badge ${
-                      inspectingProductDetail.status === 'APPROVED' ? 'badge-approved' : 
-                      inspectingProductDetail.status === 'REJECTED' ? 'badge-rejected' : 
-                      inspectingProductDetail.status === 'DISABLED' ? 'badge-pending' : 'badge-pending'
-                    }`} style={{ 
-                      fontWeight: '700',
-                      ...(inspectingProductDetail.status === 'DISABLED' ? { background: 'rgba(148, 163, 184, 0.15)', color: '#64748b', border: '1px solid rgba(148, 163, 184, 0.3)' } : {})
-                    }}>
+                    <span className={`badge ${inspectingProductDetail.status === 'APPROVED' ? 'badge-approved' :
+                        inspectingProductDetail.status === 'REJECTED' ? 'badge-rejected' :
+                          inspectingProductDetail.status === 'DISABLED' ? 'badge-pending' : 'badge-pending'
+                      }`} style={{
+                        fontWeight: '700',
+                        ...(inspectingProductDetail.status === 'DISABLED' ? { background: 'rgba(148, 163, 184, 0.15)', color: '#64748b', border: '1px solid rgba(148, 163, 184, 0.3)' } : {})
+                      }}>
                       Status: {inspectingProductDetail.status}
                     </span>
                     <span className="badge badge-vendor">
@@ -5977,11 +5980,11 @@ export default function AdminDashboard({ user, onGoToHome, onGoToProfile, theme,
                   <span style={{ fontSize: '11px', fontWeight: 'bold', textTransform: 'uppercase', color: 'var(--text-muted)', display: 'block', marginBottom: '6px' }}>Product Gallery ({inspectingProductDetail.images.length})</span>
                   <div style={{ display: 'flex', gap: '8px', overflowX: 'auto', paddingBottom: '4px' }}>
                     {inspectingProductDetail.images.map((img, idx) => (
-                      <img 
-                        key={idx} 
-                        src={formatImageUrl(img)} 
-                        alt={`Gallery ${idx}`} 
-                        style={{ width: '60px', height: '60px', borderRadius: '6px', objectFit: 'cover', border: '1px solid var(--border-light)' }} 
+                      <img
+                        key={idx}
+                        src={formatImageUrl(img)}
+                        alt={`Gallery ${idx}`}
+                        style={{ width: '60px', height: '60px', borderRadius: '6px', objectFit: 'cover', border: '1px solid var(--border-light)' }}
                       />
                     ))}
                   </div>

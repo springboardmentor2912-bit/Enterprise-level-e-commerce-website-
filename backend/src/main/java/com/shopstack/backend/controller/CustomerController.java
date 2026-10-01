@@ -160,8 +160,9 @@ public class CustomerController {
         }
         address.setUserId(id);
         List<Address> existing = addressRepository.findByUserId(id);
-        
-        // If this is the user's first address or marked default, set isDefault = true and unset others
+
+        // If this is the user's first address or marked default, set isDefault = true
+        // and unset others
         if (existing.isEmpty() || Boolean.TRUE.equals(address.getIsDefault())) {
             address.setIsDefault(true);
             for (Address a : existing) {
@@ -178,7 +179,8 @@ public class CustomerController {
     // Addresses: Update an existing address
     @PutMapping("/{id}/addresses/{addressId}")
     @Transactional
-    public ResponseEntity<?> updateCustomerAddress(@PathVariable Long id, @PathVariable Long addressId, @RequestBody Address updated) {
+    public ResponseEntity<?> updateCustomerAddress(@PathVariable Long id, @PathVariable Long addressId,
+            @RequestBody Address updated) {
         Optional<Address> opt = addressRepository.findById(addressId);
         if (opt.isPresent() && opt.get().getUserId().equals(id)) {
             Address addr = opt.get();
@@ -231,7 +233,8 @@ public class CustomerController {
             boolean wasDefault = Boolean.TRUE.equals(opt.get().getIsDefault());
             addressRepository.deleteById(addressId);
 
-            // If we deleted the default address, promote another address to default if one exists
+            // If we deleted the default address, promote another address to default if one
+            // exists
             if (wasDefault) {
                 List<Address> remaining = addressRepository.findByUserIdOrderByIdDesc(id);
                 if (!remaining.isEmpty()) {
@@ -249,7 +252,8 @@ public class CustomerController {
     @GetMapping("/{id}/orders")
     public ResponseEntity<?> getCustomerOrders(@PathVariable Long id) {
         List<Order> orders = orderRepository.findByUserIdOrderByIdDesc(id).stream()
-                .filter(o -> o.getOrderId() != null && !o.getOrderId().startsWith("ORD-FAIL-") && !"FAILED".equalsIgnoreCase(o.getPaymentStatus()))
+                .filter(o -> o.getOrderId() != null && !o.getOrderId().startsWith("ORD-FAIL-")
+                        && !"FAILED".equalsIgnoreCase(o.getPaymentStatus()))
                 .collect(Collectors.toList());
 
         // Map order headers along with their order items
@@ -282,7 +286,8 @@ public class CustomerController {
     @GetMapping("/orders/all")
     public ResponseEntity<?> getAllOrders() {
         List<Order> orders = orderRepository.findAllByOrderByIdDesc().stream()
-                .filter(o -> o.getOrderId() != null && !o.getOrderId().startsWith("ORD-FAIL-") && !"FAILED".equalsIgnoreCase(o.getPaymentStatus()))
+                .filter(o -> o.getOrderId() != null && !o.getOrderId().startsWith("ORD-FAIL-")
+                        && !"FAILED".equalsIgnoreCase(o.getPaymentStatus()))
                 .collect(Collectors.toList());
 
         List<Map<String, Object>> response = orders.stream().map(order -> {
@@ -332,7 +337,8 @@ public class CustomerController {
             }
             Product product = prodOpt.get();
             if (product.getStock() < quantity) {
-                return ResponseEntity.badRequest().body("Insufficient stock for product '" + product.getName() + "'. Only " + product.getStock() + " units available.");
+                return ResponseEntity.badRequest().body("Insufficient stock for product '" + product.getName()
+                        + "'. Only " + product.getStock() + " units available.");
             }
             itemsSubtotal += price * quantity;
         }
@@ -342,7 +348,9 @@ public class CustomerController {
         double deliveryFee = (itemsSubtotal < 500.0 && itemsSubtotal > 0) ? 99.0 : 0.0;
 
         double couponDiscount = 0.0;
-        String couponCode = payload.containsKey("couponCode") && payload.get("couponCode") != null ? payload.get("couponCode").toString() : null;
+        String couponCode = payload.containsKey("couponCode") && payload.get("couponCode") != null
+                ? payload.get("couponCode").toString()
+                : null;
         if (couponCode != null && !couponCode.trim().isEmpty()) {
             Map<String, Object> validation = couponService.validateAndCalculateDiscount(couponCode, itemsList, id);
             if (Boolean.TRUE.equals(validation.get("valid"))) {
@@ -355,9 +363,11 @@ public class CustomerController {
         String orderIdStr = "ORD-" + (int) (100000 + Math.random() * 900000);
         String dateStr = new java.text.SimpleDateFormat("MMM dd, yyyy").format(new java.util.Date());
 
-        // Create and save Order Header. Automatically confirmed since stock verification passed.
+        // Create and save Order Header. Automatically confirmed since stock
+        // verification passed.
         Order order = new Order(orderIdStr, id, dateStr, totalAmount, "CONFIRMED");
-        order.setCouponCode(couponCode != null && !couponCode.trim().isEmpty() ? couponCode.trim().toUpperCase() : null);
+        order.setCouponCode(
+                couponCode != null && !couponCode.trim().isEmpty() ? couponCode.trim().toUpperCase() : null);
         order.setCouponDiscount(couponDiscount);
         orderRepository.save(order);
 
@@ -381,8 +391,10 @@ public class CustomerController {
                 discountPercentage = Double.parseDouble(itemData.get("discountPercentage").toString());
             }
 
-            // Create and save Order Line Item with discounted price, original price and discount %
-            OrderItem orderItem = new OrderItem(orderIdStr, productId, productName, price, originalPrice, discountPercentage, quantity, vendorId);
+            // Create and save Order Line Item with discounted price, original price and
+            // discount %
+            OrderItem orderItem = new OrderItem(orderIdStr, productId, productName, price, originalPrice,
+                    discountPercentage, quantity, vendorId);
             orderItemRepository.save(orderItem);
         }
 
@@ -403,10 +415,12 @@ public class CustomerController {
         return ResponseEntity.ok(order);
     }
 
-    // Customer submits post-fulfillment feedback/survey and syncs to product reviews
+    // Customer submits post-fulfillment feedback/survey and syncs to product
+    // reviews
     @PostMapping("/orders/{orderId}/feedback")
     @Transactional
-    public ResponseEntity<?> submitOrderFeedback(@PathVariable String orderId, @RequestBody Map<String, Object> payload) {
+    public ResponseEntity<?> submitOrderFeedback(@PathVariable String orderId,
+            @RequestBody Map<String, Object> payload) {
         Optional<Order> orderOpt = orderRepository.findByOrderId(orderId);
         if (orderOpt.isEmpty()) {
             return ResponseEntity.notFound().build();
@@ -416,8 +430,10 @@ public class CustomerController {
         if (payload.containsKey("rating") && payload.get("rating") != null) {
             try {
                 rating = Integer.parseInt(payload.get("rating").toString());
-                if (rating < 1) rating = 1;
-                if (rating > 5) rating = 5;
+                if (rating < 1)
+                    rating = 1;
+                if (rating > 5)
+                    rating = 5;
             } catch (Exception e) {
                 rating = 5;
             }
@@ -449,7 +465,8 @@ public class CustomerController {
         if (reviewerName == null || reviewerName.trim().isEmpty()) {
             if (order.getUserId() != null) {
                 Optional<User> uOpt = userRepository.findById(order.getUserId());
-                if (uOpt.isPresent() && uOpt.get().getFullName() != null && !uOpt.get().getFullName().trim().isEmpty()) {
+                if (uOpt.isPresent() && uOpt.get().getFullName() != null
+                        && !uOpt.get().getFullName().trim().isEmpty()) {
                     reviewerName = uOpt.get().getFullName();
                 } else {
                     reviewerName = "Verified Customer";
@@ -466,9 +483,9 @@ public class CustomerController {
         if (items != null && !items.isEmpty()) {
             for (OrderItem item : items) {
                 if (item.getProductId() != null) {
-                    List<com.shopstack.backend.model.Review> existing = 
-                        reviewRepository.findByUserIdAndProductId(order.getUserId(), item.getProductId());
-                    
+                    List<com.shopstack.backend.model.Review> existing = reviewRepository
+                            .findByUserIdAndProductId(order.getUserId(), item.getProductId());
+
                     com.shopstack.backend.model.Review rev;
                     if (existing != null && !existing.isEmpty()) {
                         rev = existing.get(0);
@@ -478,19 +495,19 @@ public class CustomerController {
                         rev.setDate(formattedDate);
                         if (image != null && !image.trim().isEmpty()) {
                             rev.setImageUrl(image);
-                        } else if (payload.containsKey("removeImage") && Boolean.parseBoolean(payload.get("removeImage").toString())) {
+                        } else if (payload.containsKey("removeImage")
+                                && Boolean.parseBoolean(payload.get("removeImage").toString())) {
                             rev.setImageUrl(null);
                         }
                     } else {
                         rev = new com.shopstack.backend.model.Review(
-                            item.getProductId(),
-                            order.getUserId(),
-                            reviewerName,
-                            rating,
-                            comment,
-                            formattedDate,
-                            image
-                        );
+                                item.getProductId(),
+                                order.getUserId(),
+                                reviewerName,
+                                rating,
+                                comment,
+                                formattedDate,
+                                image);
                     }
                     reviewRepository.save(rev);
                 }
@@ -504,5 +521,141 @@ public class CustomerController {
         resp.put("feedbackImage", order.getFeedbackImage());
         resp.put("status", "SUCCESS");
         return ResponseEntity.ok(resp);
+    }
+
+    // ==========================================
+    // Cross-Device Notification Synchronization Endpoints
+    // ==========================================
+
+    private List<String> parseNotifIds(String raw) {
+        if (raw == null || raw.trim().isEmpty())
+            return new ArrayList<>();
+        return new ArrayList<>(java.util.Arrays.asList(raw.split(",")))
+                .stream().map(String::trim).filter(s -> !s.isEmpty()).distinct().collect(Collectors.toList());
+    }
+
+    private String joinNotifIds(List<String> list) {
+        if (list == null || list.isEmpty())
+            return "";
+        return list.stream().filter(s -> s != null && !s.trim().isEmpty()).distinct().collect(Collectors.joining(","));
+    }
+
+    @GetMapping("/{id}/notifications")
+    public ResponseEntity<?> getCustomerNotificationsState(@PathVariable Long id) {
+        Optional<User> userOpt = userRepository.findById(id);
+        if (userOpt.isEmpty()) {
+            return ResponseEntity.status(404).body(Map.of("error", "User not found"));
+        }
+        User user = userOpt.get();
+        List<String> dismissed = parseNotifIds(user.getDismissedNotifications());
+        List<String> read = parseNotifIds(user.getReadNotifications());
+        return ResponseEntity.ok(Map.of(
+                "dismissed", dismissed,
+                "read", read));
+    }
+
+    @PostMapping("/{id}/notifications/dismiss")
+    @Transactional
+    public ResponseEntity<?> dismissCustomerNotification(@PathVariable Long id,
+            @RequestBody Map<String, Object> payload) {
+        Optional<User> userOpt = userRepository.findById(id);
+        if (userOpt.isEmpty()) {
+            return ResponseEntity.status(404).body(Map.of("error", "User not found"));
+        }
+        User user = userOpt.get();
+        List<String> dismissed = parseNotifIds(user.getDismissedNotifications());
+
+        if (payload.containsKey("notifId")) {
+            String singleId = String.valueOf(payload.get("notifId"));
+            if (singleId != null && !singleId.trim().isEmpty() && !dismissed.contains(singleId)) {
+                dismissed.add(singleId.trim());
+            }
+        }
+        if (payload.containsKey("notifIds") && payload.get("notifIds") instanceof List) {
+            List<?> ids = (List<?>) payload.get("notifIds");
+            for (Object obj : ids) {
+                if (obj != null) {
+                    String strId = obj.toString().trim();
+                    if (!strId.isEmpty() && !dismissed.contains(strId)) {
+                        dismissed.add(strId);
+                    }
+                }
+            }
+        }
+
+        user.setDismissedNotifications(joinNotifIds(dismissed));
+        userRepository.save(user);
+
+        return ResponseEntity.ok(Map.of(
+                "dismissed", dismissed,
+                "read", parseNotifIds(user.getReadNotifications())));
+    }
+
+    @PostMapping("/{id}/notifications/read")
+    @Transactional
+    public ResponseEntity<?> markCustomerNotificationRead(@PathVariable Long id,
+            @RequestBody Map<String, Object> payload) {
+        Optional<User> userOpt = userRepository.findById(id);
+        if (userOpt.isEmpty()) {
+            return ResponseEntity.status(404).body(Map.of("error", "User not found"));
+        }
+        User user = userOpt.get();
+        List<String> read = parseNotifIds(user.getReadNotifications());
+
+        if (payload.containsKey("notifId")) {
+            String singleId = String.valueOf(payload.get("notifId"));
+            if (singleId != null && !singleId.trim().isEmpty() && !read.contains(singleId)) {
+                read.add(singleId.trim());
+            }
+        }
+        if (payload.containsKey("notifIds") && payload.get("notifIds") instanceof List) {
+            List<?> ids = (List<?>) payload.get("notifIds");
+            for (Object obj : ids) {
+                if (obj != null) {
+                    String strId = obj.toString().trim();
+                    if (!strId.isEmpty() && !read.contains(strId)) {
+                        read.add(strId);
+                    }
+                }
+            }
+        }
+
+        user.setReadNotifications(joinNotifIds(read));
+        userRepository.save(user);
+
+        return ResponseEntity.ok(Map.of(
+                "dismissed", parseNotifIds(user.getDismissedNotifications()),
+                "read", read));
+    }
+
+    @PostMapping("/{id}/notifications/clear")
+    @Transactional
+    public ResponseEntity<?> clearAllCustomerNotifications(@PathVariable Long id,
+            @RequestBody Map<String, Object> payload) {
+        Optional<User> userOpt = userRepository.findById(id);
+        if (userOpt.isEmpty()) {
+            return ResponseEntity.status(404).body(Map.of("error", "User not found"));
+        }
+        User user = userOpt.get();
+        List<String> dismissed = parseNotifIds(user.getDismissedNotifications());
+
+        if (payload.containsKey("notifIds") && payload.get("notifIds") instanceof List) {
+            List<?> ids = (List<?>) payload.get("notifIds");
+            for (Object obj : ids) {
+                if (obj != null) {
+                    String strId = obj.toString().trim();
+                    if (!strId.isEmpty() && !dismissed.contains(strId)) {
+                        dismissed.add(strId);
+                    }
+                }
+            }
+        }
+
+        user.setDismissedNotifications(joinNotifIds(dismissed));
+        userRepository.save(user);
+
+        return ResponseEntity.ok(Map.of(
+                "dismissed", dismissed,
+                "read", parseNotifIds(user.getReadNotifications())));
     }
 }

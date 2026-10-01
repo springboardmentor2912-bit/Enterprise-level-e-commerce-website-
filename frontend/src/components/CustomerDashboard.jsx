@@ -1,8 +1,8 @@
 import React, { useState, useEffect, useRef } from 'react';
 import axios from 'axios';
-import { 
+import {
   User, Package, RefreshCw, ArrowLeft, Edit2, Save, X, LogOut, ChevronDown,
-  CheckCircle2, AlertCircle, Phone, MapPin, Sun, Moon, Heart, 
+  CheckCircle2, AlertCircle, Phone, MapPin, Sun, Moon, Heart,
   ShoppingCart, Plus, Minus, Trash2, Check,
   CreditCard, QrCode, Smartphone, ArrowRight, ShieldCheck, Lock, Store, Truck,
   Receipt, RotateCcw, DollarSign, Clock, HelpCircle, FileText, CheckCircle, Search, Filter, AlertTriangle,
@@ -12,19 +12,20 @@ import ProductIcon from './ProductIcon';
 import NotificationCenter from './NotificationCenter';
 import { extractErrorMessage } from '../utils/errorHandler';
 import { formatImageUrl } from '../utils/imageHelper';
-import { 
-  generateCustomerNotifications, 
+import {
+  generateCustomerNotifications,
   generateAdminNotifications,
   generateWarehouseNotifications,
   generateVendorNotifications,
-  markNotifAsRead, 
-  markAllNotifsAsRead, 
-  clearAllNotifs, 
-  dismissNotif 
+  markNotifAsRead,
+  markAllNotifsAsRead,
+  clearAllNotifs,
+  dismissNotif,
+  syncNotificationsWithServer
 } from '../utils/notificationService';
 
-export default function CustomerDashboard({ 
-  user, orders = [], setOrders, cart = [], setCart, wishlist = [], setWishlist, 
+export default function CustomerDashboard({
+  user, orders = [], setOrders, cart = [], setCart, wishlist = [], setWishlist,
   toggleWishlist, addToCart, fetchOrders, fetchWishlist, onUpdateUser, onLogout, onGoToHome, onGoToAdmin, onGoToWarehouse, onGoToVendor, theme, onToggleTheme,
   initialTab = 'profile'
 }) {
@@ -70,7 +71,7 @@ export default function CustomerDashboard({
       document.removeEventListener('touchstart', handleOutsideClick);
     };
   }, [showDropdown]);
-  
+
   useEffect(() => {
     setActiveTab(initialTab);
   }, [initialTab]);
@@ -206,24 +207,29 @@ export default function CustomerDashboard({
 
   useEffect(() => {
     fetchAvailableCoupons();
+    if (user?.id || profile?.id) {
+      syncNotificationsWithServer(profile?.id || user?.id).then(() => {
+        refreshNotifications();
+      });
+    }
   }, []);
 
   useEffect(() => {
     refreshNotifications();
   }, [
-    user, 
-    profile, 
-    orders, 
-    pendingProductsCount, 
-    adminPlatformOrdersCount, 
-    adminVendorsCount, 
-    warehouseAllocationsCount, 
-    vendorOrders, 
-    vendorProducts, 
+    user,
+    profile,
+    orders,
+    pendingProductsCount,
+    adminPlatformOrdersCount,
+    adminVendorsCount,
+    warehouseAllocationsCount,
+    vendorOrders,
+    vendorProducts,
     availableCoupons,
     vendorCoupons,
-    isAdmin, 
-    isStaff, 
+    isAdmin,
+    isStaff,
     isVendor
   ]);
 
@@ -273,7 +279,7 @@ export default function CustomerDashboard({
   const [isLoadingTransactions, setIsLoadingTransactions] = useState(false);
   const [transactionFilter, setTransactionFilter] = useState('ALL');
   const [transactionSearch, setTransactionSearch] = useState('');
-  
+
   // Customer Return / Refund Request Modal State
   const [refundModalOrder, setRefundModalOrder] = useState(null);
   const [refundAmount, setRefundAmount] = useState('');
@@ -284,7 +290,7 @@ export default function CustomerDashboard({
   const [isSubmittingRefund, setIsSubmittingRefund] = useState(false);
   const [orderRefundHistory, setOrderRefundHistory] = useState([]);
   const [customerProofImage, setCustomerProofImage] = useState('');
-  
+
 
 
   // Experience feedback survey states
@@ -428,26 +434,26 @@ export default function CustomerDashboard({
 
   useEffect(() => {
     const fetchRefundsForOrders = async () => {
-      const returnOrders = (orders || []).filter(o => 
-        o.status === 'RETURN_REQUESTED' || 
-        o.paymentStatus === 'REFUND_PENDING' || 
-        o.paymentStatus === 'REFUNDED' || 
+      const returnOrders = (orders || []).filter(o =>
+        o.status === 'RETURN_REQUESTED' ||
+        o.paymentStatus === 'REFUND_PENDING' ||
+        o.paymentStatus === 'REFUNDED' ||
         o.paymentStatus === 'PARTIALLY_REFUNDED'
       );
-      
+
       const newMap = { ...orderRefundsMap };
       let changed = false;
-      
+
       await Promise.all(returnOrders.map(async (o) => {
         try {
           const res = await axios.get(`http://localhost:8080/api/payment/refund/${o.orderId}`);
           if (res.data && res.data.length > 0) {
             const latestRefund = res.data[0];
             const existingRefund = newMap[o.orderId];
-            if (!existingRefund || 
-                existingRefund.returnStage !== latestRefund.returnStage || 
-                existingRefund.status !== latestRefund.status || 
-                existingRefund.id !== latestRefund.id) {
+            if (!existingRefund ||
+              existingRefund.returnStage !== latestRefund.returnStage ||
+              existingRefund.status !== latestRefund.status ||
+              existingRefund.id !== latestRefund.id) {
               newMap[o.orderId] = latestRefund;
               changed = true;
             }
@@ -456,12 +462,12 @@ export default function CustomerDashboard({
           console.error("Failed to load refund for " + o.orderId, e);
         }
       }));
-      
+
       if (changed) {
         setOrderRefundsMap(newMap);
       }
     };
-    
+
     if (orders && orders.length > 0) {
       fetchRefundsForOrders();
     }
@@ -528,14 +534,14 @@ export default function CustomerDashboard({
     const liveProd = products.find(p => p.id === productId);
     const itemInCart = (Array.isArray(cart) ? cart : []).find(i => i.id === productId);
     const stock = liveProd != null ? liveProd.stock : (itemInCart?.stock ?? 0);
-    
+
     if (stock <= 0) {
       showToast('error', 'Item Out of Stock', "This product is currently out of stock and cannot be selected for purchase.");
       return;
     }
 
-    setSelectedCartItemIds(prev => 
-      prev.includes(productId) 
+    setSelectedCartItemIds(prev =>
+      prev.includes(productId)
         ? prev.filter(id => id !== productId)
         : [...prev, productId]
     );
@@ -715,14 +721,14 @@ export default function CustomerDashboard({
     setIsValidatingCoupon(true);
     setCouponError('');
     setCouponSuccess('');
-    
+
     try {
       const payload = {
         code: couponCodeInput.trim().toUpperCase(),
         userId: profile.id,
         items: selectedCartItems
       };
-      
+
       const res = await axios.post('http://localhost:8080/api/coupons/validate', payload);
       if (res.data.valid) {
         setAppliedCoupon(res.data);
@@ -765,8 +771,8 @@ export default function CustomerDashboard({
         const isStarted = !start || start <= nowStr || start.substring(0, 10) <= todayStr;
         const isNotExpired = !expiry || expiry >= nowStr || expiry.substring(0, 10) >= todayStr;
         return (
-          c.active && 
-          isStarted && 
+          c.active &&
+          isStarted &&
           isNotExpired &&
           (!c.usageLimit || c.usageCount < c.usageLimit)
         );
@@ -793,14 +799,14 @@ export default function CustomerDashboard({
       if (!liveProd) return false;
       if (liveProd.couponsEnabled === false) return false;
       if (liveProd.vendorId) {
-        const approval = approvalsArray.find(a => 
-          a && a.vendorId && String(a.vendorId) === String(liveProd.vendorId) && 
+        const approval = approvalsArray.find(a =>
+          a && a.vendorId && String(a.vendorId) === String(liveProd.vendorId) &&
           a.couponCode && a.couponCode.trim().toUpperCase() === coupon.code.trim().toUpperCase()
         );
         if (!approval || approval.status !== 'APPROVED') return false;
 
-        const mapping = mappingsArray.find(m => 
-          m && String(m.productId) === String(liveProd.id) && 
+        const mapping = mappingsArray.find(m =>
+          m && String(m.productId) === String(liveProd.id) &&
           m.couponCode && m.couponCode.trim().toUpperCase() === coupon.code.trim().toUpperCase()
         );
         return !!mapping;
@@ -840,7 +846,7 @@ export default function CustomerDashboard({
       }
       return;
     }
-    
+
     // Check if user has a default address
     const defaultAddr = addresses.find(a => a.isDefault) || addresses[0];
     if (defaultAddr) {
@@ -1005,14 +1011,14 @@ export default function CustomerDashboard({
     const cartItems = Array.isArray(cart) ? cart : [];
     const existing = cartItems.find(item => item.id === productId);
     if (!existing) return;
-    
+
     const newQty = existing.quantity + amount;
     if (newQty <= 0) {
       removeFromCart(productId);
     } else if (newQty > maxStock) {
       showToast('error', 'Inventory Warning', `Only ${maxStock} items available in stock.`);
     } else {
-      setCart(cartItems.map(item => 
+      setCart(cartItems.map(item =>
         item.id === productId ? { ...item, quantity: newQty } : item
       ));
     }
@@ -1062,13 +1068,13 @@ export default function CustomerDashboard({
       }
 
       const res = await axios.put(`http://localhost:8080/api/auth/customer/${profile.id}/role`, payload);
-      
+
       const isFirstTimeVendor = targetRole === 'VENDOR' && !profile.vendorCode;
 
       setProfile(res.data);
       onUpdateUser(res.data);
       setShowVendorPromptModal(false);
-      
+
       if (targetRole === 'VENDOR') {
         if (isFirstTimeVendor) {
           setShowUpgradedCodeModal(res.data.vendorCode);
@@ -1100,9 +1106,9 @@ export default function CustomerDashboard({
       {/* Navbar */}
       <div className="navbar">
         <div className="nav-left">
-          <h1 
-            className="nav-logo" 
-            onClick={onGoToHome} 
+          <h1
+            className="nav-logo"
+            onClick={onGoToHome}
             style={{ cursor: 'pointer', margin: 0, fontSize: '20px' }}
           >
             ShopStack
@@ -1111,23 +1117,23 @@ export default function CustomerDashboard({
 
         <div className="nav-right">
           {isPrivileged ? (
-            <button 
+            <button
               type="button"
-              onClick={onGoToHome} 
+              onClick={onGoToHome}
               className="btn-store-nav"
               title="Return to Home Dashboard"
-              style={{ 
-                borderColor: isAdmin ? 'rgba(244, 63, 94, 0.3)' : 'rgba(99, 102, 241, 0.3)', 
-                color: isAdmin ? 'var(--accent-rose)' : 'var(--accent-indigo)' 
+              style={{
+                borderColor: isAdmin ? 'rgba(244, 63, 94, 0.3)' : 'rgba(99, 102, 241, 0.3)',
+                color: isAdmin ? 'var(--accent-rose)' : 'var(--accent-indigo)'
               }}
             >
               <ArrowLeft size={15} style={{ flexShrink: 0 }} />
               <span>Back</span>
             </button>
           ) : (
-            <button 
+            <button
               type="button"
-              onClick={onGoToHome} 
+              onClick={onGoToHome}
               className="btn-store-nav"
               title="Return to Store"
             >
@@ -1150,11 +1156,11 @@ export default function CustomerDashboard({
             align="right"
           />
 
-          <div 
+          <div
             className="nav-user-menu"
             ref={userMenuRef}
           >
-            <div 
+            <div
               className="nav-user-trigger"
               onClick={(e) => {
                 e.stopPropagation();
@@ -1166,13 +1172,13 @@ export default function CustomerDashboard({
                 <User size={14} style={{ color: isAdmin ? 'var(--accent-rose)' : isStaff ? 'var(--accent-indigo)' : 'var(--accent-blue)', flexShrink: 0 }} />
               </div>
               <strong className="nav-user-name">{profile.fullName || user?.fullName || 'User'}</strong>
-              <ChevronDown 
-                size={13} 
+              <ChevronDown
+                size={13}
                 className="nav-user-chevron"
-                style={{ 
+                style={{
                   transform: showDropdown ? 'rotate(180deg)' : 'none',
                   transition: 'transform 0.2s ease'
-                }} 
+                }}
               />
             </div>
 
@@ -1215,12 +1221,12 @@ export default function CustomerDashboard({
 
                 {/* Light / Dark Mode Toggle Button */}
                 {onToggleTheme && (
-                  <div 
-                    onClick={(e) => { 
-                      e.stopPropagation(); 
-                      onToggleTheme(); 
-                    }} 
-                    className="dropdown-item" 
+                  <div
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      onToggleTheme();
+                    }}
+                    className="dropdown-item"
                     style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', cursor: 'pointer' }}
                   >
                     <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
@@ -1231,15 +1237,15 @@ export default function CustomerDashboard({
                       )}
                       <span>{theme === 'dark' ? 'Light Mode' : 'Dark Mode'}</span>
                     </div>
-                    <span 
-                      style={{ 
-                        fontSize: '10px', 
-                        fontWeight: '700', 
-                        padding: '2px 6px', 
-                        borderRadius: '4px', 
-                        background: 'var(--bg-input)', 
-                        color: 'var(--text-secondary)', 
-                        border: '1px solid var(--border-light)' 
+                    <span
+                      style={{
+                        fontSize: '10px',
+                        fontWeight: '700',
+                        padding: '2px 6px',
+                        borderRadius: '4px',
+                        background: 'var(--bg-input)',
+                        color: 'var(--text-secondary)',
+                        border: '1px solid var(--border-light)'
                       }}
                     >
                       {theme === 'dark' ? 'DARK' : 'LIGHT'}
@@ -1250,12 +1256,12 @@ export default function CustomerDashboard({
                 <div className="dropdown-divider" />
 
                 {/* Logout Button */}
-                <div 
-                  onClick={() => { 
-                    setShowDropdown(false); 
-                    if (onLogout) onLogout(); 
-                  }} 
-                  className="dropdown-item dropdown-item-danger" 
+                <div
+                  onClick={() => {
+                    setShowDropdown(false);
+                    if (onLogout) onLogout();
+                  }}
+                  className="dropdown-item dropdown-item-danger"
                   style={{ color: 'var(--accent-rose)', fontWeight: '600' }}
                 >
                   <LogOut size={16} style={{ flexShrink: 0 }} /> <span>Logout</span>
@@ -1270,8 +1276,8 @@ export default function CustomerDashboard({
       <div className="dashboard-layout">
         {/* Interactive Sidebar Tabs */}
         <div className="sidebar">
-          <div 
-            onClick={() => setActiveTab('profile')} 
+          <div
+            onClick={() => setActiveTab('profile')}
             className={`sidebar-item ${activeTab === 'profile' ? 'sidebar-item-active' : ''}`}
           >
             <User size={18} /> My Profile
@@ -1279,32 +1285,32 @@ export default function CustomerDashboard({
 
           {!isPrivileged && (
             <>
-              <div 
-                onClick={() => setActiveTab('addresses')} 
+              <div
+                onClick={() => setActiveTab('addresses')}
                 className={`sidebar-item ${activeTab === 'addresses' ? 'sidebar-item-active' : ''}`}
               >
                 <MapPin size={18} /> Your Addresses ({addresses.length})
               </div>
-              <div 
-                onClick={() => setActiveTab('orders')} 
+              <div
+                onClick={() => setActiveTab('orders')}
                 className={`sidebar-item ${activeTab === 'orders' ? 'sidebar-item-active' : ''}`}
               >
                 <Package size={18} /> My Orders ({orders.length})
               </div>
-              <div 
-                onClick={() => setActiveTab('transactions')} 
+              <div
+                onClick={() => setActiveTab('transactions')}
                 className={`sidebar-item ${activeTab === 'transactions' ? 'sidebar-item-active' : ''}`}
               >
                 <Receipt size={18} /> Transactions ({transactions.length})
               </div>
-              <div 
-                onClick={() => setActiveTab('wishlist')} 
+              <div
+                onClick={() => setActiveTab('wishlist')}
                 className={`sidebar-item ${activeTab === 'wishlist' ? 'sidebar-item-active' : ''}`}
               >
                 <Heart size={18} /> My Wishlist ({wishlist.length})
               </div>
-              <div 
-                onClick={() => setActiveTab('cart')} 
+              <div
+                onClick={() => setActiveTab('cart')}
                 className={`sidebar-item ${activeTab === 'cart' ? 'sidebar-item-active' : ''}`}
               >
                 <ShoppingCart size={18} /> My Cart ({Array.isArray(cart) ? cart.reduce((sum, item) => sum + (Number(item?.quantity) || 1), 0) : 0})
@@ -1370,15 +1376,14 @@ export default function CustomerDashboard({
                       <span style={{ width: '180px', color: 'var(--text-secondary)', fontWeight: '600' }}>Full Name</span>
                       <strong style={{ color: 'var(--text-primary)' }}>{profile.fullName}</strong>
                     </div>
-                    
+
                     <div style={{ display: 'flex', borderBottom: '1px solid var(--border-light)', paddingBottom: '12px' }}>
                       <span style={{ width: '180px', color: 'var(--text-secondary)', fontWeight: '600' }}>Account Mode</span>
                       <div>
-                        <span className={`badge ${
-                          profile.role === 'VENDOR' ? 'badge-vendor' : 
-                          profile.role === 'ADMINISTRATOR' ? 'badge-rejected' : 
-                          profile.role === 'WAREHOUSE_STAFF' ? 'badge-pending' : 'badge-customer'
-                        }`}>
+                        <span className={`badge ${profile.role === 'VENDOR' ? 'badge-vendor' :
+                            profile.role === 'ADMINISTRATOR' ? 'badge-rejected' :
+                              profile.role === 'WAREHOUSE_STAFF' ? 'badge-pending' : 'badge-customer'
+                          }`}>
                           {profile.role}
                         </span>
                       </div>
@@ -1396,7 +1401,7 @@ export default function CustomerDashboard({
                       </span>
                     </div>
                   </div>
-                  
+
                   <button onClick={() => setIsEditing(true)} className="btn btn-primary" style={{ width: 'fit-content' }}>
                     <Edit2 size={16} /> Edit Profile Details
                   </button>
@@ -1407,11 +1412,11 @@ export default function CustomerDashboard({
                     <label className="form-label">Full Name</label>
                     <div className="input-icon-wrapper">
                       <User className="input-icon" />
-                      <input 
-                        type="text" 
-                        value={profile.fullName} 
-                        onChange={(e) => setProfile({ ...profile, fullName: e.target.value })} 
-                        required 
+                      <input
+                        type="text"
+                        value={profile.fullName}
+                        onChange={(e) => setProfile({ ...profile, fullName: e.target.value })}
+                        required
                         className="form-input"
                       />
                     </div>
@@ -1421,11 +1426,11 @@ export default function CustomerDashboard({
                     <label className="form-label">Phone Number</label>
                     <div className="input-icon-wrapper">
                       <Phone className="input-icon" />
-                      <input 
-                        type="text" 
+                      <input
+                        type="text"
                         placeholder="+1 (555) 000-0000"
-                        value={profile.phone} 
-                        onChange={(e) => setProfile({ ...profile, phone: e.target.value })} 
+                        value={profile.phone}
+                        onChange={(e) => setProfile({ ...profile, phone: e.target.value })}
                         className="form-input"
                       />
                     </div>
@@ -1453,9 +1458,9 @@ export default function CustomerDashboard({
                     Manage multiple shipping addresses and configure your default delivery destination.
                   </p>
                 </div>
-                <button 
-                  type="button" 
-                  onClick={handleOpenAddAddress} 
+                <button
+                  type="button"
+                  onClick={handleOpenAddAddress}
                   className="btn btn-primary"
                   style={{ display: 'flex', alignItems: 'center', gap: '8px', padding: '10px 18px' }}
                 >
@@ -1477,11 +1482,11 @@ export default function CustomerDashboard({
                   {addresses.map((addr) => {
                     const isDef = !!addr.isDefault;
                     return (
-                      <div 
-                        key={addr.id} 
+                      <div
+                        key={addr.id}
                         className="order-card"
-                        style={{ 
-                          padding: '20px', 
+                        style={{
+                          padding: '20px',
                           borderRadius: '12px',
                           border: isDef ? '2px solid var(--accent-teal)' : '1px solid var(--border-light)',
                           background: isDef ? 'rgba(20, 184, 166, 0.04)' : 'var(--bg-input)',
@@ -1517,7 +1522,7 @@ export default function CustomerDashboard({
                           <p style={{ fontSize: '14px', color: 'var(--text-secondary)', lineHeight: '1.5', margin: '0 0 8px 0' }}>
                             {addr.streetAddress}
                           </p>
-                          
+
                           {(addr.city || addr.state || addr.postalCode) && (
                             <p style={{ fontSize: '13px', color: 'var(--text-muted)', margin: '0 0 12px 0', fontWeight: '500' }}>
                               {[addr.city, addr.state].filter(Boolean).join(', ')} {addr.postalCode ? `- ${addr.postalCode}` : ''}
@@ -1535,8 +1540,8 @@ export default function CustomerDashboard({
                         {/* Action Buttons */}
                         <div style={{ display: 'flex', alignItems: 'center', gap: '8px', borderTop: '1px solid var(--border-light)', paddingTop: '14px', marginTop: '10px', flexWrap: 'wrap' }}>
                           {!isDef && (
-                            <button 
-                              type="button" 
+                            <button
+                              type="button"
                               onClick={() => handleSetDefaultAddress(addr.id)}
                               className="btn btn-secondary"
                               style={{ fontSize: '12px', padding: '6px 12px' }}
@@ -1544,16 +1549,16 @@ export default function CustomerDashboard({
                               Set as Default
                             </button>
                           )}
-                          <button 
-                            type="button" 
+                          <button
+                            type="button"
                             onClick={() => handleOpenEditAddress(addr)}
                             className="btn btn-secondary"
                             style={{ fontSize: '12px', padding: '6px 12px', display: 'flex', alignItems: 'center', gap: '4px' }}
                           >
                             <Edit2 size={13} /> Edit
                           </button>
-                          <button 
-                            type="button" 
+                          <button
+                            type="button"
                             onClick={() => handleDeleteAddress(addr.id)}
                             className="btn-icon-only"
                             style={{ color: 'var(--accent-rose)', padding: '6px 10px', marginLeft: 'auto' }}
@@ -1574,9 +1579,9 @@ export default function CustomerDashboard({
             <div>
               <div className="flex-between" style={{ marginBottom: '20px', flexWrap: 'wrap', gap: '12px' }}>
                 <h2 style={{ fontSize: '20px', fontWeight: '700', margin: 0 }}>Your Order History</h2>
-                <button 
-                  type="button" 
-                  onClick={() => { if (fetchOrders) fetchOrders(); fetchTransactions(); }} 
+                <button
+                  type="button"
+                  onClick={() => { if (fetchOrders) fetchOrders(); fetchTransactions(); }}
                   className="btn btn-secondary"
                   style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '12px', padding: '6px 12px' }}
                 >
@@ -1654,27 +1659,27 @@ export default function CustomerDashboard({
 
                         {/* Order / Return Roadmap Progress Bar */}
                         {(() => {
-                          const isReturnOrder = ord.status === 'RETURN_REQUESTED' || 
-                            ord.paymentStatus === 'REFUND_PENDING' || 
-                            ord.paymentStatus === 'REFUNDED' || 
+                          const isReturnOrder = ord.status === 'RETURN_REQUESTED' ||
+                            ord.paymentStatus === 'REFUND_PENDING' ||
+                            ord.paymentStatus === 'REFUNDED' ||
                             ord.paymentStatus === 'PARTIALLY_REFUNDED';
-                          
+
                           if (isReturnOrder) {
                             const refundObj = orderRefundsMap[ord.orderId];
                             const returnStage = refundObj ? refundObj.returnStage : 'REQUESTED';
                             const refundStatus = refundObj ? refundObj.status : 'PENDING';
-                            
+
                             const isRefundedStatus = ord.status === 'REFUNDED' || ord.paymentStatus === 'REFUNDED';
-                            
+
                             const isRequested = true;
                             const isPickedUp = ['ITEM_RETURNED', 'QC_PASSED', 'QC_FAILED', 'REFUNDED', 'REJECTED'].includes(returnStage) || isRefundedStatus;
                             const isQcInspected = ['QC_PASSED', 'QC_FAILED', 'REFUNDED', 'REJECTED'].includes(returnStage) || isRefundedStatus;
                             const isResolved = ['PROCESSED', 'REFUNDED', 'REJECTED'].includes(refundStatus) || returnStage === 'REFUNDED' || isRefundedStatus;
-                            
+
                             const qcLabel = returnStage === 'QC_FAILED' ? 'QC Failed' : 'QC Passed';
                             const resolveLabel = refundStatus === 'REJECTED' ? 'Rejected' : 'Refunded';
                             const resolveColor = refundStatus === 'REJECTED' ? 'var(--accent-rose)' : 'var(--accent-teal)';
-                            
+
                             return (
                               <div style={{ margin: '14px 0 10px 0', padding: '12px 14px', background: 'var(--bg-primary)', borderRadius: '10px', border: '1.5px dashed rgba(168, 85, 247, 0.25)' }}>
                                 <div style={{ fontSize: '11px', fontWeight: '800', color: '#c084fc', textTransform: 'uppercase', marginBottom: '8px', display: 'flex', alignItems: 'center', gap: '6px' }}>
@@ -1710,12 +1715,12 @@ export default function CustomerDashboard({
                                         </span>
                                       </div>
                                       {idx < 3 && (
-                                        <div style={{ 
-                                          flex: 1, 
-                                          height: '2px', 
-                                          background: [isPickedUp, isQcInspected, isResolved][idx] ? 'var(--accent-teal)' : 'var(--border-light)', 
-                                          margin: '0 4px', 
-                                          transform: 'translateY(-8px)' 
+                                        <div style={{
+                                          flex: 1,
+                                          height: '2px',
+                                          background: [isPickedUp, isQcInspected, isResolved][idx] ? 'var(--accent-teal)' : 'var(--border-light)',
+                                          margin: '0 4px',
+                                          transform: 'translateY(-8px)'
                                         }} />
                                       )}
                                     </React.Fragment>
@@ -1729,7 +1734,7 @@ export default function CustomerDashboard({
                             const isStep2 = ['PACKED', 'READY_FOR_SHIPMENT', 'SHIPPED', 'DELIVERED'].includes(ord.status);
                             const isStep3 = ['READY_FOR_SHIPMENT', 'SHIPPED', 'DELIVERED'].includes(ord.status);
                             const isStep4 = ['DELIVERED'].includes(ord.status);
-                            
+
                             return (
                               <div style={{ margin: '14px 0 10px 0', padding: '12px 14px', background: 'var(--bg-primary)', borderRadius: '10px', border: '1px solid var(--border-light)' }}>
                                 <div style={{ fontSize: '11px', fontWeight: '800', color: 'var(--text-muted)', textTransform: 'uppercase', marginBottom: '8px', display: 'flex', alignItems: 'center', gap: '6px' }}>
@@ -1765,12 +1770,12 @@ export default function CustomerDashboard({
                                         </span>
                                       </div>
                                       {idx < 3 && (
-                                        <div style={{ 
-                                          flex: 1, 
-                                          height: '2px', 
-                                          background: [isStep2, isStep3, isStep4][idx] ? 'var(--accent-teal)' : 'var(--border-light)', 
-                                          margin: '0 4px', 
-                                          transform: 'translateY(-8px)' 
+                                        <div style={{
+                                          flex: 1,
+                                          height: '2px',
+                                          background: [isStep2, isStep3, isStep4][idx] ? 'var(--accent-teal)' : 'var(--border-light)',
+                                          margin: '0 4px',
+                                          transform: 'translateY(-8px)'
                                         }} />
                                       )}
                                     </React.Fragment>
@@ -1810,7 +1815,7 @@ export default function CustomerDashboard({
                                     <div style={{ fontWeight: '600', fontSize: '13px' }}>{item.productName || item.name}</div>
                                     <div style={{ fontSize: '11px', color: 'var(--text-muted)' }}>
                                       Qty: {item.quantity} × ₹{item.price}
-                                      <span 
+                                      <span
                                         className={`badge ${isEligible ? 'badge-approved' : 'badge-rejected'}`}
                                         style={{ marginLeft: '10px', fontSize: '9px', padding: '1px 5px' }}
                                       >
@@ -1841,24 +1846,24 @@ export default function CustomerDashboard({
 
                           {/* Refund / Return Action Buttons */}
                           {(payStatus === 'REFUND_PENDING' || ord.status === 'RETURN_REQUESTED' || ord.hasPendingRefund) ? (
-                            <span 
+                            <span
                               className="badge badge-pending"
                               style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', fontSize: '12px', padding: '6px 12px' }}
                             >
                               <Clock size={14} /> Return Pending QC
                             </span>
                           ) : (isPaid || isPartiallyRefunded) ? (
-                            <button 
-                              type="button" 
-                              onClick={() => handleOpenRefundModal(ord)} 
+                            <button
+                              type="button"
+                              onClick={() => handleOpenRefundModal(ord)}
                               className="btn btn-secondary"
                               style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '12px', padding: '8px 14px', borderColor: 'rgba(168, 85, 247, 0.3)', color: '#c084fc' }}
                             >
                               <RotateCcw size={14} /> Request Return / Refund
                             </button>
                           ) : isRefunded ? (
-                            <span 
-                              className="badge" 
+                            <span
+                              className="badge"
                               style={{ background: 'rgba(139, 92, 246, 0.15)', color: '#a78bfa', fontSize: '12px', padding: '6px 12px', border: '1px solid rgba(139, 92, 246, 0.3)' }}
                             >
                               ✓ Refunded
@@ -1882,17 +1887,17 @@ export default function CustomerDashboard({
                                     <h4 style={{ margin: 0, fontSize: '13px', fontWeight: '700', color: 'var(--text-primary)' }}>
                                       Product & Delivery Review
                                     </h4>
-                                    <span style={{ 
-                                      display: 'inline-flex', 
-                                      alignItems: 'center', 
-                                      gap: '4px', 
-                                      background: 'rgba(20, 184, 166, 0.15)', 
-                                      color: 'var(--accent-teal)', 
-                                      fontSize: '11px', 
-                                      fontWeight: '700', 
-                                      padding: '2px 8px', 
-                                      borderRadius: '12px', 
-                                      border: '1px solid rgba(20, 184, 166, 0.35)' 
+                                    <span style={{
+                                      display: 'inline-flex',
+                                      alignItems: 'center',
+                                      gap: '4px',
+                                      background: 'rgba(20, 184, 166, 0.15)',
+                                      color: 'var(--accent-teal)',
+                                      fontSize: '11px',
+                                      fontWeight: '700',
+                                      padding: '2px 8px',
+                                      borderRadius: '12px',
+                                      border: '1px solid rgba(20, 184, 166, 0.35)'
                                     }}>
                                       <CheckCircle2 size={12} /> Submitted
                                     </span>
@@ -1906,11 +1911,11 @@ export default function CustomerDashboard({
                                       setFeedbackImageInput(prev => ({ ...prev, [ord.orderId]: ord.feedbackImage || '' }));
                                     }}
                                     className="btn btn-secondary"
-                                    style={{ 
-                                      padding: '4px 10px', 
-                                      fontSize: '11.5px', 
-                                      display: 'inline-flex', 
-                                      alignItems: 'center', 
+                                    style={{
+                                      padding: '4px 10px',
+                                      fontSize: '11.5px',
+                                      display: 'inline-flex',
+                                      alignItems: 'center',
                                       gap: '5px',
                                       borderRadius: '6px',
                                       border: '1px solid var(--border-color)',
@@ -1930,9 +1935,9 @@ export default function CustomerDashboard({
                                     {ord.feedbackRating}.0 / 5.0
                                   </span>
                                 </div>
-                                <div style={{ 
-                                  color: 'var(--text-secondary)', 
-                                  fontSize: '12.5px', 
+                                <div style={{
+                                  color: 'var(--text-secondary)',
+                                  fontSize: '12.5px',
                                   fontStyle: 'italic',
                                   background: 'rgba(255, 255, 255, 0.03)',
                                   padding: '8px 12px',
@@ -1949,11 +1954,11 @@ export default function CustomerDashboard({
                                     <span style={{ fontSize: '11px', color: 'var(--text-muted)', fontWeight: '600', display: 'block', marginBottom: '5px' }}>
                                       Attached Customer Photo:
                                     </span>
-                                    <div 
+                                    <div
                                       onClick={() => setPreviewLightboxImage(ord.feedbackImage)}
-                                      style={{ 
-                                        position: 'relative', 
-                                        display: 'inline-block', 
+                                      style={{
+                                        position: 'relative',
+                                        display: 'inline-block',
                                         cursor: 'pointer',
                                         borderRadius: '8px',
                                         overflow: 'hidden',
@@ -1962,20 +1967,20 @@ export default function CustomerDashboard({
                                       }}
                                       title="Click to view full photo"
                                     >
-                                      <img 
-                                        src={formatImageUrl(ord.feedbackImage)} 
-                                        alt="Customer Review Photo" 
+                                      <img
+                                        src={formatImageUrl(ord.feedbackImage)}
+                                        alt="Customer Review Photo"
                                         style={{ width: '80px', height: '80px', objectFit: 'cover', display: 'block' }}
                                       />
-                                      <div style={{ 
-                                        position: 'absolute', 
-                                        bottom: '4px', 
-                                        right: '4px', 
-                                        background: 'rgba(0,0,0,0.65)', 
-                                        borderRadius: '4px', 
-                                        padding: '3px', 
-                                        display: 'flex', 
-                                        color: '#fff' 
+                                      <div style={{
+                                        position: 'absolute',
+                                        bottom: '4px',
+                                        right: '4px',
+                                        background: 'rgba(0,0,0,0.65)',
+                                        borderRadius: '4px',
+                                        padding: '3px',
+                                        display: 'flex',
+                                        color: '#fff'
                                       }}>
                                         <Eye size={12} />
                                       </div>
@@ -2005,15 +2010,15 @@ export default function CustomerDashboard({
                                     {[1, 2, 3, 4, 5].map(star => {
                                       const currentVal = feedbackRatingInput[ord.orderId] !== undefined ? feedbackRatingInput[ord.orderId] : (ord.feedbackRating || 5);
                                       return (
-                                        <span 
+                                        <span
                                           key={star}
                                           onClick={() => setFeedbackRatingInput(prev => ({
                                             ...prev,
                                             [ord.orderId]: star
                                           }))}
-                                          style={{ 
-                                            cursor: 'pointer', 
-                                            fontSize: '20px', 
+                                          style={{
+                                            cursor: 'pointer',
+                                            fontSize: '20px',
                                             color: star <= currentVal ? '#f59e0b' : 'var(--text-muted)',
                                             transition: 'transform 0.15s'
                                           }}
@@ -2030,7 +2035,7 @@ export default function CustomerDashboard({
                                   </span>
                                 </div>
                                 <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
-                                  <input 
+                                  <input
                                     type="text"
                                     placeholder="Tell us about product quality and delivery experience..."
                                     value={feedbackCommentInput[ord.orderId] !== undefined ? feedbackCommentInput[ord.orderId] : (ord.feedbackComment || '')}
@@ -2046,15 +2051,15 @@ export default function CustomerDashboard({
                                 {/* Review Image Upload Control & Preview */}
                                 <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', background: 'rgba(255,255,255,0.02)', padding: '10px', borderRadius: '8px', border: '1px dashed var(--border-color)' }}>
                                   <div style={{ display: 'flex', alignItems: 'center', gap: '10px', flexWrap: 'wrap' }}>
-                                    <label 
+                                    <label
                                       htmlFor={`review-img-upload-${ord.orderId}`}
                                       className="btn btn-secondary"
-                                      style={{ 
-                                        padding: '5px 12px', 
-                                        fontSize: '12px', 
-                                        cursor: 'pointer', 
-                                        display: 'inline-flex', 
-                                        alignItems: 'center', 
+                                      style={{
+                                        padding: '5px 12px',
+                                        fontSize: '12px',
+                                        cursor: 'pointer',
+                                        display: 'inline-flex',
+                                        alignItems: 'center',
                                         gap: '6px',
                                         borderRadius: '6px',
                                         background: 'var(--bg-secondary)',
@@ -2068,9 +2073,9 @@ export default function CustomerDashboard({
                                       )}
                                       <span>{isUploadingFeedbackImage[ord.orderId] ? 'Uploading Photo...' : '📷 Upload Review Image'}</span>
                                     </label>
-                                    <input 
+                                    <input
                                       id={`review-img-upload-${ord.orderId}`}
-                                      type="file" 
+                                      type="file"
                                       accept="image/*"
                                       disabled={isUploadingFeedbackImage[ord.orderId]}
                                       onChange={(e) => handleFeedbackImageUpload(ord.orderId, e)}
@@ -2085,27 +2090,27 @@ export default function CustomerDashboard({
                                   {(feedbackImageInput[ord.orderId] !== undefined ? feedbackImageInput[ord.orderId] : ord.feedbackImage) && (
                                     <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginTop: '4px' }}>
                                       <div style={{ position: 'relative', width: '64px', height: '64px', borderRadius: '8px', overflow: 'hidden', border: '1.5px solid var(--accent-teal)' }}>
-                                        <img 
-                                          src={formatImageUrl(feedbackImageInput[ord.orderId] !== undefined ? feedbackImageInput[ord.orderId] : ord.feedbackImage)} 
-                                          alt="Review attachment" 
+                                        <img
+                                          src={formatImageUrl(feedbackImageInput[ord.orderId] !== undefined ? feedbackImageInput[ord.orderId] : ord.feedbackImage)}
+                                          alt="Review attachment"
                                           style={{ width: '100%', height: '100%', objectFit: 'cover' }}
                                         />
                                         <button
                                           type="button"
                                           onClick={() => setFeedbackImageInput(prev => ({ ...prev, [ord.orderId]: '' }))}
-                                          style={{ 
-                                            position: 'absolute', 
-                                            top: '2px', 
-                                            right: '2px', 
-                                            background: 'rgba(0,0,0,0.75)', 
-                                            color: '#ff4d4f', 
-                                            border: 'none', 
-                                            borderRadius: '50%', 
-                                            width: '18px', 
-                                            height: '18px', 
-                                            cursor: 'pointer', 
-                                            display: 'flex', 
-                                            alignItems: 'center', 
+                                          style={{
+                                            position: 'absolute',
+                                            top: '2px',
+                                            right: '2px',
+                                            background: 'rgba(0,0,0,0.75)',
+                                            color: '#ff4d4f',
+                                            border: 'none',
+                                            borderRadius: '50%',
+                                            width: '18px',
+                                            height: '18px',
+                                            cursor: 'pointer',
+                                            display: 'flex',
+                                            alignItems: 'center',
                                             justifyContent: 'center',
                                             padding: 0
                                           }}
@@ -2134,16 +2139,16 @@ export default function CustomerDashboard({
 
                                       setIsSubmittingFeedback(prev => ({ ...prev, [ord.orderId]: true }));
                                       try {
-                                        await axios.post(`http://localhost:8080/api/customer/orders/${ord.orderId}/feedback`, { 
-                                          rating, 
+                                        await axios.post(`http://localhost:8080/api/customer/orders/${ord.orderId}/feedback`, {
+                                          rating,
                                           comment,
                                           image: image || null,
                                           removeImage
                                         });
                                         if (setOrders) {
-                                          setOrders(prev => prev.map(o => o.orderId === ord.orderId ? { 
-                                            ...o, 
-                                            feedbackRating: rating, 
+                                          setOrders(prev => prev.map(o => o.orderId === ord.orderId ? {
+                                            ...o,
+                                            feedbackRating: rating,
                                             feedbackComment: comment,
                                             feedbackImage: removeImage ? null : (image || o.feedbackImage)
                                           } : o));
@@ -2158,12 +2163,12 @@ export default function CustomerDashboard({
                                       }
                                     }}
                                     className="btn btn-primary"
-                                    style={{ 
-                                      padding: '8px 18px', 
-                                      fontSize: '12px', 
+                                    style={{
+                                      padding: '8px 18px',
+                                      fontSize: '12px',
                                       fontWeight: '600',
-                                      background: 'var(--accent-teal)', 
-                                      border: 'none', 
+                                      background: 'var(--accent-teal)',
+                                      border: 'none',
                                       color: '#fff',
                                       borderRadius: '6px',
                                       cursor: 'pointer',
@@ -2218,9 +2223,9 @@ export default function CustomerDashboard({
                     Complete audit trail of your checkout transactions, gateway responses, and refunds.
                   </p>
                 </div>
-                <button 
-                  type="button" 
-                  onClick={fetchTransactions} 
+                <button
+                  type="button"
+                  onClick={fetchTransactions}
                   className="btn btn-secondary"
                   style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '12px', padding: '6px 14px' }}
                 >
@@ -2282,9 +2287,9 @@ export default function CustomerDashboard({
               <div className="dashboard-filter-bar">
                 <div className="dashboard-filter-search">
                   <Search size={16} style={{ position: 'absolute', left: '12px', top: '50%', transform: 'translateY(-50%)', color: 'var(--text-muted)' }} />
-                  <input 
-                    type="text" 
-                    placeholder="Search by Order ID or Razorpay Payment ID..." 
+                  <input
+                    type="text"
+                    placeholder="Search by Order ID or Razorpay Payment ID..."
                     value={transactionSearch}
                     onChange={(e) => setTransactionSearch(e.target.value)}
                     className="form-input"
@@ -2475,23 +2480,23 @@ export default function CustomerDashboard({
                           <span className="badge badge-customer" style={{ fontSize: '10px', padding: '2px 6px' }}>{prod.category}</span>
                         </div>
                       </div>
-                      
+
                       <div style={{ display: 'flex', alignItems: 'center', gap: '14px', marginLeft: 'auto' }}>
                         <strong style={{ fontSize: '16px', color: 'var(--accent-teal)' }}>₹{prod.price}</strong>
                         <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
-                          <button 
-                            type="button" 
-                            onClick={() => addToCart(prod, (type, text) => showToast(type, type === 'success' ? 'Success' : 'Notification', text))} 
-                            className="btn btn-primary" 
+                          <button
+                            type="button"
+                            onClick={() => addToCart(prod, (type, text) => showToast(type, type === 'success' ? 'Success' : 'Notification', text))}
+                            className="btn btn-primary"
                             style={{ padding: '6px 14px', fontSize: '12px' }}
                             disabled={prod.stock <= 0}
                           >
                             {prod.stock <= 0 ? "Out of Stock" : "Add to Cart"}
                           </button>
-                          <button 
-                            type="button" 
-                            onClick={() => toggleWishlist(prod, (type, text) => showToast(type, type === 'success' ? 'Success' : 'Notification', text))} 
-                            className="btn-icon-only" 
+                          <button
+                            type="button"
+                            onClick={() => toggleWishlist(prod, (type, text) => showToast(type, type === 'success' ? 'Success' : 'Notification', text))}
+                            className="btn-icon-only"
                             style={{ width: '32px', height: '32px', padding: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--accent-rose)', borderColor: 'rgba(239, 68, 68, 0.2)' }}
                             title="Remove from wishlist"
                           >
@@ -2501,8 +2506,8 @@ export default function CustomerDashboard({
                       </div>
                     </div>
                   ))}
-                  </div>
-                )}
+                </div>
+              )}
             </div>
           )}
 
@@ -2536,11 +2541,11 @@ export default function CustomerDashboard({
                       border: '1px solid var(--border-light)'
                     }}>
                       <label style={{ display: 'flex', alignItems: 'center', gap: '10px', cursor: inStockCartItems.length > 0 ? 'pointer' : 'not-allowed', fontWeight: '600', fontSize: '13px', userSelect: 'none', opacity: inStockCartItems.length > 0 ? 1 : 0.6 }}>
-                        <input 
-                          type="checkbox" 
-                          checked={isAllSelected} 
+                        <input
+                          type="checkbox"
+                          checked={isAllSelected}
                           disabled={inStockCartItems.length === 0}
-                          onChange={toggleSelectAll} 
+                          onChange={toggleSelectAll}
                           style={{ width: '18px', height: '18px', accentColor: 'var(--accent-teal)', cursor: inStockCartItems.length > 0 ? 'pointer' : 'not-allowed' }}
                         />
                         <span>Select All In-Stock ({inStockCartItems.length}/{cart.length})</span>
@@ -2559,14 +2564,14 @@ export default function CustomerDashboard({
                       const isItemSelected = selectedCartItemIds.includes(item.id) && !isOutOfStock;
 
                       return (
-                        <div 
-                          key={item.id} 
-                          className="cart-item-card-responsive" 
-                          style={{ 
-                            background: isOutOfStock ? 'rgba(239, 68, 68, 0.04)' : 'var(--bg-input)', 
-                            padding: '14px 16px', 
-                            borderRadius: '10px', 
-                            display: 'flex', 
+                        <div
+                          key={item.id}
+                          className="cart-item-card-responsive"
+                          style={{
+                            background: isOutOfStock ? 'rgba(239, 68, 68, 0.04)' : 'var(--bg-input)',
+                            padding: '14px 16px',
+                            borderRadius: '10px',
+                            display: 'flex',
                             flexDirection: 'column',
                             gap: '12px',
                             opacity: isOutOfStock ? 0.65 : (isItemSelected ? 1 : 0.65),
@@ -2579,9 +2584,9 @@ export default function CustomerDashboard({
                           {/* Top Row: Checkbox + Thumbnail + Title/Badges + Delete Button */}
                           <div style={{ display: 'flex', alignItems: 'flex-start', gap: '12px', width: '100%' }}>
                             {/* Checkbox */}
-                            <input 
-                              type="checkbox" 
-                              checked={isItemSelected} 
+                            <input
+                              type="checkbox"
+                              checked={isItemSelected}
                               disabled={isOutOfStock}
                               onChange={() => toggleSelectItem(item.id)}
                               style={{ width: '20px', height: '20px', accentColor: 'var(--accent-teal)', cursor: isOutOfStock ? 'not-allowed' : 'pointer', flexShrink: 0, marginTop: '2px' }}
@@ -2604,38 +2609,38 @@ export default function CustomerDashboard({
                               </h4>
                               <div style={{ display: 'flex', alignItems: 'center', gap: '6px', flexWrap: 'wrap' }}>
                                 <span className="badge badge-customer" style={{ fontSize: '10px', padding: '2px 6px' }}>{item.category}</span>
-                                
+
                                 {isOutOfStock ? (
-                                  <span style={{ 
-                                    background: 'linear-gradient(135deg, rgba(239, 68, 68, 0.15), rgba(220, 38, 38, 0.25))', 
-                                    color: '#ef4444', 
-                                    fontWeight: '800', 
-                                    fontSize: '10px', 
-                                    padding: '2px 6px', 
+                                  <span style={{
+                                    background: 'linear-gradient(135deg, rgba(239, 68, 68, 0.15), rgba(220, 38, 38, 0.25))',
+                                    color: '#ef4444',
+                                    fontWeight: '800',
+                                    fontSize: '10px',
+                                    padding: '2px 6px',
                                     borderRadius: '4px',
                                     border: '1px solid rgba(239, 68, 68, 0.35)'
                                   }}>
                                     🚫 OUT OF STOCK
                                   </span>
                                 ) : isExceedingStock ? (
-                                  <span style={{ 
-                                    background: 'rgba(245, 158, 11, 0.15)', 
-                                    color: '#f59e0b', 
-                                    fontWeight: '700', 
-                                    fontSize: '10px', 
-                                    padding: '2px 6px', 
+                                  <span style={{
+                                    background: 'rgba(245, 158, 11, 0.15)',
+                                    color: '#f59e0b',
+                                    fontWeight: '700',
+                                    fontSize: '10px',
+                                    padding: '2px 6px',
                                     borderRadius: '4px',
                                     border: '1px solid rgba(245, 158, 11, 0.35)'
                                   }}>
                                     ⚠️ Only {currentStock} in stock
                                   </span>
                                 ) : hasDiscount ? (
-                                  <span style={{ 
-                                    background: 'linear-gradient(135deg, #ef4444 0%, #dc2626 100%)', 
-                                    color: '#ffffff', 
-                                    fontWeight: '800', 
-                                    fontSize: '10px', 
-                                    padding: '2px 6px', 
+                                  <span style={{
+                                    background: 'linear-gradient(135deg, #ef4444 0%, #dc2626 100%)',
+                                    color: '#ffffff',
+                                    fontWeight: '800',
+                                    fontSize: '10px',
+                                    padding: '2px 6px',
                                     borderRadius: '4px',
                                     boxShadow: '0 2px 4px rgba(239, 68, 68, 0.4)'
                                   }}>
@@ -2646,10 +2651,10 @@ export default function CustomerDashboard({
                             </div>
 
                             {/* Trash Button */}
-                            <button 
-                              type="button" 
-                              onClick={() => removeFromCart(item.id)} 
-                              className="btn-icon-only" 
+                            <button
+                              type="button"
+                              onClick={() => removeFromCart(item.id)}
+                              className="btn-icon-only"
                               style={{ color: 'var(--accent-rose)', borderColor: 'rgba(239, 68, 68, 0.2)', width: '32px', height: '32px', padding: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}
                               title="Remove item from cart"
                             >
@@ -2661,9 +2666,9 @@ export default function CustomerDashboard({
                           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', paddingTop: '10px', borderTop: '1px solid var(--border-light)', width: '100%' }}>
                             {/* Quantity Controls */}
                             <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                              <button 
-                                type="button" 
-                                onClick={() => updateCartQuantity(item.id, -1, currentStock)} 
+                              <button
+                                type="button"
+                                onClick={() => updateCartQuantity(item.id, -1, currentStock)}
                                 className="btn-icon-only"
                                 style={{ width: '30px', height: '30px', padding: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', borderRadius: '6px' }}
                                 title="Decrease quantity"
@@ -2673,17 +2678,17 @@ export default function CustomerDashboard({
                               <strong style={{ fontSize: '14px', minWidth: '22px', textAlign: 'center', color: isOutOfStock ? 'var(--accent-rose)' : 'var(--text-primary)' }}>
                                 {item.quantity}
                               </strong>
-                              <button 
-                                type="button" 
-                                onClick={() => updateCartQuantity(item.id, 1, currentStock)} 
+                              <button
+                                type="button"
+                                onClick={() => updateCartQuantity(item.id, 1, currentStock)}
                                 disabled={isOutOfStock || item.quantity >= currentStock}
                                 className="btn-icon-only"
-                                style={{ 
-                                  width: '30px', 
-                                  height: '30px', 
-                                  padding: 0, 
-                                  display: 'flex', 
-                                  alignItems: 'center', 
+                                style={{
+                                  width: '30px',
+                                  height: '30px',
+                                  padding: 0,
+                                  display: 'flex',
+                                  alignItems: 'center',
                                   justifyContent: 'center',
                                   borderRadius: '6px',
                                   opacity: (isOutOfStock || item.quantity >= currentStock) ? 0.35 : 1,
@@ -2731,7 +2736,7 @@ export default function CustomerDashboard({
                     return (
                       <div style={{ flex: 1, background: 'var(--bg-input)', padding: '24px', borderRadius: '12px', display: 'flex', flexDirection: 'column', gap: '16px' }}>
                         <h3 style={{ fontSize: '16px', fontWeight: '700', margin: '0 0 8px 0' }}>Order Price Summary</h3>
-                        
+
                         <div style={{ display: 'flex', flexDirection: 'column', gap: '10px', fontSize: '13px', color: 'var(--text-secondary)' }}>
                           <div className="flex-between">
                             <span>Total MRP ({selectedCartItems.length} selected)</span>
@@ -2761,13 +2766,13 @@ export default function CustomerDashboard({
 
                           {/* Delivery notification indicator */}
                           {calculateSubtotal() > 0 && calculateSubtotal() < 500 && (
-                            <div style={{ 
-                              background: 'rgba(245, 158, 11, 0.12)', 
-                              border: '1px solid rgba(245, 158, 11, 0.3)', 
-                              borderRadius: '6px', 
-                              padding: '6px 10px', 
-                              fontSize: '11px', 
-                              color: '#f59e0b', 
+                            <div style={{
+                              background: 'rgba(245, 158, 11, 0.12)',
+                              border: '1px solid rgba(245, 158, 11, 0.3)',
+                              borderRadius: '6px',
+                              padding: '6px 10px',
+                              fontSize: '11px',
+                              color: '#f59e0b',
                               fontWeight: '600',
                               display: 'flex',
                               alignItems: 'center',
@@ -2778,16 +2783,16 @@ export default function CustomerDashboard({
                           )}
                           {/* Total Savings banner */}
                           {calculateTotalSavings() > 0 && (
-                            <div style={{ 
-                              background: 'rgba(16, 185, 129, 0.12)', 
-                              border: '1px solid rgba(16, 185, 129, 0.35)', 
-                              borderRadius: '8px', 
-                              padding: '10px 14px', 
-                              fontSize: '13px', 
-                              color: '#10b981', 
-                              fontWeight: '700', 
-                              display: 'flex', 
-                              alignItems: 'center', 
+                            <div style={{
+                              background: 'rgba(16, 185, 129, 0.12)',
+                              border: '1px solid rgba(16, 185, 129, 0.35)',
+                              borderRadius: '8px',
+                              padding: '10px 14px',
+                              fontSize: '13px',
+                              color: '#10b981',
+                              fontWeight: '700',
+                              display: 'flex',
+                              alignItems: 'center',
                               justifyContent: 'space-between'
                             }}>
                               <span style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
@@ -2826,29 +2831,29 @@ export default function CustomerDashboard({
                           </div>
                         )}
 
-                        <button 
-                          type="button" 
-                          onClick={handleStartCheckout} 
+                        <button
+                          type="button"
+                          onClick={handleStartCheckout}
                           disabled={!canProceed}
-                          className="btn btn-success btn-block" 
-                          style={{ 
-                            marginTop: '12px', 
-                            padding: '12px', 
-                            fontSize: '15px', 
-                            fontWeight: '700', 
-                            display: 'flex', 
-                            alignItems: 'center', 
-                            justifyContent: 'center', 
+                          className="btn btn-success btn-block"
+                          style={{
+                            marginTop: '12px',
+                            padding: '12px',
+                            fontSize: '15px',
+                            fontWeight: '700',
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center',
                             gap: '8px',
                             opacity: !canProceed ? 0.5 : 1,
                             cursor: !canProceed ? 'not-allowed' : 'pointer'
                           }}
                         >
-                          {selectedCartItems.length === 0 
-                            ? "Select items to checkout" 
+                          {selectedCartItems.length === 0
+                            ? "Select items to checkout"
                             : hasInvalidSelection
                               ? "Cannot Checkout (Out of Stock items selected)"
-                              : `Proceed to Checkout (${selectedCartItems.length} item${selectedCartItems.length === 1 ? '' : 's'})`} 
+                              : `Proceed to Checkout (${selectedCartItems.length} item${selectedCartItems.length === 1 ? '' : 's'})`}
                           <ArrowRight size={18} />
                         </button>
                       </div>
@@ -2879,14 +2884,14 @@ export default function CustomerDashboard({
                 Please enter your unique 6-digit Vendor ID to verify your identity and switch to Vendor mode.
               </p>
               <div className="form-group">
-                <input 
-                  type="text" 
+                <input
+                  type="text"
                   maxLength="6"
                   pattern="\d{6}"
                   placeholder="e.g. 123456"
                   value={switchVendorCode}
                   onChange={(e) => setSwitchVendorCode(e.target.value.replace(/\D/g, ''))}
-                  className="form-input" 
+                  className="form-input"
                   style={{ textAlign: 'center', fontSize: '20px', letterSpacing: '4px', fontFamily: 'monospace' }}
                   required
                   autoFocus
@@ -2916,13 +2921,13 @@ export default function CustomerDashboard({
             <p style={{ color: 'var(--text-secondary)', fontSize: '13px', marginBottom: '20px', lineHeight: '1.5' }}>
               Congratulations! Your customer profile has been upgraded. Here is your permanent, unique **6-digit Vendor ID**. You will need this code to log in or switch back to Vendor mode.
             </p>
-            <div style={{ 
-              background: 'var(--bg-input)', 
-              border: '2px dashed var(--accent-indigo)', 
-              borderRadius: '10px', 
-              padding: '12px', 
-              fontSize: '28px', 
-              fontWeight: '800', 
+            <div style={{
+              background: 'var(--bg-input)',
+              border: '2px dashed var(--accent-indigo)',
+              borderRadius: '10px',
+              padding: '12px',
+              fontSize: '28px',
+              fontWeight: '800',
               letterSpacing: '6px',
               color: 'var(--text-primary)',
               marginBottom: '20px',
@@ -2930,12 +2935,12 @@ export default function CustomerDashboard({
             }}>
               {showUpgradedCodeModal}
             </div>
-            <button 
-              type="button" 
+            <button
+              type="button"
               onClick={() => {
                 setShowUpgradedCodeModal(null);
                 showToast('success', 'Switched to Vendor View!', 'You now have selling privileges on ShopStack.');
-              }} 
+              }}
               className="btn btn-primary btn-block"
             >
               I have copied my Vendor ID
@@ -2948,7 +2953,7 @@ export default function CustomerDashboard({
       {showPaymentModal && (
         <div className="modal-overlay" style={{ zIndex: 2500 }} onClick={() => { if (!isProcessingPayment) setShowPaymentModal(false); }}>
           <div className="dialog-content" onClick={(e) => e.stopPropagation()} style={{ maxWidth: '640px', maxHeight: '90vh', display: 'flex', flexDirection: 'column' }}>
-            
+
             {/* Modal Header & Progress Stepper */}
             <div className="modal-header" style={{ flexDirection: 'column', alignItems: 'stretch', gap: '12px', paddingBottom: '12px' }}>
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
@@ -2998,7 +3003,7 @@ export default function CustomerDashboard({
 
             {/* Modal Body: Dynamic per step */}
             <div className="modal-body" style={{ overflowY: 'auto', padding: '20px' }}>
-              
+
               {/* STEP 1: Delivery Address & Order Review */}
               {paymentStep === 1 && (
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
@@ -3012,9 +3017,9 @@ export default function CustomerDashboard({
                         </span>
                       </div>
                       {addresses.length > 0 && (
-                        <button 
-                          type="button" 
-                          onClick={handleOpenAddAddress} 
+                        <button
+                          type="button"
+                          onClick={handleOpenAddAddress}
                           style={{ background: 'none', border: 'none', color: 'var(--accent-blue)', fontSize: '11px', fontWeight: '600', cursor: 'pointer', padding: 0 }}
                         >
                           + Add New Address
@@ -3090,30 +3095,30 @@ export default function CustomerDashboard({
                         {showCustomAddressInput && (
                           <div style={{ marginTop: '10px', display: 'flex', flexDirection: 'column', gap: '8px', borderTop: '1px dashed var(--border-light)', paddingTop: '10px' }}>
                             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '8px' }}>
-                              <input 
-                                type="text" 
-                                value={deliveryInfo.name} 
-                                onChange={(e) => setDeliveryInfo({ ...deliveryInfo, name: e.target.value })} 
-                                className="form-input" 
+                              <input
+                                type="text"
+                                value={deliveryInfo.name}
+                                onChange={(e) => setDeliveryInfo({ ...deliveryInfo, name: e.target.value })}
+                                className="form-input"
                                 placeholder="Recipient Name"
                                 style={{ fontSize: '12px', padding: '8px 10px' }}
                                 required
                               />
-                              <input 
-                                type="tel" 
-                                value={deliveryInfo.phone} 
-                                onChange={(e) => setDeliveryInfo({ ...deliveryInfo, phone: e.target.value })} 
-                                className="form-input" 
+                              <input
+                                type="tel"
+                                value={deliveryInfo.phone}
+                                onChange={(e) => setDeliveryInfo({ ...deliveryInfo, phone: e.target.value })}
+                                className="form-input"
                                 placeholder="Contact Phone"
                                 style={{ fontSize: '12px', padding: '8px 10px' }}
                                 required
                               />
                             </div>
-                            <input 
-                              type="text" 
-                              value={deliveryInfo.address} 
-                              onChange={(e) => setDeliveryInfo({ ...deliveryInfo, address: e.target.value })} 
-                              className="form-input" 
+                            <input
+                              type="text"
+                              value={deliveryInfo.address}
+                              onChange={(e) => setDeliveryInfo({ ...deliveryInfo, address: e.target.value })}
+                              className="form-input"
                               placeholder="Street Address, City, State, PIN Code"
                               style={{ fontSize: '12px', padding: '8px 10px' }}
                               required
@@ -3124,30 +3129,30 @@ export default function CustomerDashboard({
                     ) : (
                       <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
                         <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '8px' }}>
-                          <input 
-                            type="text" 
-                            value={deliveryInfo.name} 
-                            onChange={(e) => setDeliveryInfo({ ...deliveryInfo, name: e.target.value })} 
-                            className="form-input" 
+                          <input
+                            type="text"
+                            value={deliveryInfo.name}
+                            onChange={(e) => setDeliveryInfo({ ...deliveryInfo, name: e.target.value })}
+                            className="form-input"
                             placeholder="Recipient Name *"
                             style={{ fontSize: '12px', padding: '8px 10px' }}
                             required
                           />
-                          <input 
-                            type="tel" 
-                            value={deliveryInfo.phone} 
-                            onChange={(e) => setDeliveryInfo({ ...deliveryInfo, phone: e.target.value })} 
-                            className="form-input" 
+                          <input
+                            type="tel"
+                            value={deliveryInfo.phone}
+                            onChange={(e) => setDeliveryInfo({ ...deliveryInfo, phone: e.target.value })}
+                            className="form-input"
                             placeholder="Phone Number *"
                             style={{ fontSize: '12px', padding: '8px 10px' }}
                             required
                           />
                         </div>
-                        <input 
-                          type="text" 
-                          value={deliveryInfo.address} 
-                          onChange={(e) => setDeliveryInfo({ ...deliveryInfo, address: e.target.value })} 
-                          className="form-input" 
+                        <input
+                          type="text"
+                          value={deliveryInfo.address}
+                          onChange={(e) => setDeliveryInfo({ ...deliveryInfo, address: e.target.value })}
+                          className="form-input"
                           placeholder="Full Street Address, City, State, PIN Code *"
                           style={{ fontSize: '12px', padding: '8px 10px' }}
                           required
@@ -3179,10 +3184,10 @@ export default function CustomerDashboard({
                                 <div style={{ fontSize: '11px', color: 'var(--text-muted)' }}>
                                   Qty: {item.quantity} × ₹{Number(item.price).toLocaleString('en-IN')}
                                   {hasDisc && (
-                                    <span style={{ 
-                                      marginLeft: '6px', 
-                                      fontSize: '9px', 
-                                      padding: '1px 5px', 
+                                    <span style={{
+                                      marginLeft: '6px',
+                                      fontSize: '9px',
+                                      padding: '1px 5px',
                                       background: 'linear-gradient(135deg, #ef4444 0%, #dc2626 100%)',
                                       color: '#ffffff',
                                       fontWeight: '800',
@@ -3209,7 +3214,7 @@ export default function CustomerDashboard({
                       Select Available Coupon / Promo Code
                     </label>
                     <div style={{ display: 'flex', gap: '8px' }}>
-                      <select 
+                      <select
                         value={couponCodeInput}
                         onChange={(e) => {
                           setCouponCodeInput(e.target.value);
@@ -3233,8 +3238,8 @@ export default function CustomerDashboard({
                           };
 
                           return (
-                            <option 
-                              key={c.id} 
+                            <option
+                              key={c.id}
                               value={c.code}
                               disabled={!isEligible}
                               style={{ textDecoration: !isEligible ? 'line-through' : 'none', color: !isEligible ? 'var(--text-muted)' : 'inherit' }}
@@ -3245,8 +3250,8 @@ export default function CustomerDashboard({
                         })}
                       </select>
                       {appliedCoupon ? (
-                        <button 
-                          type="button" 
+                        <button
+                          type="button"
                           onClick={handleRemoveCoupon}
                           className="btn btn-secondary"
                           style={{ fontSize: '12px', padding: '6px 12px', color: 'var(--accent-rose)' }}
@@ -3254,8 +3259,8 @@ export default function CustomerDashboard({
                           Remove
                         </button>
                       ) : (
-                        <button 
-                          type="button" 
+                        <button
+                          type="button"
                           onClick={handleApplyCoupon}
                           className="btn btn-primary"
                           style={{ fontSize: '12px', padding: '6px 16px', background: 'var(--accent-teal)' }}
@@ -3323,7 +3328,7 @@ export default function CustomerDashboard({
                     </div>
                   </div>
 
-                  <button 
+                  <button
                     type="button"
                     onClick={() => {
                       if (!deliveryInfo.name.trim() || !deliveryInfo.address.trim()) {
@@ -3331,8 +3336,8 @@ export default function CustomerDashboard({
                         return;
                       }
                       setPaymentStep(2);
-                    }} 
-                    className="btn btn-primary btn-block" 
+                    }}
+                    className="btn btn-primary btn-block"
                     style={{ padding: '12px', fontSize: '15px', fontWeight: '700', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px' }}
                   >
                     Proceed to Payment Options <ArrowRight size={18} />
@@ -3351,7 +3356,7 @@ export default function CustomerDashboard({
 
                     {/* Payment Method Cards */}
                     <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
-                      <div 
+                      <div
                         onClick={() => setPaymentMethod('razorpay')}
                         style={{
                           padding: '16px',
@@ -3379,7 +3384,7 @@ export default function CustomerDashboard({
                         <span style={{ fontSize: '12px', color: 'var(--text-muted)' }}>UPI, Cards, NetBanking, Wallets</span>
                       </div>
 
-                      <div 
+                      <div
                         onClick={() => setPaymentMethod('cod')}
                         style={{
                           padding: '16px',
@@ -3455,18 +3460,18 @@ export default function CustomerDashboard({
                   {/* Payment Button & Security Note */}
                   <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
                     <div style={{ display: 'flex', gap: '10px' }}>
-                      <button 
-                        type="button" 
-                        onClick={() => setPaymentStep(1)} 
-                        className="btn btn-secondary" 
+                      <button
+                        type="button"
+                        onClick={() => setPaymentStep(1)}
+                        className="btn btn-secondary"
                         style={{ padding: '12px 18px' }}
                       >
                         Back
                       </button>
-                      <button 
-                        type="button" 
-                        onClick={handleProcessPayment} 
-                        className="btn btn-success" 
+                      <button
+                        type="button"
+                        onClick={handleProcessPayment}
+                        className="btn btn-success"
                         style={{ flex: 1, padding: '12px', fontSize: '15px', fontWeight: '800', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px' }}
                       >
                         {paymentMethod === 'cod' ? (
@@ -3532,21 +3537,21 @@ export default function CustomerDashboard({
                   </div>
 
                   <div style={{ display: 'flex', gap: '12px', width: '100%', marginTop: '8px' }}>
-                    <button 
-                      type="button" 
+                    <button
+                      type="button"
                       onClick={() => {
                         setShowPaymentModal(false);
                         setActiveTab('orders');
-                      }} 
-                      className="btn btn-secondary" 
+                      }}
+                      className="btn btn-secondary"
                       style={{ flex: 1, padding: '12px' }}
                     >
                       View Order History
                     </button>
-                    <button 
-                      type="button" 
-                      onClick={() => setShowPaymentModal(false)} 
-                      className="btn btn-primary" 
+                    <button
+                      type="button"
+                      onClick={() => setShowPaymentModal(false)}
+                      className="btn btn-primary"
                       style={{ flex: 1, padding: '12px' }}
                     >
                       Continue Shopping
@@ -3576,36 +3581,36 @@ export default function CustomerDashboard({
             <form onSubmit={handleSaveAddress} style={{ display: 'flex', flexDirection: 'column', gap: '14px', marginTop: '12px' }}>
               <div className="form-group">
                 <label className="form-label">Recipient Full Name *</label>
-                <input 
-                  type="text" 
+                <input
+                  type="text"
                   placeholder="e.g. Rahul Sharma"
-                  value={addressForm.fullName} 
-                  onChange={(e) => setAddressForm({ ...addressForm, fullName: e.target.value })} 
-                  required 
+                  value={addressForm.fullName}
+                  onChange={(e) => setAddressForm({ ...addressForm, fullName: e.target.value })}
+                  required
                   className="form-input"
                 />
               </div>
 
               <div className="form-group">
                 <label className="form-label">Phone Number *</label>
-                <input 
-                  type="text" 
+                <input
+                  type="text"
                   placeholder="e.g. +91 98765 43210"
-                  value={addressForm.phone} 
-                  onChange={(e) => setAddressForm({ ...addressForm, phone: e.target.value })} 
-                  required 
+                  value={addressForm.phone}
+                  onChange={(e) => setAddressForm({ ...addressForm, phone: e.target.value })}
+                  required
                   className="form-input"
                 />
               </div>
 
               <div className="form-group">
                 <label className="form-label">Flat, House no., Building, Street Address *</label>
-                <textarea 
+                <textarea
                   rows="3"
                   placeholder="e.g. Flat 402, Sunshine Heights, 12th Main, Indiranagar"
-                  value={addressForm.streetAddress} 
-                  onChange={(e) => setAddressForm({ ...addressForm, streetAddress: e.target.value })} 
-                  required 
+                  value={addressForm.streetAddress}
+                  onChange={(e) => setAddressForm({ ...addressForm, streetAddress: e.target.value })}
+                  required
                   className="form-input"
                   style={{ resize: 'vertical' }}
                 />
@@ -3614,23 +3619,23 @@ export default function CustomerDashboard({
               <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
                 <div className="form-group">
                   <label className="form-label">City / District *</label>
-                  <input 
-                    type="text" 
+                  <input
+                    type="text"
                     placeholder="e.g. Bengaluru"
-                    value={addressForm.city} 
-                    onChange={(e) => setAddressForm({ ...addressForm, city: e.target.value })} 
-                    required 
+                    value={addressForm.city}
+                    onChange={(e) => setAddressForm({ ...addressForm, city: e.target.value })}
+                    required
                     className="form-input"
                   />
                 </div>
                 <div className="form-group">
                   <label className="form-label">State *</label>
-                  <input 
-                    type="text" 
+                  <input
+                    type="text"
                     placeholder="e.g. Karnataka"
-                    value={addressForm.state} 
-                    onChange={(e) => setAddressForm({ ...addressForm, state: e.target.value })} 
-                    required 
+                    value={addressForm.state}
+                    onChange={(e) => setAddressForm({ ...addressForm, state: e.target.value })}
+                    required
                     className="form-input"
                   />
                 </div>
@@ -3639,12 +3644,12 @@ export default function CustomerDashboard({
               <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
                 <div className="form-group">
                   <label className="form-label">PIN Code / Postal Code *</label>
-                  <input 
-                    type="text" 
+                  <input
+                    type="text"
                     placeholder="e.g. 560038"
-                    value={addressForm.postalCode} 
-                    onChange={(e) => setAddressForm({ ...addressForm, postalCode: e.target.value })} 
-                    required 
+                    value={addressForm.postalCode}
+                    onChange={(e) => setAddressForm({ ...addressForm, postalCode: e.target.value })}
+                    required
                     className="form-input"
                   />
                 </div>
@@ -3668,8 +3673,8 @@ export default function CustomerDashboard({
               </div>
 
               <div style={{ display: 'flex', alignItems: 'center', gap: '10px', padding: '6px 0' }}>
-                <input 
-                  type="checkbox" 
+                <input
+                  type="checkbox"
                   id="makeDefaultCheckbox"
                   checked={addressForm.isDefault}
                   onChange={(e) => setAddressForm({ ...addressForm, isDefault: e.target.checked })}
@@ -3708,11 +3713,11 @@ export default function CustomerDashboard({
             </div>
 
             {/* Return Policy Banner */}
-            <div style={{ 
-              background: 'linear-gradient(135deg, rgba(20, 184, 166, 0.1) 0%, rgba(99, 102, 241, 0.1) 100%)', 
-              border: '1px solid rgba(20, 184, 166, 0.3)', 
-              borderRadius: '8px', 
-              padding: '10px 14px', 
+            <div style={{
+              background: 'linear-gradient(135deg, rgba(20, 184, 166, 0.1) 0%, rgba(99, 102, 241, 0.1) 100%)',
+              border: '1px solid rgba(20, 184, 166, 0.3)',
+              borderRadius: '8px',
+              padding: '10px 14px',
               marginBottom: '16px',
               fontSize: '12px',
               display: 'flex',
@@ -3727,10 +3732,10 @@ export default function CustomerDashboard({
             </div>
 
             {/* Return Progress Preview */}
-            <div style={{ 
-              background: 'var(--bg-input)', 
-              borderRadius: '8px', 
-              padding: '12px', 
+            <div style={{
+              background: 'var(--bg-input)',
+              borderRadius: '8px',
+              padding: '12px',
               marginBottom: '16px',
               border: '1px solid var(--border-light)'
             }}>
@@ -3780,7 +3785,7 @@ export default function CustomerDashboard({
               {/* Reason Category Selection */}
               <div className="form-group">
                 <label className="form-label">Return Reason Category *</label>
-                <select 
+                <select
                   value={returnReasonCategory}
                   onChange={(e) => {
                     setReturnReasonCategory(e.target.value);
@@ -3833,7 +3838,7 @@ export default function CustomerDashboard({
 
               <div className="form-group">
                 <label className="form-label">Refund Amount (₹) *</label>
-                <input 
+                <input
                   type="number"
                   step="0.01"
                   min="1"
@@ -3848,7 +3853,7 @@ export default function CustomerDashboard({
 
               <div className="form-group">
                 <label className="form-label">Reason Summary *</label>
-                <input 
+                <input
                   type="text"
                   value={refundReason}
                   onChange={(e) => setRefundReason(e.target.value)}
@@ -3860,7 +3865,7 @@ export default function CustomerDashboard({
 
               <div className="form-group">
                 <label className="form-label">Additional Comments / Item Condition</label>
-                <textarea 
+                <textarea
                   value={customerNotes}
                   onChange={(e) => setCustomerNotes(e.target.value)}
                   placeholder="Provide any additional details about the packaging, accessories, or defects..."
@@ -3871,7 +3876,7 @@ export default function CustomerDashboard({
 
               <div className="form-group">
                 <label className="form-label">Attach Proof Photo URL (Optional)</label>
-                <input 
+                <input
                   type="url"
                   placeholder="https://example.com/item-defect.jpg"
                   value={customerProofImage}
@@ -3881,16 +3886,16 @@ export default function CustomerDashboard({
               </div>
 
               <div style={{ display: 'flex', gap: '10px', justifyContent: 'flex-end', marginTop: '10px' }}>
-                <button 
-                  type="button" 
-                  onClick={() => setRefundModalOrder(null)} 
+                <button
+                  type="button"
+                  onClick={() => setRefundModalOrder(null)}
                   className="btn btn-secondary"
                   disabled={isSubmittingRefund}
                 >
                   Cancel
                 </button>
-                <button 
-                  type="submit" 
+                <button
+                  type="submit"
                   className="btn btn-primary"
                   style={{ background: 'linear-gradient(135deg, #8b5cf6 0%, #7c3aed 100%)', color: '#fff' }}
                   disabled={isSubmittingRefund || !refundAmount}
@@ -3905,31 +3910,31 @@ export default function CustomerDashboard({
 
       {/* Review Photo Preview Lightbox Modal */}
       {previewLightboxImage && (
-        <div 
-          className="modal-overlay" 
-          onClick={() => setPreviewLightboxImage(null)} 
+        <div
+          className="modal-overlay"
+          onClick={() => setPreviewLightboxImage(null)}
           style={{ zIndex: 9999, background: 'rgba(0,0,0,0.88)', backdropFilter: 'blur(6px)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
         >
-          <div 
-            onClick={(e) => e.stopPropagation()} 
+          <div
+            onClick={(e) => e.stopPropagation()}
             style={{ position: 'relative', maxWidth: '90vw', maxHeight: '90vh', display: 'flex', flexDirection: 'column', alignItems: 'center' }}
           >
-            <button 
-              type="button" 
+            <button
+              type="button"
               onClick={() => setPreviewLightboxImage(null)}
-              style={{ 
-                position: 'absolute', 
-                top: '-42px', 
-                right: '0', 
-                background: 'rgba(255,255,255,0.2)', 
-                color: '#fff', 
-                border: 'none', 
-                borderRadius: '50%', 
-                width: '34px', 
-                height: '34px', 
-                cursor: 'pointer', 
-                display: 'flex', 
-                alignItems: 'center', 
+              style={{
+                position: 'absolute',
+                top: '-42px',
+                right: '0',
+                background: 'rgba(255,255,255,0.2)',
+                color: '#fff',
+                border: 'none',
+                borderRadius: '50%',
+                width: '34px',
+                height: '34px',
+                cursor: 'pointer',
+                display: 'flex',
+                alignItems: 'center',
                 justifyContent: 'center',
                 transition: 'background 0.2s'
               }}
@@ -3937,10 +3942,10 @@ export default function CustomerDashboard({
             >
               <X size={20} />
             </button>
-            <img 
-              src={formatImageUrl(previewLightboxImage)} 
-              alt="Full resolution review attachment" 
-              style={{ maxWidth: '100%', maxHeight: '85vh', borderRadius: '10px', objectFit: 'contain', boxShadow: '0 12px 40px rgba(0,0,0,0.6)', border: '1px solid rgba(255,255,255,0.1)' }} 
+            <img
+              src={formatImageUrl(previewLightboxImage)}
+              alt="Full resolution review attachment"
+              style={{ maxWidth: '100%', maxHeight: '85vh', borderRadius: '10px', objectFit: 'contain', boxShadow: '0 12px 40px rgba(0,0,0,0.6)', border: '1px solid rgba(255,255,255,0.1)' }}
             />
           </div>
         </div>

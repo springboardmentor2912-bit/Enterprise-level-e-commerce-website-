@@ -40,10 +40,17 @@ public class User {
     @Column(name = "warehouse_name")
     private String warehouseName;
 
+    @Column(columnDefinition = "TEXT")
+    private String dismissedNotifications;
+
+    @Column(columnDefinition = "TEXT")
+    private String readNotifications;
+
     @jakarta.persistence.Transient
     private String token;
 
-    public User() {}
+    public User() {
+    }
 
     public User(String fullName, String email, String password, String role, String phone, String address) {
         this.fullName = fullName;
@@ -58,39 +65,115 @@ public class User {
         this.warehouseName = null;
     }
 
-    public Long getId() { return id; }
-    public void setId(Long id) { this.id = id; }
+    public Long getId() {
+        return id;
+    }
 
-    public String getFullName() { return fullName; }
-    public void setFullName(String fullName) { this.fullName = fullName; }
+    public void setId(Long id) {
+        this.id = id;
+    }
 
-    public String getEmail() { return email; }
-    public void setEmail(String email) { this.email = email; }
+    public String getFullName() {
+        return fullName;
+    }
 
-    public String getPassword() { return password; }
-    public void setPassword(String password) { this.password = password; }
+    public void setFullName(String fullName) {
+        this.fullName = fullName;
+    }
 
-    public String getRole() { return role; }
-    public void setRole(String role) { this.role = role; }
+    public String getEmail() {
+        return email;
+    }
 
-    public String getPhone() { return phone; }
-    public void setPhone(String phone) { this.phone = phone; }
+    public void setEmail(String email) {
+        this.email = email;
+    }
 
-    public String getAddress() { return address; }
-    public void setAddress(String address) { this.address = address; }
+    public String getPassword() {
+        return password;
+    }
 
-    public String getVendorCode() { return vendorCode; }
-    public void setVendorCode(String vendorCode) { this.vendorCode = vendorCode; }
+    public void setPassword(String password) {
+        this.password = password;
+    }
 
-    public Double getCommissionRate() { return commissionRate; }
-    public void setCommissionRate(Double commissionRate) { this.commissionRate = commissionRate; }
+    public String getRole() {
+        return role;
+    }
 
-    public Long getWarehouseId() { return warehouseId; }
-    public void setWarehouseId(Long warehouseId) { this.warehouseId = warehouseId; }
+    public void setRole(String role) {
+        this.role = role;
+    }
 
-    public String getWarehouseName() { return warehouseName; }
-    public void setWarehouseName(String warehouseName) { this.warehouseName = warehouseName; }
+    public String getPhone() {
+        return phone;
+    }
 
-    public String getToken() { return token; }
-    public void setToken(String token) { this.token = token; }
+    public void setPhone(String phone) {
+        this.phone = phone;
+    }
+
+    public String getAddress() {
+        return address;
+    }
+
+    public void setAddress(String address) {
+        this.address = address;
+    }
+
+    public String getVendorCode() {
+        return vendorCode;
+    }
+
+    public void setVendorCode(String vendorCode) {
+        this.vendorCode = vendorCode;
+    }
+
+    public Double getCommissionRate() {
+        return commissionRate;
+    }
+
+    public void setCommissionRate(Double commissionRate) {
+        this.commissionRate = commissionRate;
+    }
+
+    public Long getWarehouseId() {
+        return warehouseId;
+    }
+
+    public void setWarehouseId(Long warehouseId) {
+        this.warehouseId = warehouseId;
+    }
+
+    public String getWarehouseName() {
+        return warehouseName;
+    }
+
+    public void setWarehouseName(String warehouseName) {
+        this.warehouseName = warehouseName;
+    }
+
+    public String getToken() {
+        return token;
+    }
+
+    public void setToken(String token) {
+        this.token = token;
+    }
+
+    public String getDismissedNotifications() {
+        return dismissedNotifications;
+    }
+
+    public void setDismissedNotifications(String dismissedNotifications) {
+        this.dismissedNotifications = dismissedNotifications;
+    }
+
+    public String getReadNotifications() {
+        return readNotifications;
+    }
+
+    public void setReadNotifications(String readNotifications) {
+        this.readNotifications = readNotifications;
+    }
 }

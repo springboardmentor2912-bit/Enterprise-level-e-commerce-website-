@@ -1,8 +1,8 @@
 import React, { useState, useEffect, useRef, useMemo } from 'react';
 import axios from 'axios';
-import { 
-  Search, User, ChevronDown, ShoppingCart, Heart, MapPin, 
-  Package, LogOut, X, Trash2, Plus, Minus, Sun, Moon, Star, 
+import {
+  Search, User, ChevronDown, ShoppingCart, Heart, MapPin,
+  Package, LogOut, X, Trash2, Plus, Minus, Sun, Moon, Star,
   MessageSquare, ShieldAlert, Store, ShoppingBag, Send, Truck, Check, Bell,
   CreditCard, QrCode, Smartphone, CheckCircle2, ArrowRight, ShieldCheck, Lock,
   ExternalLink, Maximize2, Zap, Eye, Camera, UploadCloud, Image
@@ -11,19 +11,20 @@ import ProductIcon from './ProductIcon';
 import NotificationCenter from './NotificationCenter';
 import { extractErrorMessage } from '../utils/errorHandler';
 import { formatImageUrl } from '../utils/imageHelper';
-import { 
-  generateCustomerNotifications, 
+import {
+  generateCustomerNotifications,
   generateAdminNotifications,
   generateWarehouseNotifications,
   generateVendorNotifications,
-  markNotifAsRead, 
-  markAllNotifsAsRead, 
-  clearAllNotifs, 
-  dismissNotif 
+  markNotifAsRead,
+  markAllNotifsAsRead,
+  clearAllNotifs,
+  dismissNotif,
+  syncNotificationsWithServer
 } from '../utils/notificationService';
 
-export default function HomeDashboard({ 
-  user, cart, setCart, orders, setOrders, onLogout, 
+export default function HomeDashboard({
+  user, cart, setCart, orders, setOrders, onLogout,
   onGoToProfile, onGoToVendor, onGoToAdmin, onGoToWarehouse, theme, onToggleTheme,
   wishlist, setWishlist, toggleWishlist, addToCart, fetchOrders,
   isCartOpen, setIsCartOpen
@@ -140,14 +141,14 @@ export default function HomeDashboard({
     const liveProd = products.find(p => p.id === productId);
     const itemInCart = (Array.isArray(cart) ? cart : []).find(i => i.id === productId);
     const stock = liveProd != null ? liveProd.stock : (itemInCart?.stock ?? 0);
-    
+
     if (stock <= 0) {
       showFlash('error', "This product is currently out of stock and cannot be selected for purchase.");
       return;
     }
 
-    setSelectedCartItemIds(prev => 
-      prev.includes(productId) 
+    setSelectedCartItemIds(prev =>
+      prev.includes(productId)
         ? prev.filter(id => id !== productId)
         : [...prev, productId]
     );
@@ -198,7 +199,7 @@ export default function HomeDashboard({
   useEffect(() => {
     const handleKeyDown = (e) => {
       if (!showLightbox || !selectedProduct) return;
-      
+
       const allImgs = [];
       if (selectedProduct.imageUrl && selectedProduct.imageUrl !== '📦') {
         const formatted = formatImageUrl(selectedProduct.imageUrl);
@@ -227,7 +228,7 @@ export default function HomeDashboard({
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, [showLightbox, selectedProduct]);
-  
+
   // Toast notifications
   const [flash, setFlash] = useState({ type: '', text: '' });
 
@@ -350,23 +351,28 @@ export default function HomeDashboard({
 
   useEffect(() => {
     fetchAvailableCoupons();
-  }, []);
+    if (user?.id) {
+      syncNotificationsWithServer(user.id).then(() => {
+        refreshNotifications();
+      });
+    }
+  }, [user?.id]);
 
   useEffect(() => {
     refreshNotifications();
   }, [
-    user, 
-    orders, 
-    pendingProductsCount, 
-    adminPlatformOrdersCount, 
-    adminVendorsCount, 
-    warehouseAllocationsCount, 
-    vendorOrders, 
-    vendorProducts, 
+    user,
+    orders,
+    pendingProductsCount,
+    adminPlatformOrdersCount,
+    adminVendorsCount,
+    warehouseAllocationsCount,
+    vendorOrders,
+    vendorProducts,
     availableCoupons,
     vendorCoupons,
-    isAdmin, 
-    isStaff, 
+    isAdmin,
+    isStaff,
     isVendor
   ]);
 
@@ -413,14 +419,14 @@ export default function HomeDashboard({
     const cartItems = Array.isArray(cart) ? cart : [];
     const existing = cartItems.find(item => item.id === productId);
     if (!existing) return;
-    
+
     const newQty = existing.quantity + amount;
     if (newQty <= 0) {
       removeFromCart(productId);
     } else if (newQty > maxStock) {
       showFlash('error', `Only ${maxStock} items available in inventory.`);
     } else {
-      setCart(cartItems.map(item => 
+      setCart(cartItems.map(item =>
         item.id === productId ? { ...item, quantity: newQty } : item
       ));
     }
@@ -480,14 +486,14 @@ export default function HomeDashboard({
     setIsValidatingCoupon(true);
     setCouponError('');
     setCouponSuccess('');
-    
+
     try {
       const payload = {
         code: couponCodeInput.trim().toUpperCase(),
         userId: user.id,
         items: activeCheckoutItems
       };
-      
+
       const res = await axios.post('http://localhost:8080/api/coupons/validate', payload);
       if (res.data.valid) {
         setAppliedCoupon(res.data);
@@ -530,8 +536,8 @@ export default function HomeDashboard({
         const isStarted = !start || start <= nowStr || start.substring(0, 10) <= todayStr;
         const isNotExpired = !expiry || expiry >= nowStr || expiry.substring(0, 10) >= todayStr;
         return (
-          c.active && 
-          isStarted && 
+          c.active &&
+          isStarted &&
           isNotExpired &&
           (!c.usageLimit || c.usageCount < c.usageLimit)
         );
@@ -558,14 +564,14 @@ export default function HomeDashboard({
       if (!liveProd) return false;
       if (liveProd.couponsEnabled === false) return false;
       if (liveProd.vendorId) {
-        const approval = approvalsArray.find(a => 
-          a && a.vendorId && String(a.vendorId) === String(liveProd.vendorId) && 
+        const approval = approvalsArray.find(a =>
+          a && a.vendorId && String(a.vendorId) === String(liveProd.vendorId) &&
           a.couponCode && a.couponCode.trim().toUpperCase() === coupon.code.trim().toUpperCase()
         );
         if (!approval || approval.status !== 'APPROVED') return false;
 
-        const mapping = mappingsArray.find(m => 
-          m && String(m.productId) === String(liveProd.id) && 
+        const mapping = mappingsArray.find(m =>
+          m && String(m.productId) === String(liveProd.id) &&
           m.couponCode && m.couponCode.trim().toUpperCase() === coupon.code.trim().toUpperCase()
         );
         return !!mapping;
@@ -635,16 +641,16 @@ export default function HomeDashboard({
 
     const discPct = Number(product.discountPercentage) || 0;
     const origPrice = Number(product.price) || 0;
-    const effectivePrice = product.finalPrice != null 
-      ? Number(product.finalPrice) 
+    const effectivePrice = product.finalPrice != null
+      ? Number(product.finalPrice)
       : (discPct > 0 ? Math.round(origPrice * (1 - discPct / 100) * 100) / 100 : origPrice);
 
-    const directItem = { 
-      ...product, 
+    const directItem = {
+      ...product,
       price: effectivePrice,
       originalPrice: origPrice,
       discountPercentage: discPct,
-      quantity: 1 
+      quantity: 1
     };
 
     setCheckoutMode('buynow');
@@ -920,9 +926,9 @@ export default function HomeDashboard({
         userId: user.id,
         date: new Date().toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' })
       };
-      
+
       await axios.post(`http://localhost:8080/api/products/${selectedProduct.id}/reviews`, payload);
-      
+
       // Reload reviews
       const res = await axios.get(`http://localhost:8080/api/products/${selectedProduct.id}/reviews`);
       setProductReviews(res.data);
@@ -961,7 +967,7 @@ export default function HomeDashboard({
         userId: user.id
       };
       await axios.put(`http://localhost:8080/api/products/reviews/${reviewId}`, payload);
-      
+
       // Reload reviews
       const res = await axios.get(`http://localhost:8080/api/products/${selectedProduct.id}/reviews`);
       setProductReviews(res.data);
@@ -978,7 +984,7 @@ export default function HomeDashboard({
     if (!window.confirm("Are you sure you want to delete your review? This action cannot be undone.")) return;
     try {
       await axios.delete(`http://localhost:8080/api/products/reviews/${reviewId}?userId=${user.id}`);
-      
+
       // Reload reviews
       const res = await axios.get(`http://localhost:8080/api/products/${selectedProduct.id}/reviews`);
       setProductReviews(res.data);
@@ -998,21 +1004,21 @@ export default function HomeDashboard({
 
   // Filters logic
   const categories = useMemo(() => ['All', ...new Set(products.map(p => p.category))], [products]);
-  
+
   const filteredProducts = useMemo(() => {
     const q = searchQuery.toLowerCase().trim();
     const maxP = maxPriceFilter ? parseFloat(maxPriceFilter) : null;
     return products.filter(prod => {
-      const matchesSearch = !q || (prod.name && prod.name.toLowerCase().includes(q)) || 
-                            (prod.category && prod.category.toLowerCase().includes(q));
+      const matchesSearch = !q || (prod.name && prod.name.toLowerCase().includes(q)) ||
+        (prod.category && prod.category.toLowerCase().includes(q));
       const matchesCategory = categoryFilter === 'All' || prod.category === categoryFilter;
       const disc = Number(prod.discountPercentage) || 0;
       const effectiveP = prod.finalPrice != null ? prod.finalPrice : (disc > 0 ? Math.round(prod.price * (1 - disc / 100) * 100) / 100 : prod.price);
       const matchesPrice = maxP === null || effectiveP <= maxP;
-      
+
       const ratingScore = prod.averageRating !== null && prod.averageRating !== undefined ? prod.averageRating : 0.0;
       const matchesRating = ratingScore >= minRatingFilter;
-      
+
       return matchesSearch && matchesCategory && matchesPrice && matchesRating;
     });
   }, [products, searchQuery, categoryFilter, maxPriceFilter, minRatingFilter]);
@@ -1038,9 +1044,9 @@ export default function HomeDashboard({
           <h1 className="nav-logo" onClick={() => fetchProducts()} style={{ cursor: 'pointer' }}>ShopStack</h1>
           <div className="nav-search">
             <Search className="nav-search-icon" />
-            <input 
-              type="text" 
-              placeholder="Search for Products, Brands and More..." 
+            <input
+              type="text"
+              placeholder="Search for Products, Brands and More..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               className="nav-search-input"
@@ -1081,9 +1087,9 @@ export default function HomeDashboard({
 
           {/* Admin link */}
           {isAdmin && (
-            <button 
-              onClick={onGoToAdmin} 
-              className="btn btn-secondary" 
+            <button
+              onClick={onGoToAdmin}
+              className="btn btn-secondary"
               style={{ display: 'flex', alignItems: 'center', gap: '8px', color: 'var(--accent-rose)' }}
             >
               <ShieldAlert size={16} /> Admin Console
@@ -1092,9 +1098,9 @@ export default function HomeDashboard({
 
           {/* Vendor link */}
           {(user?.role === 'VENDOR') && (
-            <button 
-              onClick={onGoToVendor} 
-              className="btn btn-secondary" 
+            <button
+              onClick={onGoToVendor}
+              className="btn btn-secondary"
               style={{ display: 'flex', alignItems: 'center', gap: '8px', color: 'var(--accent-emerald)' }}
             >
               <Store size={16} /> Seller Console
@@ -1103,20 +1109,20 @@ export default function HomeDashboard({
 
           {/* Warehouse link */}
           {isStaff && (
-            <button 
-              onClick={onGoToWarehouse} 
-              className="btn btn-secondary" 
+            <button
+              onClick={onGoToWarehouse}
+              className="btn btn-secondary"
               style={{ display: 'flex', alignItems: 'center', gap: '8px', color: 'var(--accent-indigo)' }}
             >
               <Truck size={16} strokeWidth={2} /> Warehouse Panel
             </button>
           )}
 
-          <div 
+          <div
             className="nav-user-menu"
             ref={userMenuRef}
           >
-            <div 
+            <div
               className="nav-user-trigger"
               onClick={(e) => {
                 e.stopPropagation();
@@ -1128,13 +1134,13 @@ export default function HomeDashboard({
                 <User size={14} style={{ color: 'var(--accent-blue)', flexShrink: 0 }} />
               </div>
               <strong className="nav-user-name">{user?.fullName || 'User'}</strong>
-              <ChevronDown 
-                size={13} 
+              <ChevronDown
+                size={13}
                 className="nav-user-chevron"
-                style={{ 
+                style={{
                   transform: showDropdown ? 'rotate(180deg)' : 'none',
                   transition: 'transform 0.2s ease'
-                }} 
+                }}
               />
             </div>
 
@@ -1191,12 +1197,12 @@ export default function HomeDashboard({
 
                 {/* Light / Dark Mode Toggle Button */}
                 {onToggleTheme && (
-                  <div 
-                    onClick={(e) => { 
-                      e.stopPropagation(); 
-                      onToggleTheme(); 
-                    }} 
-                    className="dropdown-item" 
+                  <div
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      onToggleTheme();
+                    }}
+                    className="dropdown-item"
                     style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', cursor: 'pointer' }}
                   >
                     <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
@@ -1207,15 +1213,15 @@ export default function HomeDashboard({
                       )}
                       <span>{theme === 'dark' ? 'Light Mode' : 'Dark Mode'}</span>
                     </div>
-                    <span 
-                      style={{ 
-                        fontSize: '10px', 
-                        fontWeight: '700', 
-                        padding: '2px 6px', 
-                        borderRadius: '4px', 
-                        background: 'var(--bg-input)', 
-                        color: 'var(--text-secondary)', 
-                        border: '1px solid var(--border-light)' 
+                    <span
+                      style={{
+                        fontSize: '10px',
+                        fontWeight: '700',
+                        padding: '2px 6px',
+                        borderRadius: '4px',
+                        background: 'var(--bg-input)',
+                        color: 'var(--text-secondary)',
+                        border: '1px solid var(--border-light)'
                       }}
                     >
                       {theme === 'dark' ? 'DARK' : 'LIGHT'}
@@ -1226,12 +1232,12 @@ export default function HomeDashboard({
                 <div className="dropdown-divider" />
 
                 {/* Logout Button */}
-                <div 
-                  onClick={() => { 
-                    setShowDropdown(false); 
-                    if (onLogout) onLogout(); 
-                  }} 
-                  className="dropdown-item dropdown-item-danger" 
+                <div
+                  onClick={() => {
+                    setShowDropdown(false);
+                    if (onLogout) onLogout();
+                  }}
+                  className="dropdown-item dropdown-item-danger"
                   style={{ color: 'var(--accent-rose)', fontWeight: '600' }}
                 >
                   <LogOut size={16} style={{ flexShrink: 0 }} /> <span>Logout</span>
@@ -1253,8 +1259,8 @@ export default function HomeDashboard({
         <div className="filters-container">
           <div className="filter-group">
             <label>Product Category</label>
-            <select 
-              value={categoryFilter} 
+            <select
+              value={categoryFilter}
               onChange={(e) => setCategoryFilter(e.target.value)}
               className="form-select"
             >
@@ -1266,9 +1272,9 @@ export default function HomeDashboard({
 
           <div className="filter-group">
             <label>Max Budget Price (₹)</label>
-            <input 
-              type="number" 
-              placeholder="e.g. 3000" 
+            <input
+              type="number"
+              placeholder="e.g. 3000"
               value={maxPriceFilter}
               onChange={(e) => setMaxPriceFilter(e.target.value)}
               className="form-input"
@@ -1278,7 +1284,7 @@ export default function HomeDashboard({
 
           <div className="filter-group">
             <label>Minimum Rating</label>
-            <select 
+            <select
               value={minRatingFilter}
               onChange={(e) => setMinRatingFilter(parseFloat(e.target.value))}
               className="form-select"
@@ -1302,7 +1308,7 @@ export default function HomeDashboard({
             Showing {filteredProducts.length} approved products
           </span>
         </div>
-        
+
         {filteredProducts.length === 0 ? (
           <div className="cart-empty-state" style={{ gridColumn: 'span 4' }}>
             <Package className="cart-empty-icon" style={{ opacity: 0.2 }} />
@@ -1326,13 +1332,13 @@ export default function HomeDashboard({
                   )}
                   {/* Heart button - only for customers */}
                   {!isStaffOrAdmin && (
-                    <button 
+                    <button
                       type="button"
                       onClick={(e) => {
                         e.preventDefault();
                         e.stopPropagation();
                         toggleWishlist(prod, showFlash);
-                      }} 
+                      }}
                       className={`product-wishlist-btn ${isWishlisted ? 'product-wishlist-active' : ''}`}
                       title="Add to Wishlist"
                     >
@@ -1341,18 +1347,18 @@ export default function HomeDashboard({
                   )}
 
                   {/* Body click opens detail modal */}
-                  <div 
-                    onClick={() => handleOpenProductDetails(prod)} 
+                  <div
+                    onClick={() => handleOpenProductDetails(prod)}
                     style={{ cursor: 'pointer', flex: 1, display: 'flex', flexDirection: 'column' }}
                   >
                     <div className="product-image-container">
                       {prod.imageUrl && formatImageUrl(prod.imageUrl).length > 4 ? (
-                        <img 
-                          src={formatImageUrl(prod.imageUrl)} 
-                          alt={prod.name} 
+                        <img
+                          src={formatImageUrl(prod.imageUrl)}
+                          alt={prod.name}
                           loading="lazy"
                           decoding="async"
-                          style={{ width: '100%', height: '100%', objectFit: 'cover' }} 
+                          style={{ width: '100%', height: '100%', objectFit: 'cover' }}
                         />
                       ) : (
                         <ProductIcon name={prod.name} category={prod.category} size={36} />
@@ -1361,13 +1367,13 @@ export default function HomeDashboard({
                     <div className="product-info" style={{ flex: 1 }}>
                       <span className="product-category">{prod.category}</span>
                       <h4 className="product-title">{prod.name}</h4>
-                      
+
                       {/* Rating display */}
                       <div className="stars-display" style={{ marginBottom: '12px', fontSize: '12px' }}>
                         <Star size={13} fill="currentColor" style={{ color: '#fbbf24' }} />
                         <strong>
-                          {prod.averageRating !== null && prod.averageRating !== undefined && prod.averageRating > 0 
-                            ? prod.averageRating.toFixed(1) 
+                          {prod.averageRating !== null && prod.averageRating !== undefined && prod.averageRating > 0
+                            ? prod.averageRating.toFixed(1)
                             : '0.0'}
                         </strong>
                         <span style={{ color: 'var(--text-muted)' }}>
@@ -1389,17 +1395,17 @@ export default function HomeDashboard({
                           </div>
 
                           {disc > 0 && (
-                            <div style={{ 
-                              display: 'inline-flex', 
-                              alignItems: 'center', 
+                            <div style={{
+                              display: 'inline-flex',
+                              alignItems: 'center',
                               gap: '4px',
-                              background: 'rgba(16, 185, 129, 0.16)', 
-                              border: '1px solid rgba(16, 185, 129, 0.45)', 
-                              color: '#10b981', 
-                              fontSize: '11px', 
-                              fontWeight: '700', 
-                              padding: '2px 7px', 
-                              borderRadius: '4px', 
+                              background: 'rgba(16, 185, 129, 0.16)',
+                              border: '1px solid rgba(16, 185, 129, 0.45)',
+                              color: '#10b981',
+                              fontSize: '11px',
+                              fontWeight: '700',
+                              padding: '2px 7px',
+                              borderRadius: '4px',
                               width: 'fit-content'
                             }}>
                               <span>✓</span> Save ₹{Number(savings).toLocaleString('en-IN')}
@@ -1420,22 +1426,22 @@ export default function HomeDashboard({
 
                   {isAdmin ? (
                     <div style={{ marginTop: '16px' }}>
-                      <button 
+                      <button
                         type="button"
                         onClick={(e) => {
                           e.preventDefault();
                           e.stopPropagation();
                           handleOpenProductDetails(prod);
-                        }} 
-                        className="btn btn-secondary" 
-                        style={{ 
+                        }}
+                        className="btn btn-secondary"
+                        style={{
                           width: '100%',
-                          padding: '9px 12px', 
-                          fontSize: '13px', 
-                          justifyContent: 'center', 
-                          display: 'flex', 
-                          alignItems: 'center', 
-                          gap: '6px', 
+                          padding: '9px 12px',
+                          fontSize: '13px',
+                          justifyContent: 'center',
+                          display: 'flex',
+                          alignItems: 'center',
+                          gap: '6px',
                           fontWeight: '700',
                           color: 'var(--accent-rose)',
                           borderColor: 'rgba(244, 63, 94, 0.4)',
@@ -1447,22 +1453,22 @@ export default function HomeDashboard({
                     </div>
                   ) : isStaff ? (
                     <div style={{ marginTop: '16px' }}>
-                      <button 
+                      <button
                         type="button"
                         onClick={(e) => {
                           e.preventDefault();
                           e.stopPropagation();
                           handleOpenProductDetails(prod);
-                        }} 
-                        className="btn btn-secondary" 
-                        style={{ 
+                        }}
+                        className="btn btn-secondary"
+                        style={{
                           width: '100%',
-                          padding: '9px 12px', 
-                          fontSize: '13px', 
-                          justifyContent: 'center', 
-                          display: 'flex', 
-                          alignItems: 'center', 
-                          gap: '6px', 
+                          padding: '9px 12px',
+                          fontSize: '13px',
+                          justifyContent: 'center',
+                          display: 'flex',
+                          alignItems: 'center',
+                          gap: '6px',
                           fontWeight: '700',
                           color: 'var(--accent-indigo)',
                           borderColor: 'rgba(99, 102, 241, 0.4)',
@@ -1474,41 +1480,41 @@ export default function HomeDashboard({
                     </div>
                   ) : (
                     <div style={{ display: 'grid', gridTemplateColumns: prod.stock <= 0 ? '1fr' : '1fr 1fr', gap: '8px', marginTop: '16px' }}>
-                      <button 
+                      <button
                         type="button"
                         onClick={(e) => {
                           e.preventDefault();
                           e.stopPropagation();
                           addToCart(prod, showFlash);
-                        }} 
-                        className="btn btn-secondary" 
+                        }}
+                        className="btn btn-secondary"
                         style={{ padding: '8px 10px', fontSize: '12.5px', justifyContent: 'center', display: 'flex', alignItems: 'center', gap: '6px', fontWeight: '600' }}
                         disabled={prod.stock <= 0}
                       >
                         {prod.stock <= 0 ? "Out of Stock" : <><ShoppingCart size={14} /> Add to Cart</>}
                       </button>
-                      
+
                       {prod.stock > 0 && (
-                        <button 
+                        <button
                           type="button"
                           onClick={(e) => {
                             e.preventDefault();
                             e.stopPropagation();
                             handleBuyNow(prod);
-                          }} 
-                          className="btn btn-primary" 
-                          style={{ 
-                            padding: '8px 10px', 
-                            fontSize: '12.5px', 
-                            justifyContent: 'center', 
-                            display: 'flex', 
-                            alignItems: 'center', 
-                            gap: '6px', 
-                            fontWeight: '700', 
-                            background: 'linear-gradient(135deg, #f59e0b 0%, #d97706 100%)', 
-                            borderColor: '#d97706', 
+                          }}
+                          className="btn btn-primary"
+                          style={{
+                            padding: '8px 10px',
+                            fontSize: '12.5px',
+                            justifyContent: 'center',
+                            display: 'flex',
+                            alignItems: 'center',
+                            gap: '6px',
+                            fontWeight: '700',
+                            background: 'linear-gradient(135deg, #f59e0b 0%, #d97706 100%)',
+                            borderColor: '#d97706',
                             color: '#ffffff',
-                            boxShadow: '0 2px 8px rgba(245, 158, 11, 0.3)' 
+                            boxShadow: '0 2px 8px rgba(245, 158, 11, 0.3)'
                           }}
                         >
                           <Zap size={14} /> Buy Now
@@ -1557,11 +1563,11 @@ export default function HomeDashboard({
                     border: '1px solid var(--border-light)'
                   }}>
                     <label style={{ display: 'flex', alignItems: 'center', gap: '10px', cursor: inStockCartItems.length > 0 ? 'pointer' : 'not-allowed', fontWeight: '600', fontSize: '13px', userSelect: 'none', opacity: inStockCartItems.length > 0 ? 1 : 0.6 }}>
-                      <input 
-                        type="checkbox" 
-                        checked={isAllSelected} 
+                      <input
+                        type="checkbox"
+                        checked={isAllSelected}
                         disabled={inStockCartItems.length === 0}
-                        onChange={toggleSelectAll} 
+                        onChange={toggleSelectAll}
                         style={{ width: '17px', height: '17px', accentColor: 'var(--accent-teal)', cursor: inStockCartItems.length > 0 ? 'pointer' : 'not-allowed' }}
                       />
                       <span>Select All In-Stock ({inStockCartItems.length}/{cart.length})</span>
@@ -1580,11 +1586,11 @@ export default function HomeDashboard({
                     const hasDiscount = item.originalPrice && item.originalPrice > item.price;
 
                     return (
-                      <div 
-                        key={item.id} 
-                        className="cart-item-card-responsive" 
-                        style={{ 
-                          opacity: isOutOfStock ? 0.65 : (isItemSelected ? 1 : 0.65), 
+                      <div
+                        key={item.id}
+                        className="cart-item-card-responsive"
+                        style={{
+                          opacity: isOutOfStock ? 0.65 : (isItemSelected ? 1 : 0.65),
                           background: isOutOfStock ? 'rgba(239, 68, 68, 0.04)' : 'var(--bg-input)',
                           border: isOutOfStock ? '1px dashed rgba(239, 68, 68, 0.35)' : (isItemSelected ? '1px solid var(--border-light)' : '1px dashed var(--border-light)'),
                           borderRadius: '10px',
@@ -1601,9 +1607,9 @@ export default function HomeDashboard({
                         {/* Top Tier: Checkbox + Image + Title/Badges + Delete Button */}
                         <div style={{ display: 'flex', alignItems: 'flex-start', gap: '10px', width: '100%' }}>
                           {/* Item Selection Box */}
-                          <input 
-                            type="checkbox" 
-                            checked={isItemSelected} 
+                          <input
+                            type="checkbox"
+                            checked={isItemSelected}
                             disabled={isOutOfStock}
                             onChange={() => toggleSelectItem(item.id)}
                             style={{ width: '18px', height: '18px', accentColor: 'var(--accent-teal)', cursor: isOutOfStock ? 'not-allowed' : 'pointer', marginTop: '2px', flexShrink: 0 }}
@@ -1626,25 +1632,25 @@ export default function HomeDashboard({
                             {/* Out of Stock & Inventory Warnings */}
                             <div style={{ display: 'flex', alignItems: 'center', gap: '4px', flexWrap: 'wrap', marginTop: '2px' }}>
                               {isOutOfStock ? (
-                                <span style={{ 
+                                <span style={{
                                   background: 'linear-gradient(135deg, rgba(239, 68, 68, 0.15), rgba(220, 38, 38, 0.25))',
-                                  color: '#ef4444', 
+                                  color: '#ef4444',
                                   border: '1px solid rgba(239, 68, 68, 0.4)',
-                                  fontSize: '10px', 
-                                  fontWeight: '800', 
-                                  padding: '1px 6px', 
+                                  fontSize: '10px',
+                                  fontWeight: '800',
+                                  padding: '1px 6px',
                                   borderRadius: '3px'
                                 }}>
                                   🚫 OUT OF STOCK
                                 </span>
                               ) : isExceedingStock ? (
-                                <span style={{ 
-                                  background: 'rgba(245, 158, 11, 0.15)', 
-                                  color: '#f59e0b', 
+                                <span style={{
+                                  background: 'rgba(245, 158, 11, 0.15)',
+                                  color: '#f59e0b',
                                   border: '1px solid rgba(245, 158, 11, 0.35)',
-                                  fontSize: '10px', 
-                                  fontWeight: '700', 
-                                  padding: '1px 5px', 
+                                  fontSize: '10px',
+                                  fontWeight: '700',
+                                  padding: '1px 5px',
                                   borderRadius: '3px'
                                 }}>
                                   ⚠️ Only {currentStock} in stock
@@ -1653,10 +1659,10 @@ export default function HomeDashboard({
                             </div>
                           </div>
 
-                          <button 
+                          <button
                             type="button"
-                            onClick={() => removeFromCart(item.id)} 
-                            className="btn-icon-only" 
+                            onClick={() => removeFromCart(item.id)}
+                            className="btn-icon-only"
                             style={{ color: 'var(--accent-rose)', borderColor: 'rgba(239, 68, 68, 0.2)', width: '28px', height: '28px', padding: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}
                             title="Remove item from cart"
                           >
@@ -1668,9 +1674,9 @@ export default function HomeDashboard({
                         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', paddingTop: '8px', borderTop: '1px solid var(--border-light)', width: '100%' }}>
                           {/* Quantity Toggles */}
                           <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-                            <button 
+                            <button
                               type="button"
-                              onClick={() => updateCartQuantity(item.id, -1, currentStock)} 
+                              onClick={() => updateCartQuantity(item.id, -1, currentStock)}
                               className="btn-icon-only"
                               style={{ width: '26px', height: '26px', padding: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', borderRadius: '5px' }}
                               title="Decrease quantity"
@@ -1680,18 +1686,18 @@ export default function HomeDashboard({
                             <strong style={{ fontSize: '13px', minWidth: '18px', textAlign: 'center', color: isOutOfStock ? 'var(--accent-rose)' : 'inherit' }}>
                               {item.quantity}
                             </strong>
-                            <button 
+                            <button
                               type="button"
-                              onClick={() => updateCartQuantity(item.id, 1, currentStock)} 
+                              onClick={() => updateCartQuantity(item.id, 1, currentStock)}
                               disabled={isOutOfStock || item.quantity >= currentStock}
                               className="btn-icon-only"
-                              style={{ 
-                                width: '26px', 
-                                height: '26px', 
-                                padding: 0, 
-                                display: 'flex', 
-                                alignItems: 'center', 
-                                justifyContent: 'center', 
+                              style={{
+                                width: '26px',
+                                height: '26px',
+                                padding: 0,
+                                display: 'flex',
+                                alignItems: 'center',
+                                justifyContent: 'center',
                                 borderRadius: '5px',
                                 opacity: (isOutOfStock || item.quantity >= currentStock) ? 0.35 : 1,
                                 cursor: (isOutOfStock || item.quantity >= currentStock) ? 'not-allowed' : 'pointer'
@@ -1767,16 +1773,16 @@ export default function HomeDashboard({
 
                     {/* Total Savings banner */}
                     {calculateTotalSavings() > 0 && (
-                      <div style={{ 
-                        background: 'rgba(16, 185, 129, 0.12)', 
-                        border: '1px solid rgba(16, 185, 129, 0.35)', 
-                        borderRadius: '8px', 
-                        padding: '10px 14px', 
-                        fontSize: '13px', 
-                        color: '#10b981', 
-                        fontWeight: '700', 
-                        display: 'flex', 
-                        alignItems: 'center', 
+                      <div style={{
+                        background: 'rgba(16, 185, 129, 0.12)',
+                        border: '1px solid rgba(16, 185, 129, 0.35)',
+                        borderRadius: '8px',
+                        padding: '10px 14px',
+                        fontSize: '13px',
+                        color: '#10b981',
+                        fontWeight: '700',
+                        display: 'flex',
+                        alignItems: 'center',
                         justifyContent: 'space-between'
                       }}>
                         <span style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
@@ -1813,28 +1819,28 @@ export default function HomeDashboard({
                     </div>
                   )}
 
-                  <button 
-                    onClick={handleStartCheckout} 
+                  <button
+                    onClick={handleStartCheckout}
                     disabled={!canProceed}
-                    className="btn btn-success btn-block" 
-                    style={{ 
-                      marginTop: '4px', 
-                      padding: '12px', 
-                      fontSize: '15px', 
-                      fontWeight: '700', 
-                      display: 'flex', 
-                      alignItems: 'center', 
-                      justifyContent: 'center', 
+                    className="btn btn-success btn-block"
+                    style={{
+                      marginTop: '4px',
+                      padding: '12px',
+                      fontSize: '15px',
+                      fontWeight: '700',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
                       gap: '8px',
                       opacity: !canProceed ? 0.5 : 1,
                       cursor: !canProceed ? 'not-allowed' : 'pointer'
                     }}
                   >
-                    {selectedCartItems.length === 0 
-                      ? "Select items to checkout" 
+                    {selectedCartItems.length === 0
+                      ? "Select items to checkout"
                       : hasInvalidSelection
                         ? "Cannot Checkout (Out of Stock items selected)"
-                        : `Proceed to Checkout (${selectedCartItems.length} item${selectedCartItems.length === 1 ? '' : 's'})`} 
+                        : `Proceed to Checkout (${selectedCartItems.length} item${selectedCartItems.length === 1 ? '' : 's'})`}
                     <ArrowRight size={18} />
                   </button>
                 </div>
@@ -1869,13 +1875,12 @@ export default function HomeDashboard({
                   <div key={order.id} className="order-card">
                     <div className="order-card-header">
                       <span className="order-id">{order.orderId}</span>
-                      <span className={`badge ${
-                        order.status === 'DELIVERED' ? 'badge-approved' : 
-                        order.status === 'SHIPPED' ? 'badge-pending' : 'badge-customer'
-                      }`}>{order.status}</span>
+                      <span className={`badge ${order.status === 'DELIVERED' ? 'badge-approved' :
+                          order.status === 'SHIPPED' ? 'badge-pending' : 'badge-customer'
+                        }`}>{order.status}</span>
                     </div>
                     <div className="order-date">Placed on: {order.date}</div>
-                    
+
                     <div className="order-items-list">
                       {order.items && order.items.map((it, i) => (
                         <div key={i} className="order-item-row">
@@ -1884,7 +1889,7 @@ export default function HomeDashboard({
                         </div>
                       ))}
                     </div>
-                    
+
                     <div className="order-total-row">
                       <span style={{ fontSize: '13px', color: 'var(--text-secondary)' }}>Total Invoice Amount</span>
                       <strong style={{ fontSize: '16px', color: 'var(--accent-blue)' }}>₹{order.totalAmount}</strong>
@@ -1952,17 +1957,17 @@ export default function HomeDashboard({
                   {/* Left Column: Image Gallery */}
                   <div style={{ flex: '1 1 240px', minWidth: 0, maxWidth: '100%', display: 'flex', flexDirection: 'column', gap: '10px' }}>
                     {/* Main Preview Box */}
-                    <div 
-                      style={{ 
-                        position: 'relative', 
-                        width: '100%', 
-                        height: '220px', 
-                        borderRadius: '12px', 
-                        background: 'var(--bg-input)', 
-                        border: '1px solid var(--border-light)', 
-                        display: 'flex', 
-                        alignItems: 'center', 
-                        justifyContent: 'center', 
+                    <div
+                      style={{
+                        position: 'relative',
+                        width: '100%',
+                        height: '220px',
+                        borderRadius: '12px',
+                        background: 'var(--bg-input)',
+                        border: '1px solid var(--border-light)',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
                         overflow: 'hidden',
                         cursor: 'pointer'
                       }}
@@ -1972,10 +1977,10 @@ export default function HomeDashboard({
                       {activeImg.length <= 4 ? (
                         <span style={{ fontSize: '72px', filter: 'drop-shadow(0 4px 6px rgba(0,0,0,0.05))' }}>{activeImg}</span>
                       ) : (
-                        <img 
-                          src={activeImg} 
-                          alt={selectedProduct.name} 
-                          style={{ width: '100%', height: '100%', objectFit: 'contain' }} 
+                        <img
+                          src={activeImg}
+                          alt={selectedProduct.name}
+                          style={{ width: '100%', height: '100%', objectFit: 'contain' }}
                         />
                       )}
 
@@ -2013,7 +2018,7 @@ export default function HomeDashboard({
                       {/* Navigation Arrows */}
                       {allImages.length > 1 && (
                         <>
-                          <button 
+                          <button
                             type="button"
                             onClick={(e) => {
                               e.stopPropagation();
@@ -2024,7 +2029,7 @@ export default function HomeDashboard({
                           >
                             ‹
                           </button>
-                          <button 
+                          <button
                             type="button"
                             onClick={(e) => {
                               e.stopPropagation();
@@ -2043,7 +2048,7 @@ export default function HomeDashboard({
                     {allImages.length > 1 && (
                       <div className="thumbnail-slider-container">
                         {allImages.length > 4 && (
-                          <button 
+                          <button
                             type="button"
                             className="thumbnail-slider-btn"
                             title="Scroll left"
@@ -2055,7 +2060,7 @@ export default function HomeDashboard({
                             ‹
                           </button>
                         )}
-                        <div 
+                        <div
                           id="product-thumb-track"
                           className="thumbnail-slider-track"
                         >
@@ -2063,23 +2068,23 @@ export default function HomeDashboard({
                             const isActive = idx === activeImageIndex;
                             const isEmoji = img.length <= 4;
                             return (
-                              <div 
+                              <div
                                 key={idx}
                                 onClick={() => setActiveImageIndex(idx)}
                                 onDoubleClick={() => {
                                   if (!isEmoji) window.open(img, '_blank');
                                 }}
-                                style={{ 
-                                  width: '46px', 
-                                  height: '46px', 
-                                  flexShrink: 0, 
-                                  borderRadius: '6px', 
-                                  overflow: 'hidden', 
-                                  border: isActive ? '2px solid var(--accent-indigo)' : '1px solid var(--border-light)', 
-                                  cursor: 'pointer', 
-                                  background: 'var(--bg-card)', 
-                                  display: 'flex', 
-                                  alignItems: 'center', 
+                                style={{
+                                  width: '46px',
+                                  height: '46px',
+                                  flexShrink: 0,
+                                  borderRadius: '6px',
+                                  overflow: 'hidden',
+                                  border: isActive ? '2px solid var(--accent-indigo)' : '1px solid var(--border-light)',
+                                  cursor: 'pointer',
+                                  background: 'var(--bg-card)',
+                                  display: 'flex',
+                                  alignItems: 'center',
                                   justifyContent: 'center',
                                   transition: 'transform 0.15s ease, border-color 0.15s ease'
                                 }}
@@ -2095,7 +2100,7 @@ export default function HomeDashboard({
                           })}
                         </div>
                         {allImages.length > 4 && (
-                          <button 
+                          <button
                             type="button"
                             className="thumbnail-slider-btn"
                             title="Scroll right"
@@ -2115,7 +2120,7 @@ export default function HomeDashboard({
                   <div style={{ flex: '1.2 1 280px', display: 'flex', flexDirection: 'column', gap: '8px', justifyContent: 'center' }}>
                     <span className="product-category" style={{ margin: '0', width: 'fit-content' }}>{selectedProduct.category}</span>
                     <h3 style={{ fontSize: '22px', fontWeight: '800', lineHeight: '1.2', color: 'var(--text-primary)' }}>{selectedProduct.name}</h3>
-                    
+
                     <div className="stars-display" style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
                       <Star size={16} fill="currentColor" style={{ color: '#fbbf24' }} />
                       <strong style={{ fontSize: '14px' }}>{getAverageRating(productReviews)} / 5.0</strong>
@@ -2138,12 +2143,12 @@ export default function HomeDashboard({
                                 <span style={{ fontSize: '18px', fontWeight: '600', textDecoration: 'line-through', color: '#94a3b8', textDecorationColor: '#ef4444', textDecorationThickness: '2px' }}>
                                   ₹{Number(selectedProduct.price).toLocaleString('en-IN')}
                                 </span>
-                                <span style={{ 
-                                  background: 'linear-gradient(135deg, #ef4444 0%, #dc2626 100%)', 
-                                  color: '#ffffff', 
-                                  fontWeight: '800', 
-                                  fontSize: '12px', 
-                                  padding: '4px 10px', 
+                                <span style={{
+                                  background: 'linear-gradient(135deg, #ef4444 0%, #dc2626 100%)',
+                                  color: '#ffffff',
+                                  fontWeight: '800',
+                                  fontSize: '12px',
+                                  padding: '4px 10px',
                                   borderRadius: '6px',
                                   boxShadow: '0 2px 8px rgba(239, 68, 68, 0.4)'
                                 }}>
@@ -2156,13 +2161,13 @@ export default function HomeDashboard({
                             </span>
                           </div>
                           {!isStaffOrAdmin && disc > 0 && (
-                            <div style={{ 
-                              background: 'rgba(16, 185, 129, 0.14)', 
-                              border: '1px solid rgba(16, 185, 129, 0.4)', 
-                              borderRadius: '8px', 
-                              padding: '10px 14px', 
-                              color: '#10b981', 
-                              fontSize: '13px', 
+                            <div style={{
+                              background: 'rgba(16, 185, 129, 0.14)',
+                              border: '1px solid rgba(16, 185, 129, 0.4)',
+                              borderRadius: '8px',
+                              padding: '10px 14px',
+                              color: '#10b981',
+                              fontSize: '13px',
                               fontWeight: '700',
                               display: 'flex',
                               alignItems: 'center',
@@ -2175,11 +2180,11 @@ export default function HomeDashboard({
 
                           {/* Action Buttons / Synchronized Admin or Warehouse Inspection Panel */}
                           {isAdmin ? (
-                            <div style={{ 
-                              marginTop: '12px', 
-                              padding: '16px', 
-                              borderRadius: 'var(--radius-md)', 
-                              background: 'rgba(244, 63, 94, 0.06)', 
+                            <div style={{
+                              marginTop: '12px',
+                              padding: '16px',
+                              borderRadius: 'var(--radius-md)',
+                              background: 'rgba(244, 63, 94, 0.06)',
                               border: '1px solid rgba(244, 63, 94, 0.22)',
                               display: 'flex',
                               flexDirection: 'column',
@@ -2218,24 +2223,24 @@ export default function HomeDashboard({
                               </div>
 
                               {onGoToAdmin && (
-                                <button 
-                                  type="button" 
+                                <button
+                                  type="button"
                                   onClick={() => {
                                     handleCloseProductDetails();
                                     onGoToAdmin();
                                   }}
                                   className="btn btn-primary"
-                                  style={{ 
-                                    marginTop: '4px', 
-                                    justifyContent: 'center', 
-                                    background: 'var(--gradient-danger)', 
+                                  style={{
+                                    marginTop: '4px',
+                                    justifyContent: 'center',
+                                    background: 'var(--gradient-danger)',
                                     borderColor: 'transparent',
-                                    color: '#ffffff', 
-                                    fontWeight: '700', 
-                                    fontSize: '13px', 
+                                    color: '#ffffff',
+                                    fontWeight: '700',
+                                    fontSize: '13px',
                                     padding: '10px 16px',
-                                    display: 'flex', 
-                                    alignItems: 'center', 
+                                    display: 'flex',
+                                    alignItems: 'center',
                                     gap: '8px',
                                     boxShadow: '0 4px 14px rgba(244, 63, 94, 0.35)',
                                     cursor: 'pointer'
@@ -2246,11 +2251,11 @@ export default function HomeDashboard({
                               )}
                             </div>
                           ) : isStaff ? (
-                            <div style={{ 
-                              marginTop: '12px', 
-                              padding: '16px', 
-                              borderRadius: 'var(--radius-md)', 
-                              background: 'rgba(99, 102, 241, 0.06)', 
+                            <div style={{
+                              marginTop: '12px',
+                              padding: '16px',
+                              borderRadius: 'var(--radius-md)',
+                              background: 'rgba(99, 102, 241, 0.06)',
                               border: '1px solid rgba(99, 102, 241, 0.22)',
                               display: 'flex',
                               flexDirection: 'column',
@@ -2289,24 +2294,24 @@ export default function HomeDashboard({
                               </div>
 
                               {onGoToWarehouse && (
-                                <button 
-                                  type="button" 
+                                <button
+                                  type="button"
                                   onClick={() => {
                                     handleCloseProductDetails();
                                     onGoToWarehouse();
                                   }}
                                   className="btn btn-primary"
-                                  style={{ 
-                                    marginTop: '4px', 
-                                    justifyContent: 'center', 
-                                    background: 'linear-gradient(135deg, #6366f1 0%, #4f46e5 100%)', 
-                                    borderColor: 'transparent', 
-                                    color: '#ffffff', 
-                                    fontWeight: '700', 
-                                    fontSize: '13px', 
+                                  style={{
+                                    marginTop: '4px',
+                                    justifyContent: 'center',
+                                    background: 'linear-gradient(135deg, #6366f1 0%, #4f46e5 100%)',
+                                    borderColor: 'transparent',
+                                    color: '#ffffff',
+                                    fontWeight: '700',
+                                    fontSize: '13px',
                                     padding: '10px 16px',
-                                    display: 'flex', 
-                                    alignItems: 'center', 
+                                    display: 'flex',
+                                    alignItems: 'center',
                                     gap: '8px',
                                     boxShadow: '0 4px 14px rgba(99, 102, 241, 0.35)',
                                     cursor: 'pointer'
@@ -2318,28 +2323,28 @@ export default function HomeDashboard({
                             </div>
                           ) : (
                             <div style={{ display: 'grid', gridTemplateColumns: selectedProduct.stock > 0 ? '1fr 1fr' : '1fr', gap: '12px', marginTop: '12px' }}>
-                              <button 
+                              <button
                                 type="button"
-                                onClick={() => addToCart(selectedProduct, showFlash)} 
-                                className="btn btn-secondary" 
+                                onClick={() => addToCart(selectedProduct, showFlash)}
+                                className="btn btn-secondary"
                                 style={{ padding: '12px 18px', fontSize: '14px', fontWeight: '700', justifyContent: 'center', display: 'flex', alignItems: 'center', gap: '8px' }}
                                 disabled={selectedProduct.stock <= 0}
                               >
                                 {selectedProduct.stock <= 0 ? "Out of Stock" : <><ShoppingCart size={17} /> Add to Cart</>}
                               </button>
-                              
+
                               {selectedProduct.stock > 0 && (
-                                <button 
+                                <button
                                   type="button"
-                                  onClick={() => handleBuyNow(selectedProduct)} 
-                                  className="btn btn-primary" 
-                                  style={{ 
-                                    padding: '12px 18px', 
-                                    fontSize: '14px', 
-                                    fontWeight: '700', 
-                                    justifyContent: 'center', 
-                                    display: 'flex', 
-                                    alignItems: 'center', 
+                                  onClick={() => handleBuyNow(selectedProduct)}
+                                  className="btn btn-primary"
+                                  style={{
+                                    padding: '12px 18px',
+                                    fontSize: '14px',
+                                    fontWeight: '700',
+                                    justifyContent: 'center',
+                                    display: 'flex',
+                                    alignItems: 'center',
                                     gap: '8px',
                                     background: 'var(--gradient-primary)',
                                     borderColor: 'transparent'
@@ -2415,9 +2420,9 @@ export default function HomeDashboard({
                           <span style={{ fontSize: '13px', color: 'var(--text-secondary)' }}>Your Rating:</span>
                           <div style={{ display: 'flex', gap: '4px' }}>
                             {[1, 2, 3, 4, 5].map((star) => (
-                              <Star 
-                                key={star} 
-                                size={18} 
+                              <Star
+                                key={star}
+                                size={18}
                                 onClick={() => setReviewForm({ ...reviewForm, rating: star })}
                                 fill={star <= reviewForm.rating ? '#fbbf24' : 'none'}
                                 style={{ color: '#fbbf24', cursor: 'pointer' }}
@@ -2429,27 +2434,27 @@ export default function HomeDashboard({
 
                         {/* Attach Photo Button */}
                         <div>
-                          <label 
-                            style={{ 
-                              display: 'inline-flex', 
-                              alignItems: 'center', 
-                              gap: '6px', 
-                              padding: '5px 12px', 
-                              background: 'var(--bg-secondary)', 
-                              border: '1px solid var(--border-color)', 
-                              borderRadius: '6px', 
-                              fontSize: '12px', 
+                          <label
+                            style={{
+                              display: 'inline-flex',
+                              alignItems: 'center',
+                              gap: '6px',
+                              padding: '5px 12px',
+                              background: 'var(--bg-secondary)',
+                              border: '1px solid var(--border-color)',
+                              borderRadius: '6px',
+                              fontSize: '12px',
                               cursor: 'pointer',
                               color: 'var(--text-secondary)'
                             }}
                           >
                             <Camera size={14} style={{ color: 'var(--accent-teal)' }} />
                             <span>{isUploadingReviewImg ? 'Uploading...' : reviewImage ? 'Change Photo' : 'Attach Photo'}</span>
-                            <input 
-                              type="file" 
-                              accept="image/*" 
-                              onChange={(e) => handleReviewImageUpload(e, false)} 
-                              style={{ display: 'none' }} 
+                            <input
+                              type="file"
+                              accept="image/*"
+                              onChange={(e) => handleReviewImageUpload(e, false)}
+                              style={{ display: 'none' }}
                             />
                           </label>
                         </div>
@@ -2458,14 +2463,14 @@ export default function HomeDashboard({
                       {/* Uploaded Photo Preview */}
                       {reviewImage && (
                         <div style={{ display: 'flex', alignItems: 'center', gap: '10px', background: 'var(--bg-secondary)', padding: '8px 12px', borderRadius: '8px', border: '1px solid var(--border-color)' }}>
-                          <img 
-                            src={formatImageUrl(reviewImage)} 
-                            alt="Attached Review" 
-                            style={{ width: '40px', height: '40px', borderRadius: '6px', objectFit: 'cover' }} 
+                          <img
+                            src={formatImageUrl(reviewImage)}
+                            alt="Attached Review"
+                            style={{ width: '40px', height: '40px', borderRadius: '6px', objectFit: 'cover' }}
                           />
                           <span style={{ fontSize: '12px', color: 'var(--text-primary)', flex: 1 }}>Photo attached</span>
-                          <button 
-                            type="button" 
+                          <button
+                            type="button"
                             onClick={() => setReviewImage('')}
                             style={{ background: 'none', border: 'none', color: 'var(--accent-rose)', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '4px', fontSize: '11.5px' }}
                           >
@@ -2475,8 +2480,8 @@ export default function HomeDashboard({
                       )}
 
                       <div className="input-icon-wrapper">
-                        <input 
-                          type="text" 
+                        <input
+                          type="text"
                           placeholder="Share your thoughts about this product..."
                           value={reviewForm.comment}
                           onChange={(e) => setReviewForm({ ...reviewForm, comment: e.target.value })}
@@ -2513,9 +2518,9 @@ export default function HomeDashboard({
                                   <span className="review-author" style={{ fontWeight: 'bold' }}>Editing Your Review</span>
                                   <div style={{ display: 'flex', gap: '4px' }}>
                                     {[1, 2, 3, 4, 5].map((star) => (
-                                      <Star 
-                                        key={star} 
-                                        size={16} 
+                                      <Star
+                                        key={star}
+                                        size={16}
                                         onClick={() => setEditReviewForm({ ...editReviewForm, rating: star })}
                                         fill={star <= editReviewForm.rating ? '#fbbf24' : 'none'}
                                         style={{ color: '#fbbf24', cursor: 'pointer' }}
@@ -2526,7 +2531,7 @@ export default function HomeDashboard({
                                 </div>
 
                                 <div className="input-icon-wrapper">
-                                  <input 
+                                  <input
                                     type="text"
                                     value={editReviewForm.comment}
                                     onChange={(e) => setEditReviewForm({ ...editReviewForm, comment: e.target.value })}
@@ -2538,39 +2543,39 @@ export default function HomeDashboard({
 
                                 {/* Edit Photo attachment */}
                                 <div style={{ display: 'flex', alignItems: 'center', gap: '10px', flexWrap: 'wrap' }}>
-                                  <label 
-                                    style={{ 
-                                      display: 'inline-flex', 
-                                      alignItems: 'center', 
-                                      gap: '6px', 
-                                      padding: '4px 10px', 
-                                      background: 'var(--bg-secondary)', 
-                                      border: '1px solid var(--border-color)', 
-                                      borderRadius: '6px', 
-                                      fontSize: '11.5px', 
+                                  <label
+                                    style={{
+                                      display: 'inline-flex',
+                                      alignItems: 'center',
+                                      gap: '6px',
+                                      padding: '4px 10px',
+                                      background: 'var(--bg-secondary)',
+                                      border: '1px solid var(--border-color)',
+                                      borderRadius: '6px',
+                                      fontSize: '11.5px',
                                       cursor: 'pointer',
                                       color: 'var(--text-secondary)'
                                     }}
                                   >
                                     <Camera size={13} style={{ color: 'var(--accent-teal)' }} />
                                     <span>{isUploadingEditReviewImg ? 'Uploading...' : editReviewImage ? 'Replace Photo' : 'Attach Photo'}</span>
-                                    <input 
-                                      type="file" 
-                                      accept="image/*" 
-                                      onChange={(e) => handleReviewImageUpload(e, true)} 
-                                      style={{ display: 'none' }} 
+                                    <input
+                                      type="file"
+                                      accept="image/*"
+                                      onChange={(e) => handleReviewImageUpload(e, true)}
+                                      style={{ display: 'none' }}
                                     />
                                   </label>
 
                                   {editReviewImage && (
                                     <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-                                      <img 
-                                        src={formatImageUrl(editReviewImage)} 
-                                        alt="Preview" 
-                                        style={{ width: '30px', height: '30px', borderRadius: '4px', objectFit: 'cover' }} 
+                                      <img
+                                        src={formatImageUrl(editReviewImage)}
+                                        alt="Preview"
+                                        style={{ width: '30px', height: '30px', borderRadius: '4px', objectFit: 'cover' }}
                                       />
-                                      <button 
-                                        type="button" 
+                                      <button
+                                        type="button"
                                         onClick={() => setEditReviewImage('')}
                                         style={{ background: 'none', border: 'none', color: 'var(--accent-rose)', cursor: 'pointer', fontSize: '11px' }}
                                       >
@@ -2600,9 +2605,9 @@ export default function HomeDashboard({
                                 <span className="review-author">{rev.reviewerName}</span>
                                 <div style={{ display: 'flex', gap: '2px', color: '#fbbf24', marginTop: '4px' }}>
                                   {[1, 2, 3, 4, 5].map((star) => (
-                                    <Star 
-                                      key={star} 
-                                      size={12} 
+                                    <Star
+                                      key={star}
+                                      size={12}
                                       fill={star <= rev.rating ? '#fbbf24' : 'none'}
                                       style={{ color: '#fbbf24' }}
                                     />
@@ -2613,17 +2618,17 @@ export default function HomeDashboard({
                                 <span className="review-date">{rev.date}</span>
                                 {isOwner && (
                                   <div style={{ display: 'flex', gap: '8px', fontSize: '12px' }}>
-                                    <button 
-                                      type="button" 
-                                      onClick={() => handleStartEditReview(rev)} 
+                                    <button
+                                      type="button"
+                                      onClick={() => handleStartEditReview(rev)}
                                       style={{ background: 'none', border: 'none', color: 'var(--accent-blue)', cursor: 'pointer', padding: '0', textDecoration: 'underline' }}
                                     >
                                       Edit
                                     </button>
                                     <span style={{ color: 'var(--text-muted)' }}>|</span>
-                                    <button 
-                                      type="button" 
-                                      onClick={() => handleDeleteReview(rev.id)} 
+                                    <button
+                                      type="button"
+                                      onClick={() => handleDeleteReview(rev.id)}
                                       style={{ background: 'none', border: 'none', color: 'var(--accent-rose)', cursor: 'pointer', padding: '0', textDecoration: 'underline' }}
                                     >
                                       Delete
@@ -2637,7 +2642,7 @@ export default function HomeDashboard({
                             {/* Customer Uploaded Review Photo */}
                             {rev.imageUrl && (
                               <div style={{ marginTop: '10px' }}>
-                                <div 
+                                <div
                                   onClick={() => setReviewLightboxImg({ url: formatImageUrl(rev.imageUrl), author: rev.reviewerName, product: selectedProduct.name })}
                                   style={{
                                     display: 'inline-flex',
@@ -2653,10 +2658,10 @@ export default function HomeDashboard({
                                   }}
                                   title="Click to view customer photo"
                                 >
-                                  <img 
-                                    src={formatImageUrl(rev.imageUrl)} 
-                                    alt="Customer Unboxing Photo" 
-                                    style={{ width: '46px', height: '46px', objectFit: 'cover', borderRadius: '6px', border: '1px solid var(--border-light)' }} 
+                                  <img
+                                    src={formatImageUrl(rev.imageUrl)}
+                                    alt="Customer Unboxing Photo"
+                                    style={{ width: '46px', height: '46px', objectFit: 'cover', borderRadius: '6px', border: '1px solid var(--border-light)' }}
                                   />
                                   <div style={{ display: 'flex', flexDirection: 'column' }}>
                                     <span style={{ fontSize: '12px', fontWeight: '600', color: 'var(--text-primary)', display: 'flex', alignItems: 'center', gap: '4px' }}>
@@ -2683,8 +2688,8 @@ export default function HomeDashboard({
 
       {/* Customer Review Image Lightbox Modal */}
       {reviewLightboxImg && (
-        <div 
-          className="image-lightbox-overlay" 
+        <div
+          className="image-lightbox-overlay"
           style={{ zIndex: 99999 }}
           onClick={() => setReviewLightboxImg(null)}
         >
@@ -2694,9 +2699,9 @@ export default function HomeDashboard({
               <span>Customer Review Photo: {reviewLightboxImg.product}</span>
               <span className="badge badge-customer" style={{ marginLeft: '6px', fontSize: '11px' }}>By {reviewLightboxImg.author}</span>
             </div>
-            <button 
-              type="button" 
-              className="lightbox-close-btn" 
+            <button
+              type="button"
+              className="lightbox-close-btn"
               onClick={() => setReviewLightboxImg(null)}
               title="Close Preview (Esc)"
             >
@@ -2705,10 +2710,10 @@ export default function HomeDashboard({
           </div>
           <div className="lightbox-main-stage" onClick={(e) => e.stopPropagation()}>
             <div className="lightbox-img-wrapper" style={{ maxHeight: '80vh', maxWidth: '85vw' }}>
-              <img 
-                src={reviewLightboxImg.url} 
-                alt="Customer Review Photo" 
-                style={{ maxWidth: '100%', maxHeight: '80vh', objectFit: 'contain', borderRadius: '12px', boxShadow: '0 20px 50px rgba(0,0,0,0.5)' }} 
+              <img
+                src={reviewLightboxImg.url}
+                alt="Customer Review Photo"
+                style={{ maxWidth: '100%', maxHeight: '80vh', objectFit: 'contain', borderRadius: '12px', boxShadow: '0 20px 50px rgba(0,0,0,0.5)' }}
               />
             </div>
           </div>
@@ -2747,7 +2752,7 @@ export default function HomeDashboard({
                 <span className="lightbox-counter">
                   Image {activeImageIndex + 1} of {allImages.length}
                 </span>
-                <button 
+                <button
                   type="button"
                   className="lightbox-close-btn"
                   onClick={() => setShowLightbox(false)}
@@ -2761,7 +2766,7 @@ export default function HomeDashboard({
             {/* Main Stage with Big Image and Nav Buttons */}
             <div className="lightbox-main-stage" onClick={(e) => e.stopPropagation()}>
               {allImages.length > 1 && (
-                <button 
+                <button
                   type="button"
                   className="lightbox-nav-btn prev"
                   onClick={() => setActiveImageIndex(prev => (prev - 1 + allImages.length) % allImages.length)}
@@ -2777,16 +2782,16 @@ export default function HomeDashboard({
                     {currentImg}
                   </span>
                 ) : (
-                  <img 
+                  <img
                     key={activeImageIndex}
-                    src={currentImg} 
-                    alt={`${selectedProduct.name} - slide ${activeImageIndex + 1}`} 
+                    src={currentImg}
+                    alt={`${selectedProduct.name} - slide ${activeImageIndex + 1}`}
                   />
                 )}
               </div>
 
               {allImages.length > 1 && (
-                <button 
+                <button
                   type="button"
                   className="lightbox-nav-btn next"
                   onClick={() => setActiveImageIndex(prev => (prev + 1) % allImages.length)}
@@ -2803,7 +2808,7 @@ export default function HomeDashboard({
                 const isActive = idx === activeImageIndex;
                 const thumbIsEmoji = img.length <= 4;
                 return (
-                  <div 
+                  <div
                     key={idx}
                     className={`lightbox-thumb-item ${isActive ? 'active' : ''}`}
                     onClick={() => setActiveImageIndex(idx)}
@@ -2822,21 +2827,21 @@ export default function HomeDashboard({
         );
       })()}
 
-                  {/* Payment & Checkout Modal */}
+      {/* Payment & Checkout Modal */}
       {showPaymentModal && (
-        <div 
-          className="modal-overlay" 
-          style={{ zIndex: 2500 }} 
-          onClick={() => { 
-            if (!isProcessingPayment) { 
-              setShowPaymentModal(false); 
-              setBuyNowItem(null); 
-              setCheckoutMode('cart'); 
-            } 
+        <div
+          className="modal-overlay"
+          style={{ zIndex: 2500 }}
+          onClick={() => {
+            if (!isProcessingPayment) {
+              setShowPaymentModal(false);
+              setBuyNowItem(null);
+              setCheckoutMode('cart');
+            }
           }}
         >
           <div className="dialog-content" onClick={(e) => e.stopPropagation()} style={{ maxWidth: '640px', maxHeight: '90vh', display: 'flex', flexDirection: 'column' }}>
-            
+
             {/* Modal Header & Progress Stepper */}
             <div className="modal-header" style={{ flexDirection: 'column', alignItems: 'stretch', gap: '12px', paddingBottom: '12px' }}>
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
@@ -2848,12 +2853,12 @@ export default function HomeDashboard({
                   {paymentStep === 4 && "Order Confirmed!"}
                 </h2>
                 {!isProcessingPayment && (
-                  <button 
-                    onClick={() => { 
-                      setShowPaymentModal(false); 
-                      setBuyNowItem(null); 
-                      setCheckoutMode('cart'); 
-                    }} 
+                  <button
+                    onClick={() => {
+                      setShowPaymentModal(false);
+                      setBuyNowItem(null);
+                      setCheckoutMode('cart');
+                    }}
                     className="btn-icon-only"
                   >
                     <X size={18} />
@@ -2893,7 +2898,7 @@ export default function HomeDashboard({
 
             {/* Modal Body: Dynamic per step */}
             <div className="modal-body" style={{ overflowY: 'auto', padding: '20px' }}>
-              
+
               {/* STEP 1: Delivery Address & Order Review */}
               {paymentStep === 1 && (
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
@@ -2907,12 +2912,12 @@ export default function HomeDashboard({
                         </span>
                       </div>
                       {savedAddresses.length > 0 && (
-                        <button 
-                          type="button" 
+                        <button
+                          type="button"
                           onClick={() => {
                             setShowPaymentModal(false);
                             onGoToProfile('addresses');
-                          }} 
+                          }}
                           style={{ background: 'none', border: 'none', color: 'var(--accent-blue)', fontSize: '11px', fontWeight: '600', cursor: 'pointer', padding: 0 }}
                         >
                           + Manage Addresses
@@ -2988,30 +2993,30 @@ export default function HomeDashboard({
                         {showCustomAddressInput && (
                           <div style={{ marginTop: '10px', display: 'flex', flexDirection: 'column', gap: '8px', borderTop: '1px dashed var(--border-light)', paddingTop: '10px' }}>
                             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '8px' }}>
-                              <input 
-                                type="text" 
-                                value={deliveryInfo.name} 
-                                onChange={(e) => setDeliveryInfo({ ...deliveryInfo, name: e.target.value })} 
-                                className="form-input" 
+                              <input
+                                type="text"
+                                value={deliveryInfo.name}
+                                onChange={(e) => setDeliveryInfo({ ...deliveryInfo, name: e.target.value })}
+                                className="form-input"
                                 placeholder="Recipient Name"
                                 style={{ fontSize: '12px', padding: '8px 10px' }}
                                 required
                               />
-                              <input 
-                                type="tel" 
-                                value={deliveryInfo.phone} 
-                                onChange={(e) => setDeliveryInfo({ ...deliveryInfo, phone: e.target.value })} 
-                                className="form-input" 
+                              <input
+                                type="tel"
+                                value={deliveryInfo.phone}
+                                onChange={(e) => setDeliveryInfo({ ...deliveryInfo, phone: e.target.value })}
+                                className="form-input"
                                 placeholder="Contact Phone"
                                 style={{ fontSize: '12px', padding: '8px 10px' }}
                                 required
                               />
                             </div>
-                            <input 
-                              type="text" 
-                              value={deliveryInfo.address} 
-                              onChange={(e) => setDeliveryInfo({ ...deliveryInfo, address: e.target.value })} 
-                              className="form-input" 
+                            <input
+                              type="text"
+                              value={deliveryInfo.address}
+                              onChange={(e) => setDeliveryInfo({ ...deliveryInfo, address: e.target.value })}
+                              className="form-input"
                               placeholder="Street Address, City, State, PIN Code"
                               style={{ fontSize: '12px', padding: '8px 10px' }}
                               required
@@ -3022,30 +3027,30 @@ export default function HomeDashboard({
                     ) : (
                       <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
                         <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '8px' }}>
-                          <input 
-                            type="text" 
-                            value={deliveryInfo.name} 
-                            onChange={(e) => setDeliveryInfo({ ...deliveryInfo, name: e.target.value })} 
-                            className="form-input" 
+                          <input
+                            type="text"
+                            value={deliveryInfo.name}
+                            onChange={(e) => setDeliveryInfo({ ...deliveryInfo, name: e.target.value })}
+                            className="form-input"
                             placeholder="Recipient Name *"
                             style={{ fontSize: '12px', padding: '8px 10px' }}
                             required
                           />
-                          <input 
-                            type="tel" 
-                            value={deliveryInfo.phone} 
-                            onChange={(e) => setDeliveryInfo({ ...deliveryInfo, phone: e.target.value })} 
-                            className="form-input" 
+                          <input
+                            type="tel"
+                            value={deliveryInfo.phone}
+                            onChange={(e) => setDeliveryInfo({ ...deliveryInfo, phone: e.target.value })}
+                            className="form-input"
                             placeholder="Phone Number *"
                             style={{ fontSize: '12px', padding: '8px 10px' }}
                             required
                           />
                         </div>
-                        <input 
-                          type="text" 
-                          value={deliveryInfo.address} 
-                          onChange={(e) => setDeliveryInfo({ ...deliveryInfo, address: e.target.value })} 
-                          className="form-input" 
+                        <input
+                          type="text"
+                          value={deliveryInfo.address}
+                          onChange={(e) => setDeliveryInfo({ ...deliveryInfo, address: e.target.value })}
+                          className="form-input"
                           placeholder="Full Street Address, City, State, PIN Code *"
                           style={{ fontSize: '12px', padding: '8px 10px' }}
                           required
@@ -3077,10 +3082,10 @@ export default function HomeDashboard({
                                 <div style={{ fontSize: '11px', color: 'var(--text-muted)' }}>
                                   Qty: {item.quantity} × ₹{Number(item.price).toLocaleString('en-IN')}
                                   {hasDisc && (
-                                    <span style={{ 
-                                      marginLeft: '6px', 
-                                      fontSize: '9px', 
-                                      padding: '1px 5px', 
+                                    <span style={{
+                                      marginLeft: '6px',
+                                      fontSize: '9px',
+                                      padding: '1px 5px',
                                       background: 'linear-gradient(135deg, #ef4444 0%, #dc2626 100%)',
                                       color: '#ffffff',
                                       fontWeight: '800',
@@ -3107,7 +3112,7 @@ export default function HomeDashboard({
                       Select Available Coupon / Promo Code
                     </label>
                     <div style={{ display: 'flex', gap: '8px' }}>
-                      <select 
+                      <select
                         value={couponCodeInput}
                         onChange={(e) => {
                           setCouponCodeInput(e.target.value);
@@ -3131,8 +3136,8 @@ export default function HomeDashboard({
                           };
 
                           return (
-                            <option 
-                              key={c.id} 
+                            <option
+                              key={c.id}
                               value={c.code}
                               disabled={!isEligible}
                               style={{ textDecoration: !isEligible ? 'line-through' : 'none', color: !isEligible ? 'var(--text-muted)' : 'inherit' }}
@@ -3143,8 +3148,8 @@ export default function HomeDashboard({
                         })}
                       </select>
                       {appliedCoupon ? (
-                        <button 
-                          type="button" 
+                        <button
+                          type="button"
                           onClick={handleRemoveCoupon}
                           className="btn btn-secondary"
                           style={{ fontSize: '12px', padding: '6px 12px', color: 'var(--accent-rose)' }}
@@ -3152,8 +3157,8 @@ export default function HomeDashboard({
                           Remove
                         </button>
                       ) : (
-                        <button 
-                          type="button" 
+                        <button
+                          type="button"
                           onClick={handleApplyCoupon}
                           className="btn btn-primary"
                           style={{ fontSize: '12px', padding: '6px 16px', background: 'var(--accent-teal)' }}
@@ -3221,7 +3226,7 @@ export default function HomeDashboard({
                     </div>
                   </div>
 
-                  <button 
+                  <button
                     type="button"
                     onClick={() => {
                       if (!deliveryInfo.name.trim() || !deliveryInfo.address.trim()) {
@@ -3229,8 +3234,8 @@ export default function HomeDashboard({
                         return;
                       }
                       setPaymentStep(2);
-                    }} 
-                    className="btn btn-primary btn-block" 
+                    }}
+                    className="btn btn-primary btn-block"
                     style={{ padding: '12px', fontSize: '15px', fontWeight: '700', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px' }}
                   >
                     Proceed to Payment Options <ArrowRight size={18} />
@@ -3248,7 +3253,7 @@ export default function HomeDashboard({
 
                     {/* Payment Method Cards */}
                     <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
-                      <div 
+                      <div
                         onClick={() => setPaymentMethod('razorpay')}
                         style={{
                           padding: '16px',
@@ -3276,7 +3281,7 @@ export default function HomeDashboard({
                         <span style={{ fontSize: '12px', color: 'var(--text-muted)' }}>UPI, Cards, NetBanking, Wallets</span>
                       </div>
 
-                      <div 
+                      <div
                         onClick={() => setPaymentMethod('cod')}
                         style={{
                           padding: '16px',
@@ -3352,18 +3357,18 @@ export default function HomeDashboard({
                   {/* Payment Button & Security Note */}
                   <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
                     <div style={{ display: 'flex', gap: '10px' }}>
-                      <button 
-                        type="button" 
-                        onClick={() => setPaymentStep(1)} 
-                        className="btn btn-secondary" 
+                      <button
+                        type="button"
+                        onClick={() => setPaymentStep(1)}
+                        className="btn btn-secondary"
                         style={{ padding: '12px 18px' }}
                       >
                         Back
                       </button>
-                      <button 
-                        type="button" 
-                        onClick={handleProcessPayment} 
-                        className="btn btn-success" 
+                      <button
+                        type="button"
+                        onClick={handleProcessPayment}
+                        className="btn btn-success"
                         style={{ flex: 1, padding: '12px', fontSize: '15px', fontWeight: '800', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px' }}
                       >
                         {paymentMethod === 'cod' ? (
@@ -3429,27 +3434,27 @@ export default function HomeDashboard({
                   </div>
 
                   <div style={{ display: 'flex', gap: '12px', width: '100%', marginTop: '8px' }}>
-                    <button 
-                      type="button" 
+                    <button
+                      type="button"
                       onClick={() => {
                         setShowPaymentModal(false);
                         setBuyNowItem(null);
                         setCheckoutMode('cart');
                         setShowOrdersModal(true);
-                      }} 
-                      className="btn btn-secondary" 
+                      }}
+                      className="btn btn-secondary"
                       style={{ flex: 1, padding: '12px' }}
                     >
                       View Order History
                     </button>
-                    <button 
-                      type="button" 
+                    <button
+                      type="button"
                       onClick={() => {
                         setShowPaymentModal(false);
                         setBuyNowItem(null);
                         setCheckoutMode('cart');
-                      }} 
-                      className="btn btn-primary" 
+                      }}
+                      className="btn btn-primary"
                       style={{ flex: 1, padding: '12px' }}
                     >
                       Continue Shopping

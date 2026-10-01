@@ -1,8 +1,8 @@
 import React, { useState, useEffect, useRef } from 'react';
 import axios from 'axios';
-import { 
-  Truck, Calendar, ShoppingBag, Check, X, ShieldAlert, ShieldCheck, Package, CheckCircle2, 
-  RotateCcw, Clock, RefreshCw, Eye, Plus, Edit, PlusCircle, Trash, Box, 
+import {
+  Truck, Calendar, ShoppingBag, Check, X, ShieldAlert, ShieldCheck, Package, CheckCircle2,
+  RotateCcw, Clock, RefreshCw, Eye, Plus, Edit, PlusCircle, Trash, Box,
   MapPin, CheckCircle, BarChart3, AlertCircle, PlayCircle, Loader2, Bell,
   Layers, Repeat, ArrowRightLeft, FileText, ArrowRight, Store, Search, AlertTriangle,
   Sun, Moon, ArrowLeft, ChevronDown, User, LogOut
@@ -11,12 +11,13 @@ import ProductIcon from './ProductIcon';
 import NotificationCenter from './NotificationCenter';
 import { extractErrorMessage } from '../utils/errorHandler';
 import { formatImageUrl } from '../utils/imageHelper';
-import { 
-  generateWarehouseNotifications, 
-  markNotifAsRead, 
-  markAllNotifsAsRead, 
-  clearAllNotifs, 
-  dismissNotif 
+import {
+  generateWarehouseNotifications,
+  markNotifAsRead,
+  markAllNotifsAsRead,
+  clearAllNotifs,
+  dismissNotif,
+  syncNotificationsWithServer
 } from '../utils/notificationService';
 
 export default function WarehouseDashboard({ user, onGoToHome, onGoToProfile, theme, onToggleTheme, onLogout, initialTab = 'analytics' }) {
@@ -59,7 +60,7 @@ export default function WarehouseDashboard({ user, onGoToHome, onGoToProfile, th
   }, [initialTab]);
   // Fulfillment Pipeline Sub-tabs: 'allocate' | 'pick' | 'pack' | 'ship'
   const [fulfillmentSubTab, setFulfillmentSubTab] = useState('allocate');
-  
+
   const [showNotifications, setShowNotifications] = useState(false);
   const [flashMessage, setFlashMessage] = useState({ type: '', text: '' });
   const [selectedReturnDetails, setSelectedReturnDetails] = useState(null);
@@ -108,17 +109,17 @@ export default function WarehouseDashboard({ user, onGoToHome, onGoToProfile, th
   const activeReturnsList = facilityFilter === 'ALL'
     ? returnsList
     : returnsList.filter(r => {
-        const orderAllocs = allocations.filter(a => a.orderId === r.orderId);
-        if (orderAllocs.length === 0) return true;
-        return orderAllocs.some(a => String(a.warehouseId) === String(facilityFilter) || (a.warehouse && String(a.warehouse.id) === String(facilityFilter)));
-      });
+      const orderAllocs = allocations.filter(a => a.orderId === r.orderId);
+      if (orderAllocs.length === 0) return true;
+      return orderAllocs.some(a => String(a.warehouseId) === String(facilityFilter) || (a.warehouse && String(a.warehouse.id) === String(facilityFilter)));
+    });
 
   const pendingReturns = activeReturnsList.filter(r => r.status === 'PENDING');
   const damagedInventories = facilityFilter === 'ALL'
     ? inventories.filter(i => (i.damagedQuantity || 0) > 0)
     : inventories.filter(i => (i.damagedQuantity || 0) > 0 && (String(i.warehouseId) === String(facilityFilter) || (i.warehouse && String(i.warehouse.id) === String(facilityFilter))));
 
-  const staffPendingAllocations = allocations.filter(a => 
+  const staffPendingAllocations = allocations.filter(a =>
     a.status === 'ALLOCATED' && (
       !user.warehouseId || String(a.warehouseId) === String(user.warehouseId) || (a.warehouse && String(a.warehouse.id) === String(user.warehouseId))
     )
@@ -138,6 +139,14 @@ export default function WarehouseDashboard({ user, onGoToHome, onGoToProfile, th
     });
     setNotificationList(list);
   };
+
+  useEffect(() => {
+    if (user?.id) {
+      syncNotificationsWithServer(user.id).then(() => {
+        refreshNotifications();
+      });
+    }
+  }, [user?.id]);
 
   useEffect(() => {
     refreshNotifications();
@@ -204,7 +213,7 @@ export default function WarehouseDashboard({ user, onGoToHome, onGoToProfile, th
   };
 
   // --- WAREHOUSE MANAGEMENT ACTIONS ---
-  
+
   const handleCreateWarehouse = async (e) => {
     e.preventDefault();
     try {
@@ -424,7 +433,7 @@ export default function WarehouseDashboard({ user, onGoToHome, onGoToProfile, th
 
 
   const filteredDamagedInventories = damagedInventories.filter(i => {
-    const matchesSearch = !damagedSearchTerm || 
+    const matchesSearch = !damagedSearchTerm ||
       (i.productName && i.productName.toLowerCase().includes(damagedSearchTerm.toLowerCase())) ||
       (i.productCategory && i.productCategory.toLowerCase().includes(damagedSearchTerm.toLowerCase())) ||
       (i.warehouseName && i.warehouseName.toLowerCase().includes(damagedSearchTerm.toLowerCase())) ||
@@ -437,13 +446,13 @@ export default function WarehouseDashboard({ user, onGoToHome, onGoToProfile, th
   const getAllocationStatus = (orderId, orderItems) => {
     const orderAllocs = allocations.filter(a => a.orderId === orderId);
     if (orderAllocs.length === 0) return { label: 'Unallocated', class: 'badge-rejected', code: 0 };
-    
+
     // Check total quantities
     const totalAllocatedQty = orderAllocs.reduce((sum, a) => sum + (a.quantity || 0), 0);
     const totalRequiredQty = orderItems.reduce((sum, item) => sum + (item.quantity || 0), 0);
 
     const hasUnallocated = orderAllocs.some(a => a.status === 'UNALLOCATED');
-    
+
     if (hasUnallocated) {
       return { label: 'Stock Pending / Unallocated', class: 'badge-pending', code: 1 };
     }
@@ -477,9 +486,9 @@ export default function WarehouseDashboard({ user, onGoToHome, onGoToProfile, th
         </div>
 
         <div className="nav-right">
-          <button 
+          <button
             type="button"
-            onClick={onGoToHome} 
+            onClick={onGoToHome}
             className="btn-store-nav"
             title="Browse ShopStack Storefront"
           >
@@ -501,11 +510,11 @@ export default function WarehouseDashboard({ user, onGoToHome, onGoToProfile, th
             align="right"
           />
 
-          <div 
+          <div
             className="nav-user-menu"
             ref={userMenuRef}
           >
-            <div 
+            <div
               className="nav-user-trigger"
               onClick={(e) => {
                 e.stopPropagation();
@@ -517,13 +526,13 @@ export default function WarehouseDashboard({ user, onGoToHome, onGoToProfile, th
                 <User size={14} style={{ color: 'var(--accent-indigo)', flexShrink: 0 }} />
               </div>
               <strong className="nav-user-name">{user?.fullName || 'Staff'}</strong>
-              <ChevronDown 
-                size={13} 
+              <ChevronDown
+                size={13}
                 className="nav-user-chevron"
-                style={{ 
+                style={{
                   transform: showUserDropdown ? 'rotate(180deg)' : 'none',
                   transition: 'transform 0.2s ease'
-                }} 
+                }}
               />
             </div>
 
@@ -541,11 +550,11 @@ export default function WarehouseDashboard({ user, onGoToHome, onGoToProfile, th
                   </div>
                 </div>
 
-                <div 
-                  onClick={() => { 
-                    setShowUserDropdown(false); 
-                    if (onGoToProfile) onGoToProfile('profile'); 
-                  }} 
+                <div
+                  onClick={() => {
+                    setShowUserDropdown(false);
+                    if (onGoToProfile) onGoToProfile('profile');
+                  }}
                   className="dropdown-item"
                 >
                   <User size={16} style={{ flexShrink: 0 }} /> <span>My Profile</span>
@@ -559,12 +568,12 @@ export default function WarehouseDashboard({ user, onGoToHome, onGoToProfile, th
 
                 {/* Light / Dark Mode Toggle Button */}
                 {onToggleTheme && (
-                  <div 
-                    onClick={(e) => { 
-                      e.stopPropagation(); 
-                      onToggleTheme(); 
-                    }} 
-                    className="dropdown-item" 
+                  <div
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      onToggleTheme();
+                    }}
+                    className="dropdown-item"
                     style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', cursor: 'pointer' }}
                   >
                     <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
@@ -575,15 +584,15 @@ export default function WarehouseDashboard({ user, onGoToHome, onGoToProfile, th
                       )}
                       <span>{theme === 'dark' ? 'Light Mode' : 'Dark Mode'}</span>
                     </div>
-                    <span 
-                      style={{ 
-                        fontSize: '10px', 
-                        fontWeight: '700', 
-                        padding: '2px 6px', 
-                        borderRadius: '4px', 
-                        background: 'var(--bg-input)', 
+                    <span
+                      style={{
+                        fontSize: '10px',
+                        fontWeight: '700',
+                        padding: '2px 6px',
+                        borderRadius: '4px',
+                        background: 'var(--bg-input)',
                         color: 'var(--text-secondary)',
-                        border: '1px solid var(--border-light)' 
+                        border: '1px solid var(--border-light)'
                       }}
                     >
                       {theme === 'dark' ? 'DARK' : 'LIGHT'}
@@ -595,12 +604,12 @@ export default function WarehouseDashboard({ user, onGoToHome, onGoToProfile, th
 
                 {/* Logout Button */}
                 {onLogout && (
-                  <div 
-                    onClick={() => { 
-                      setShowUserDropdown(false); 
-                      onLogout(); 
-                    }} 
-                    className="dropdown-item dropdown-item-danger" 
+                  <div
+                    onClick={() => {
+                      setShowUserDropdown(false);
+                      onLogout();
+                    }}
+                    className="dropdown-item dropdown-item-danger"
                     style={{ color: 'var(--accent-rose)', fontWeight: '600' }}
                   >
                     <LogOut size={16} style={{ flexShrink: 0 }} /> <span>Logout</span>
@@ -895,10 +904,10 @@ export default function WarehouseDashboard({ user, onGoToHome, onGoToProfile, th
                           <span style={{ fontSize: '13px', fontWeight: '600' }}>{totalWhStock} / {limit} Units ({pct}%)</span>
                         </div>
                         <div style={{ width: '100%', height: '8px', background: 'var(--bg-input)', borderRadius: '4px', overflow: 'hidden' }}>
-                          <div style={{ 
-                            width: `${pct}%`, 
-                            height: '100%', 
-                            background: pct > 85 ? 'var(--accent-rose)' : pct > 60 ? 'var(--accent-amber)' : 'var(--accent-indigo)', 
+                          <div style={{
+                            width: `${pct}%`,
+                            height: '100%',
+                            background: pct > 85 ? 'var(--accent-rose)' : pct > 60 ? 'var(--accent-amber)' : 'var(--accent-indigo)',
                             borderRadius: '4px',
                             transition: 'width 0.4s ease'
                           }}></div>
@@ -946,35 +955,35 @@ export default function WarehouseDashboard({ user, onGoToHome, onGoToProfile, th
 
               {/* Sub-tab Navigation */}
               <div style={{ display: 'flex', borderBottom: '1px solid var(--border-light)', marginBottom: '20px', gap: '4px', overflowX: 'auto' }}>
-                <button 
+                <button
                   onClick={() => setFulfillmentSubTab('allocate')}
                   className={`btn ${fulfillmentSubTab === 'allocate' ? 'btn-primary' : 'btn-secondary'}`}
                   style={{ borderRadius: '6px 6px 0 0', padding: '8px 16px', fontSize: '13px', borderBottom: 'none' }}
                 >
                   1. Allocation Review ({allOrders.filter(o => o.status === 'CONFIRMED').length})
                 </button>
-                <button 
+                <button
                   onClick={() => setFulfillmentSubTab('pick')}
                   className={`btn ${fulfillmentSubTab === 'pick' ? 'btn-primary' : 'btn-secondary'}`}
                   style={{ borderRadius: '6px 6px 0 0', padding: '8px 16px', fontSize: '13px', borderBottom: 'none' }}
                 >
                   2. Picking Queue ({displayedAllocations.filter(a => a.status === 'ALLOCATED').length})
                 </button>
-                <button 
+                <button
                   onClick={() => setFulfillmentSubTab('pack')}
                   className={`btn ${fulfillmentSubTab === 'pack' ? 'btn-primary' : 'btn-secondary'}`}
                   style={{ borderRadius: '6px 6px 0 0', padding: '8px 16px', fontSize: '13px', borderBottom: 'none' }}
                 >
                   3. Packing Queue ({displayedAllocations.filter(a => a.status === 'PICKED').length})
                 </button>
-                <button 
+                <button
                   onClick={() => setFulfillmentSubTab('ship')}
                   className={`btn ${fulfillmentSubTab === 'ship' ? 'btn-primary' : 'btn-secondary'}`}
                   style={{ borderRadius: '6px 6px 0 0', padding: '8px 16px', fontSize: '13px', borderBottom: 'none' }}
                 >
                   4. Carrier Dispatch ({displayedAllocations.filter(a => a.status === 'PACKED').length})
                 </button>
-                <button 
+                <button
                   onClick={() => setFulfillmentSubTab('transit')}
                   className={`btn ${fulfillmentSubTab === 'transit' ? 'btn-primary' : 'btn-secondary'}`}
                   style={{ borderRadius: '6px 6px 0 0', padding: '8px 16px', fontSize: '13px', borderBottom: 'none' }}
@@ -1030,9 +1039,9 @@ export default function WarehouseDashboard({ user, onGoToHome, onGoToProfile, th
                                 </td>
                                 <td>
                                   <div style={{ display: 'flex', gap: '8px', justifyContent: 'center' }}>
-                                    <button 
-                                      onClick={() => handleAutoAllocate(ord.orderId)} 
-                                      className="btn btn-secondary" 
+                                    <button
+                                      onClick={() => handleAutoAllocate(ord.orderId)}
+                                      className="btn btn-secondary"
                                       style={{ padding: '6px 12px', fontSize: '12px', display: 'flex', gap: '4px', alignItems: 'center' }}
                                     >
                                       <PlayCircle size={13} /> Auto
@@ -1092,9 +1101,9 @@ export default function WarehouseDashboard({ user, onGoToHome, onGoToProfile, th
                               </td>
                               <td style={{ fontSize: '14px', fontWeight: 'bold' }}>{alloc.quantity} units</td>
                               <td style={{ textAlign: 'center' }}>
-                                <button 
-                                  onClick={() => handlePickAllocation(alloc.id)} 
-                                  className="btn btn-success" 
+                                <button
+                                  onClick={() => handlePickAllocation(alloc.id)}
+                                  className="btn btn-success"
                                   style={{ padding: '6px 14px', fontSize: '12px', display: 'flex', gap: '4px', alignItems: 'center', margin: '0 auto' }}
                                 >
                                   <CheckCircle size={14} /> Confirm Pick
@@ -1138,7 +1147,7 @@ export default function WarehouseDashboard({ user, onGoToHome, onGoToProfile, th
                               <td>{alloc.warehouseName}</td>
                               <td style={{ fontWeight: 'bold' }}>{alloc.quantity}</td>
                               <td>
-                                <select 
+                                <select
                                   value={packagingSelections[alloc.id] || 'Standard Box'}
                                   onChange={(e) => setPackagingSelections({
                                     ...packagingSelections,
@@ -1154,9 +1163,9 @@ export default function WarehouseDashboard({ user, onGoToHome, onGoToProfile, th
                                 </select>
                               </td>
                               <td style={{ textAlign: 'center' }}>
-                                <button 
-                                  onClick={() => handlePackAllocation(alloc.id)} 
-                                  className="btn btn-primary" 
+                                <button
+                                  onClick={() => handlePackAllocation(alloc.id)}
+                                  className="btn btn-primary"
                                   style={{ padding: '6px 14px', fontSize: '12px', display: 'flex', gap: '4px', alignItems: 'center', margin: '0 auto' }}
                                 >
                                   <Box size={14} /> Pack & Containerize
@@ -1212,7 +1221,7 @@ export default function WarehouseDashboard({ user, onGoToHome, onGoToProfile, th
                               </td>
                               <td>
                                 <div style={{ display: 'flex', gap: '4px' }}>
-                                  <input 
+                                  <input
                                     type="text"
                                     placeholder="Enter Tracking AWB"
                                     value={trackingNumbers[alloc.id] || ''}
@@ -1236,9 +1245,9 @@ export default function WarehouseDashboard({ user, onGoToHome, onGoToProfile, th
                                 </div>
                               </td>
                               <td style={{ textAlign: 'center' }}>
-                                <button 
-                                  onClick={() => handleShipAllocation(alloc.id)} 
-                                  className="btn btn-success" 
+                                <button
+                                  onClick={() => handleShipAllocation(alloc.id)}
+                                  className="btn btn-success"
                                   style={{ padding: '6px 12px', fontSize: '12px', display: 'flex', gap: '4px', alignItems: 'center', margin: '0 auto' }}
                                 >
                                   <Truck size={14} /> Ready for Shipment
@@ -1286,9 +1295,9 @@ export default function WarehouseDashboard({ user, onGoToHome, onGoToProfile, th
                                 <div style={{ fontSize: '11px', color: 'var(--text-muted)' }}>AWB: <code style={{ color: 'var(--accent-teal)' }}>{alloc.trackingNumber}</code></div>
                               </td>
                               <td style={{ textAlign: 'center' }}>
-                                <button 
-                                  onClick={() => handleAdvanceStatus(alloc.id, 'DELIVERED')} 
-                                  className="btn btn-primary" 
+                                <button
+                                  onClick={() => handleAdvanceStatus(alloc.id, 'DELIVERED')}
+                                  className="btn btn-primary"
                                   style={{ padding: '6px 12px', fontSize: '12px', display: 'flex', gap: '4px', alignItems: 'center', margin: '0 auto', background: 'var(--accent-teal)', border: 'none', color: '#fff' }}
                                 >
                                   <CheckCircle size={14} /> Mark Delivered
@@ -1522,7 +1531,7 @@ export default function WarehouseDashboard({ user, onGoToHome, onGoToProfile, th
 
                                     // Find originating allocated warehouse for this specific order
                                     const orderAllocs = allocations.filter(a => a.orderId === r.orderId);
-                                    const allocatedWhId = orderAllocs.find(a => a.warehouseId || a.warehouse)?.warehouseId 
+                                    const allocatedWhId = orderAllocs.find(a => a.warehouseId || a.warehouse)?.warehouseId
                                       || (orderAllocs.find(a => a.warehouse)?.warehouse?.id)
                                       || (user.warehouseId ? String(user.warehouseId) : '')
                                       || (warehouses.length > 0 ? String(warehouses[0].id) : '');
@@ -1564,7 +1573,7 @@ export default function WarehouseDashboard({ user, onGoToHome, onGoToProfile, th
               <div className="flex-between" style={{ marginBottom: '20px', flexWrap: 'wrap', gap: '12px' }}>
                 <div>
                   <h2 style={{ fontSize: '20px', fontWeight: '800', margin: 0, display: 'flex', alignItems: 'center', gap: '8px' }}>
-                    <ShieldAlert size={22} style={{ color: 'var(--accent-rose, #ef4444)' }} /> 
+                    <ShieldAlert size={22} style={{ color: 'var(--accent-rose, #ef4444)' }} />
                     Quarantine & Damaged Goods Facility
                   </h2>
                   <p style={{ fontSize: '13px', color: 'var(--text-secondary)', marginTop: '4px' }}>
@@ -1664,10 +1673,10 @@ export default function WarehouseDashboard({ user, onGoToHome, onGoToProfile, th
                             <td>
                               <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
                                 {item.productImageUrl ? (
-                                  <img 
-                                    src={formatImageUrl(item.productImageUrl)} 
-                                    alt={item.productName} 
-                                    style={{ width: '38px', height: '38px', borderRadius: '6px', objectFit: 'cover', border: '1px solid var(--border-light)' }} 
+                                  <img
+                                    src={formatImageUrl(item.productImageUrl)}
+                                    alt={item.productName}
+                                    style={{ width: '38px', height: '38px', borderRadius: '6px', objectFit: 'cover', border: '1px solid var(--border-light)' }}
                                     onError={(e) => { e.target.style.display = 'none'; }}
                                   />
                                 ) : (
@@ -1741,10 +1750,10 @@ export default function WarehouseDashboard({ user, onGoToHome, onGoToProfile, th
 
                 <div>
                   <label className="form-label">Choose Warehouse Bin with Stock</label>
-                  <select 
+                  <select
                     required
                     value={manualAllocForm.warehouseId}
-                    onChange={(e) => setManualAllocForm({...manualAllocForm, warehouseId: e.target.value})}
+                    onChange={(e) => setManualAllocForm({ ...manualAllocForm, warehouseId: e.target.value })}
                     className="form-select"
                   >
                     <option value="">-- Choose Warehouse --</option>
@@ -1762,14 +1771,14 @@ export default function WarehouseDashboard({ user, onGoToHome, onGoToProfile, th
 
                 <div>
                   <label className="form-label">Quantity to Allocate</label>
-                  <input 
-                    type="number" 
-                    required 
+                  <input
+                    type="number"
+                    required
                     min="1"
                     max={manualAllocForm.maxQty}
                     value={manualAllocForm.quantity}
-                    onChange={(e) => setManualAllocForm({...manualAllocForm, quantity: Math.min(manualAllocForm.maxQty, parseInt(e.target.value) || 0)})}
-                    className="form-input" 
+                    onChange={(e) => setManualAllocForm({ ...manualAllocForm, quantity: Math.min(manualAllocForm.maxQty, parseInt(e.target.value) || 0) })}
+                    className="form-input"
                   />
                   <span style={{ fontSize: '11px', color: 'var(--text-muted)' }}>
                     Cannot exceed requested amount of {manualAllocForm.maxQty}.
@@ -1840,20 +1849,20 @@ export default function WarehouseDashboard({ user, onGoToHome, onGoToProfile, th
                   <label className="form-label" style={{ display: 'block', marginBottom: '6px' }}>QC Inspection Outcome</label>
                   <div style={{ display: 'flex', gap: '16px' }}>
                     <label style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '13px' }}>
-                      <input 
-                        type="radio" 
-                        name="qcPassed" 
+                      <input
+                        type="radio"
+                        name="qcPassed"
                         checked={qcForm.passed === true}
-                        onChange={() => setQcForm({...qcForm, passed: true})}
+                        onChange={() => setQcForm({ ...qcForm, passed: true })}
                       />
                       Passed QC Verification
                     </label>
                     <label style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '13px' }}>
-                      <input 
-                        type="radio" 
-                        name="qcPassed" 
+                      <input
+                        type="radio"
+                        name="qcPassed"
                         checked={qcForm.passed === false}
-                        onChange={() => setQcForm({...qcForm, passed: false})}
+                        onChange={() => setQcForm({ ...qcForm, passed: false })}
                       />
                       Failed QC / Rejected
                     </label>
@@ -1863,10 +1872,10 @@ export default function WarehouseDashboard({ user, onGoToHome, onGoToProfile, th
                 {qcForm.passed && (
                   <div>
                     <label className="form-label">Restocking Category Choice</label>
-                    <select 
+                    <select
                       required
                       value={qcForm.restockOption}
-                      onChange={(e) => setQcForm({...qcForm, restockOption: e.target.value})}
+                      onChange={(e) => setQcForm({ ...qcForm, restockOption: e.target.value })}
                       className="form-select"
                     >
                       <option value="RESELLABLE">Resellable Item (Restock to Active Main Bin)</option>
@@ -1877,14 +1886,14 @@ export default function WarehouseDashboard({ user, onGoToHome, onGoToProfile, th
 
                 <div>
                   <label className="form-label">
-                    {qcForm.passed && qcForm.restockOption === 'RESELLABLE' 
-                      ? "Restock Destination Warehouse Bin (Adds to Main Stock)" 
+                    {qcForm.passed && qcForm.restockOption === 'RESELLABLE'
+                      ? "Restock Destination Warehouse Bin (Adds to Main Stock)"
                       : "Quarantine Warehouse Section (Damaged Stock - Main Stock Unaffected)"}
                   </label>
-                  <select 
+                  <select
                     required
                     value={qcForm.warehouseId}
-                    onChange={(e) => setQcForm({...qcForm, warehouseId: e.target.value})}
+                    onChange={(e) => setQcForm({ ...qcForm, warehouseId: e.target.value })}
                     className="form-select"
                   >
                     <option value="">-- Choose Warehouse Location --</option>
@@ -1901,11 +1910,11 @@ export default function WarehouseDashboard({ user, onGoToHome, onGoToProfile, th
 
                 <div>
                   <label className="form-label">QC Observations / Notes</label>
-                  <textarea 
-                    required 
-                    placeholder="e.g. Item package unopened, original tags attached." 
+                  <textarea
+                    required
+                    placeholder="e.g. Item package unopened, original tags attached."
                     value={qcForm.notes}
-                    onChange={(e) => setQcForm({...qcForm, notes: e.target.value})}
+                    onChange={(e) => setQcForm({ ...qcForm, notes: e.target.value })}
                     className="form-input"
                     style={{ minHeight: '60px', fontSize: '12px' }}
                   />
@@ -1913,11 +1922,11 @@ export default function WarehouseDashboard({ user, onGoToHome, onGoToProfile, th
 
                 <div>
                   <label className="form-label">QC Verification Photo URL (Optional)</label>
-                  <input 
+                  <input
                     type="url"
                     placeholder="https://example.com/inspected-item.jpg"
                     value={qcForm.warehouseInspectionImage}
-                    onChange={(e) => setQcForm({...qcForm, warehouseInspectionImage: e.target.value})}
+                    onChange={(e) => setQcForm({ ...qcForm, warehouseInspectionImage: e.target.value })}
                     className="form-input"
                   />
                 </div>
@@ -1954,7 +1963,7 @@ export default function WarehouseDashboard({ user, onGoToHome, onGoToProfile, th
                   <label className="form-label">Select Disposition Strategy *</label>
                   <select
                     value={damagedActionForm.action}
-                    onChange={(e) => setDamagedActionForm({...damagedActionForm, action: e.target.value})}
+                    onChange={(e) => setDamagedActionForm({ ...damagedActionForm, action: e.target.value })}
                     className="form-select"
                   >
                     <option value="WRITE_OFF">Write-off / Scrap (Deduct from quarantine, destroy item)</option>
@@ -1971,7 +1980,7 @@ export default function WarehouseDashboard({ user, onGoToHome, onGoToProfile, th
                     max={selectedDamagedItem.damagedQuantity}
                     required
                     value={damagedActionForm.quantity}
-                    onChange={(e) => setDamagedActionForm({...damagedActionForm, quantity: Math.min(selectedDamagedItem.damagedQuantity, Math.max(1, parseInt(e.target.value) || 1))})}
+                    onChange={(e) => setDamagedActionForm({ ...damagedActionForm, quantity: Math.min(selectedDamagedItem.damagedQuantity, Math.max(1, parseInt(e.target.value) || 1)) })}
                     className="form-input"
                   />
                 </div>
@@ -1981,7 +1990,7 @@ export default function WarehouseDashboard({ user, onGoToHome, onGoToProfile, th
                   <textarea
                     placeholder="e.g. Scrapped item per vendor RMA warranty policy."
                     value={damagedActionForm.notes}
-                    onChange={(e) => setDamagedActionForm({...damagedActionForm, notes: e.target.value})}
+                    onChange={(e) => setDamagedActionForm({ ...damagedActionForm, notes: e.target.value })}
                     className="form-input"
                     style={{ minHeight: '60px', fontSize: '12px' }}
                   />
