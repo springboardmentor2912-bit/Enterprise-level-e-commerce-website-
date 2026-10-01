@@ -48,30 +48,35 @@ public class SecurityConfig {
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         http
-            .cors(Customizer.withDefaults())
-            .csrf(csrf -> csrf.disable())
-            .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
-            .authorizeHttpRequests(auth -> auth
-                // Public auth, static files & uploads
-                .requestMatchers("/api/auth/**", "/uploads/**").permitAll()
-                
-                // Public product and coupon viewing
-                .requestMatchers(HttpMethod.GET, "/api/products/**").permitAll()
-                .requestMatchers(HttpMethod.GET, "/api/coupons/**").permitAll()
-                
-                // Admin specific routes
-                .requestMatchers("/api/admin/**").hasAnyRole("ADMINISTRATOR", "ADMIN")
-                
-                // Vendor specific routes
-                .requestMatchers("/api/vendor/**").hasRole("VENDOR")
-                
-                // Warehouse specific routes
-                .requestMatchers("/api/warehouse/**").hasRole("WAREHOUSE_STAFF")
-                
-                // All other API endpoints require authentication
-                .requestMatchers("/api/**").authenticated()
-                .anyRequest().authenticated()
-            );
+                .cors(Customizer.withDefaults())
+                .csrf(csrf -> csrf.disable())
+                .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+                .authorizeHttpRequests(auth -> auth
+                        // Public auth, static files & uploads
+                        .requestMatchers("/api/auth/**", "/uploads/**").permitAll()
+
+                        // Public product, coupon and vendor viewing
+                        .requestMatchers(HttpMethod.GET, "/api/products/**").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/api/coupons/**").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/api/admin/vendors/**").permitAll()
+
+                        // Refund requests management (Admin, Warehouse Staff, Vendor)
+                        .requestMatchers("/api/admin/refunds/**")
+                        .hasAnyRole("ADMINISTRATOR", "ADMIN", "WAREHOUSE_STAFF", "VENDOR")
+
+                        // Admin specific routes
+                        .requestMatchers("/api/admin/**").hasAnyRole("ADMINISTRATOR", "ADMIN")
+
+                        // Vendor specific routes
+                        .requestMatchers("/api/vendor/**").hasRole("VENDOR")
+
+                        // Warehouse specific routes
+                        .requestMatchers("/api/warehouses/**", "/api/warehouse/**")
+                        .hasAnyRole("ADMINISTRATOR", "ADMIN", "WAREHOUSE_STAFF")
+
+                        // All other API endpoints require authentication
+                        .requestMatchers("/api/**").authenticated()
+                        .anyRequest().authenticated());
 
         http.addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
 
@@ -87,7 +92,7 @@ public class SecurityConfig {
         configuration.setAllowedHeaders(List.of("*"));
         configuration.setExposedHeaders(List.of("Authorization", "Content-Disposition"));
         configuration.setAllowCredentials(true);
-        
+
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
         source.registerCorsConfiguration("/**", configuration);
         return source;

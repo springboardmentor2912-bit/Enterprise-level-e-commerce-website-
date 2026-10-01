@@ -184,26 +184,23 @@ export default function WarehouseDashboard({ user, onGoToHome, onGoToProfile, th
   const fetchData = async () => {
     setLoading(true);
     try {
-      const whRes = await axios.get('http://localhost:8080/api/warehouses');
-      setWarehouses(whRes.data || []);
+      const [whRes, invRes, allocRes, ordersRes, productsRes, returnsRes, analyticsRes] = await Promise.all([
+        axios.get('http://localhost:8080/api/warehouses').catch(err => { console.error("Failed to load warehouses", err); return { data: [] }; }),
+        axios.get('http://localhost:8080/api/warehouses/inventory/all').catch(err => { console.error("Failed to load inventory", err); return { data: [] }; }),
+        axios.get('http://localhost:8080/api/warehouses/allocations').catch(err => { console.error("Failed to load allocations", err); return { data: [] }; }),
+        axios.get('http://localhost:8080/api/customer/orders/all').catch(err => { console.error("Failed to load orders", err); return { data: [] }; }),
+        axios.get('http://localhost:8080/api/products').catch(err => { console.error("Failed to load products", err); return { data: [] }; }),
+        axios.get('http://localhost:8080/api/admin/refunds').catch(err => { console.error("Failed to load refunds", err); return { data: [] }; }),
+        axios.get('http://localhost:8080/api/warehouses/analytics').catch(err => { console.error("Failed to load analytics", err); return { data: {} }; })
+      ]);
 
-      const invRes = await axios.get('http://localhost:8080/api/warehouses/inventory/all');
-      setInventories(invRes.data || []);
-
-      const allocRes = await axios.get('http://localhost:8080/api/warehouses/allocations');
-      setAllocations(allocRes.data || []);
-
-      const ordersRes = await axios.get('http://localhost:8080/api/customer/orders/all');
-      setAllOrders(ordersRes.data || []);
-
-      const productsRes = await axios.get('http://localhost:8080/api/products');
-      setProducts(productsRes.data || []);
-
-      const returnsRes = await axios.get('http://localhost:8080/api/admin/refunds');
-      setReturnsList(returnsRes.data || []);
-
-      const analyticsRes = await axios.get('http://localhost:8080/api/warehouses/analytics');
-      setAnalytics(analyticsRes.data || {});
+      if (whRes?.data) setWarehouses(whRes.data);
+      if (invRes?.data) setInventories(invRes.data);
+      if (allocRes?.data) setAllocations(allocRes.data);
+      if (ordersRes?.data) setAllOrders(ordersRes.data);
+      if (productsRes?.data) setProducts(productsRes.data);
+      if (returnsRes?.data) setReturnsList(returnsRes.data);
+      if (analyticsRes?.data) setAnalytics(analyticsRes.data);
     } catch (err) {
       console.error("Failed to load warehouse data", err);
       showFlash('error', 'Error loading warehouse workspace data.');
