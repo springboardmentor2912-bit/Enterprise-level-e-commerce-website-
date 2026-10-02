@@ -10,7 +10,7 @@ ShopStack is a full-stack, enterprise-grade multi-vendor e-commerce platform bui
 ## 🛠️ Tech Stack & Prerequisites
 
 ### Backend
-* **Language:** Java 26
+* **Language:** Java 21
 * **Framework:** Spring Boot 4.1.0
 * **Security:** Spring Security & CORS Configuration
 * **ORM / Database:** Spring Data JPA, Hibernate, PostgreSQL
