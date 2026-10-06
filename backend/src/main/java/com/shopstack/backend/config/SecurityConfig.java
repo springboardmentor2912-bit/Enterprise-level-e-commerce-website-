@@ -55,10 +55,12 @@ public class SecurityConfig {
                         // Public auth, static files & uploads
                         .requestMatchers("/api/auth/**", "/uploads/**").permitAll()
 
-                        // Public product, coupon and vendor viewing
+                        // Public product, coupon, vendor and warehouse facility viewing
                         .requestMatchers(HttpMethod.GET, "/api/products/**").permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/coupons/**").permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/admin/vendors/**").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/api/warehouses", "/api/warehouses/", "/api/warehouses/*")
+                        .permitAll()
 
                         // Refund requests management (Admin, Warehouse Staff, Vendor)
                         .requestMatchers("/api/admin/refunds/**")

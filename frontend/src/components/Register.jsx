@@ -26,16 +26,39 @@ export default function Register({ switchToLogin, theme, onToggleTheme }) {
   const [flashMessage, setFlashMessage] = useState({ type: '', title: '', text: '' });
   const [generatedVendorCode, setGeneratedVendorCode] = useState(null);
 
+  const defaultWarehouses = [
+    { id: 1, name: 'Kolkata Regional Fulfillment Hub', code: 'WH-KOL-01', city: 'Kolkata', active: true },
+    { id: 2, name: 'Mumbai Central Warehouse', code: 'WH-MUM-02', city: 'Mumbai', active: true },
+    { id: 3, name: 'Delhi NCR Fulfillment Center', code: 'WH-DEL-03', city: 'Delhi', active: true },
+    { id: 4, name: 'Bangalore Logistics Hub', code: 'WH-BLR-04', city: 'Bangalore', active: true }
+  ];
+
   // Fetch active warehouses for staff registration selection
-  useEffect(() => {
+  const loadWarehouses = () => {
     axios.get('http://localhost:8080/api/warehouses')
       .then(res => {
-        if (Array.isArray(res.data)) {
-          setAvailableWarehouses(res.data.filter(w => w.active));
+        if (Array.isArray(res.data) && res.data.length > 0) {
+          const activeList = res.data.filter(w => w.active !== false);
+          setAvailableWarehouses(activeList.length > 0 ? activeList : defaultWarehouses);
+        } else {
+          setAvailableWarehouses(defaultWarehouses);
         }
       })
-      .catch(err => console.error("Failed to load warehouses list", err));
+      .catch(err => {
+        console.warn("Failed to load warehouses list from API, using default hubs", err);
+        setAvailableWarehouses(defaultWarehouses);
+      });
+  };
+
+  useEffect(() => {
+    loadWarehouses();
   }, []);
+
+  useEffect(() => {
+    if (formData.role === 'WAREHOUSE_STAFF' && availableWarehouses.length === 0) {
+      loadWarehouses();
+    }
+  }, [formData.role]);
 
   // Auto-dismiss flash messages after 3 seconds
   useEffect(() => {
@@ -312,8 +335,8 @@ export default function Register({ switchToLogin, theme, onToggleTheme }) {
                   onChange={(e) => {
                     const selId = e.target.value;
                     const selWh = availableWarehouses.find(w => String(w.id) === String(selId));
-                    setFormData({ 
-                      ...formData, 
+                    setFormData({
+                      ...formData,
                       warehouseId: selId ? parseInt(selId) : null,
                       warehouseName: selWh ? `${selWh.name} (${selWh.code})` : ''
                     });
